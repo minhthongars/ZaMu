@@ -1,0 +1,151 @@
+package com.minhthong.zamu.main
+
+import android.os.Bundle
+import android.view.View
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import dagger.hilt.android.AndroidEntryPoint
+import com.minhthong.zamu.R as AppR
+
+@AndroidEntryPoint
+class MainActivity: AppCompatActivity() {
+
+    companion object {
+        const val PREFS = "app_prefs"
+        const val KEY_THEME = "selected_theme"
+        const val THEME_LIGHT = "light"
+        const val THEME_DARK = "dark"
+        const val THEME_DRACULA = "dracula"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        applyTheme()
+
+        enableEdgeToEdge()
+
+        configureStatusBarAppearance()
+
+        if (savedInstanceState == null) {
+            setupWindowInsets()
+            supportFragmentManager.beginTransaction()
+                .replace(
+                    android.R.id.content,
+                    MainFragment()
+                )
+                .commit()
+        } else {
+            setupWindowInsets()
+        }
+
+        setupBackPressHandler()
+    }
+
+    private fun applyTheme() {
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        when (prefs.getString(KEY_THEME, THEME_LIGHT)) {
+            THEME_LIGHT -> setTheme(AppR.style.Theme_App_Light)
+            THEME_DARK -> setTheme(AppR.style.Theme_App_Dark)
+            THEME_DRACULA -> setTheme(AppR.style.Theme_App_Dracula)
+            else -> setTheme(AppR.style.Theme_App_Light)
+        }
+    }
+
+    private fun saveThemeAndRecreate(value: String) {
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        prefs.edit { putString(KEY_THEME, value) }
+        recreate()
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val mainFragment = findMainFragment()
+                val navController = getNavControllerFromMainFragment(mainFragment)
+
+                if (navController != null) {
+                    val currentDestination = navController.currentDestination?.id
+                    val isAtHome = currentDestination == AppR.id.homeFragment
+
+                    val handled = if (!isAtHome) {
+                        navController.popBackStack(AppR.id.homeFragment, false)
+                    } else {
+                        false
+                    }
+
+                    if (!handled) {
+                        finish()
+                    }
+                } else {
+                    finish()
+                }
+            }
+        })
+    }
+
+    private fun findMainFragment(): Fragment? {
+        return supportFragmentManager.findFragmentById(android.R.id.content)
+    }
+
+    private fun getNavControllerFromMainFragment(mainFragment: Fragment?): NavController? {
+        if (mainFragment !is MainFragment) return null
+        
+        val navHostFragment = mainFragment.childFragmentManager.findFragmentById(AppR.id.main_nav_host)
+        return (navHostFragment as? NavHostFragment)?.navController
+    }
+
+    private fun enableEdgeToEdge() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+    }
+
+    private fun configureStatusBarAppearance() {
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        val theme = prefs.getString(KEY_THEME, THEME_LIGHT)
+        
+        when (theme) {
+            THEME_LIGHT -> {
+                windowInsetsController.isAppearanceLightStatusBars = true
+                windowInsetsController.isAppearanceLightNavigationBars = true
+            }
+            THEME_DARK, THEME_DRACULA -> {
+                windowInsetsController.isAppearanceLightStatusBars = false
+                windowInsetsController.isAppearanceLightNavigationBars = false
+            }
+        }
+    }
+
+    private fun setupWindowInsets() {
+        val root = findViewById<View>(android.R.id.content) ?: return
+
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        configureStatusBarAppearance()
+    }
+
+}

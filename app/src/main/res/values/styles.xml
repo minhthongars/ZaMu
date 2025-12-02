@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TextAppearance.App" parent="TextAppearance.Material3.BodyMedium"/>
+
+    <style name="TextAppearance.App.H1">
+        <item name="android:textSize">@dimen/text_huge</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.App.Title">
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.App.Body">
+        <item name="android:textSize">@dimen/text_medium</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.App.Small">
+        <item name="android:textSize">@dimen/text_small</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+</resources>
