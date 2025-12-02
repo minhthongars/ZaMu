@@ -14,7 +14,8 @@
     <dimen name="text_medium">16sp</dimen>
     <dimen name="text_small">12sp</dimen>
 
-    <dimen name="user_info_height">80dp</dimen>
-    <dimen name="device_track_height">150dp</dimen>
-    <dimen name="recommend_track_height">380dp</dimen>
+    <dimen name="user_info_section_height">80dp</dimen>
+    <dimen name="device_track_item_height">120dp</dimen>
+    <dimen name="recommend_track_section_height">400dp</dimen>
+    <dimen name="message_section_height">120dp</dimen>
 </resources>

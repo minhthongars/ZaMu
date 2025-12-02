@@ -8,7 +8,7 @@ import com.minhthong.zamu.home.presentation.adapter.HomeAdapterClickListener
 import com.minhthong.zamu.home.presentation.adapter.HomeAdapterItem
 
 class ErrorViewHolder(
-    binding: ViewHolderErrorBinding,
+    private val binding: ViewHolderErrorBinding,
     private val listener: HomeAdapterClickListener
 ): HomeViewHolder(binding.root) {
 
@@ -31,7 +31,8 @@ class ErrorViewHolder(
         layoutParams.height = itemView.resources.getDimensionPixelSize(errorData.viewHeight)
         itemView.layoutParams = layoutParams
 
-        itemView.setOnClickListener {
+        binding.tvMessage.text = errorData.message
+        binding.layoutMessage.setOnClickListener {
             listener.onRetryClick(errorData.type)
         }
     }

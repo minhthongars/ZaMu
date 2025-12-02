@@ -37,11 +37,11 @@ class HomeViewModel @Inject constructor(
     private val userInfoAdapterItemFlow = MutableStateFlow<HomeAdapterItem?>(null)
 
     private var deviceTrackEntities = emptyList<TrackEntity>()
-    private val deviceTrackItemsFlow = MutableStateFlow<List<HomeAdapterItem>>(emptyList())
+    private val deviceTrackAdapterItemsFlow = MutableStateFlow<List<HomeAdapterItem>>(emptyList())
 
     val adapterItemsFlow: StateFlow<List<HomeAdapterItem>> = combine(
         userInfoAdapterItemFlow,
-        deviceTrackItemsFlow
+        deviceTrackAdapterItemsFlow
     ) { userInfo, deviceTracks ->
         listOfNotNull(userInfo) + deviceTracks
     }
@@ -51,65 +51,74 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    private fun fetchUserInfo() {
-        viewModelScope.launch {
-            userInfoAdapterItemFlow.update {
-                HomeAdapterItem.LoadingView(
-                    viewHeight = R.dimen.user_info_height
-                )
-            }
+    private fun fetchUserInfo() = viewModelScope.launch {
+        val userInfoSectionHeightDimenRes = R.dimen.user_info_section_height
+        val loadingItem = HomeAdapterItem.LoadingView(
+            viewHeight = userInfoSectionHeightDimenRes
+        )
+        userInfoAdapterItemFlow.update { loadingItem }
 
-            fetchUserInfoUseCase.invoke()
-                .onSuccess { entity ->
-                    userEntity = entity
-                    userInfoAdapterItemFlow.update {
-                        with(mapper) { entity.toPresentation() }
-                    }
-                }
-                .onError {
-                    userInfoAdapterItemFlow.update {
-                        HomeAdapterItem.ErrorView(
-                            viewHeight = R.dimen.user_info_height,
-                            type = HomeAdapterItem.ViewType.USER_INFO
-                        )
-                    }
-                }
-        }
+        fetchUserInfoUseCase.invoke()
+            .onSuccess { entity ->
+                userEntity = entity
+
+                val adapterItems = with(mapper) { entity.toPresentation() }
+                userInfoAdapterItemFlow.update { adapterItems }
+            }
+            .onError { message ->
+                val errorItem = HomeAdapterItem.ErrorView(
+                    viewHeight = userInfoSectionHeightDimenRes,
+                    message = message,
+                    type = HomeAdapterItem.ViewType.USER_INFO
+                )
+                userInfoAdapterItemFlow.update { errorItem }
+            }
     }
 
-    private fun getDeviceTrack() {
+    private fun getDeviceTrack() = viewModelScope.launch {
         val titleItem = HomeAdapterItem.Title(content = "Recommend for you")
         val loadingItems = List(6) {
             HomeAdapterItem.LoadingView(
-                viewHeight = R.dimen.device_track_height
+                viewHeight = R.dimen.device_track_item_height
             )
         }
 
-        viewModelScope.launch {
-            deviceTrackItemsFlow.update {
-                listOf(titleItem) + loadingItems
-            }
+        deviceTrackAdapterItemsFlow.update {
+            listOf(titleItem) + loadingItems
+        }
 
-            getTrackFromDeviceUseCase.invoke()
-                .onError {
+        getTrackFromDeviceUseCase.invoke()
+            .onError { message ->
+                val errorItem = HomeAdapterItem.ErrorView(
+                    type = HomeAdapterItem.ViewType.TRACK,
+                    message = message,
+                    viewHeight = R.dimen.recommend_track_section_height
+                )
+                deviceTrackAdapterItemsFlow.update {
+                    listOf(titleItem, errorItem)
+                }
+            }
+            .onSuccess { trackEntities ->
+                if (trackEntities.isEmpty()) {
                     val errorItem = HomeAdapterItem.ErrorView(
                         type = HomeAdapterItem.ViewType.TRACK,
-                        viewHeight = R.dimen.recommend_track_height
+                        message = "Bạn chả có nhạc gì cả, hoặc hãy cấp quyền thủ công giúp tôi",
+                        viewHeight = R.dimen.message_section_height
                     )
-                    deviceTrackItemsFlow.update {
+                    deviceTrackAdapterItemsFlow.update {
                         listOf(titleItem, errorItem)
                     }
+                    return@onSuccess
                 }
-                .onSuccess { trackEntities ->
-                    deviceTrackEntities = trackEntities
-                    val trackItems = trackEntities.map {
-                        with(mapper) { it.toPresentation() }
-                    }
-                    deviceTrackItemsFlow.update {
-                        listOf(titleItem) + trackItems
-                    }
+
+                deviceTrackEntities = trackEntities
+                val trackItems = trackEntities.map {
+                    with(mapper) { it.toPresentation() }
                 }
-        }
+                deviceTrackAdapterItemsFlow.update {
+                    listOf(titleItem) + trackItems
+                }
+            }
     }
 
     fun retry(viewType: Int) {

@@ -21,6 +21,7 @@ sealed class HomeAdapterItem(
 
     data class ErrorView(
         @DimenRes val viewHeight: Int,
+        val message: String,
         val type: Int
     ): HomeAdapterItem(viewType = ViewType.ERROR_VIEW)
 
