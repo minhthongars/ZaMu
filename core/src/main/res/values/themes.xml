@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Zamu" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Common attributes -->
+        <item name="android:windowMinWidthMajor">320dp</item>
+        <item name="android:windowMinWidthMinor">320dp</item>
+        <!-- Edge-to-edge: transparent status and navigation bars -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- semantic attributes we will use in layouts -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorOnPrimary">@color/color_on_primary</item>
+        <item name="colorSurface">@color/color_surface</item>
+        <item name="colorOnSurface">@color/color_on_surface</item>
+        <item name="android:textColorSecondary">@color/color_text_secondary</item>
+        <item name="android:textColorLink">@color/color_text_link</item>
+    </style>
+
+    <!-- Light Theme -->
+    <style name="Theme.App.Light" parent="Theme.Zamu">
+        <item name="colorPrimary">@color/blue_600</item>
+        <item name="colorOnPrimary">@color/grey_50</item>
+
+        <item name="colorSurface">@color/grey_50</item>
+        <item name="colorOnSurface">@color/grey_900</item>
+
+        <item name="android:textColorSecondary">@color/grey_500</item>
+        <item name="android:textColorLink">@color/blue_600</item>
+
+        <!-- custom background for root -->
+        <item name="android:windowBackground">@color/grey_100</item>
+        
+        <!-- Light theme: dark status bar icons (for light background) -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <!-- Dark Theme -->
+    <style name="Theme.App.Dark" parent="Theme.Zamu">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorOnPrimary">@color/grey_50</item>
+
+        <item name="colorSurface">@color/grey_900</item>
+        <item name="colorOnSurface">@color/grey_50</item>
+
+        <item name="android:textColorSecondary">@color/grey_300</item>
+        <item name="android:textColorLink">@color/purple_500</item>
+
+        <item name="android:windowBackground">@color/grey_900</item>
+
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="Theme.App.Dracula" parent="Theme.Zamu">
+        <item name="colorPrimary">@color/dracula_pink</item>
+        <item name="colorOnPrimary">@color/dracula_bg</item>
+
+        <item name="colorSurface">@color/dracula_surface</item>
+        <item name="colorOnSurface">@color/dracula_text</item>
+
+        <item name="android:textColorSecondary">@color/dracula_cyan</item>
+        <item name="android:textColorLink">@color/dracula_purple</item>
+
+        <item name="android:windowBackground">@color/dracula_bg</item>
+        
+        <!-- Dracula theme: light status bar icons (for dark background) -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+
+</resources>

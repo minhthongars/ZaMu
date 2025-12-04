@@ -1,8 +1,7 @@
 package com.minhthong.zamu
 
 import android.app.Application
-import com.minhthong.zamu.core.player.PlayerManager
-import com.minhthong.zamu.core.player.PlayerManagerImpl
+import com.minhthong.core.player.PlayerManager
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 

@@ -2,7 +2,6 @@ package com.minhthong.zamu.main
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
@@ -11,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.minhthong.core.R
 import dagger.hilt.android.AndroidEntryPoint
 import com.minhthong.zamu.R as AppR
 
@@ -32,30 +32,34 @@ class MainActivity: AppCompatActivity() {
 
         enableEdgeToEdge()
 
-        configureStatusBarAppearance()
-
         if (savedInstanceState == null) {
-            setupWindowInsets()
-            supportFragmentManager.beginTransaction()
-                .replace(
-                    android.R.id.content,
-                    MainFragment()
-                )
-                .commit()
-        } else {
-            setupWindowInsets()
+            attachFragment()
         }
 
-        setupBackPressHandler()
+        setupWindowInsets()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        configureStatusBarAppearance()
+    }
+
+    private fun attachFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(
+                android.R.id.content,
+                MainFragment()
+            )
+            .commit()
     }
 
     private fun applyTheme() {
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         when (prefs.getString(KEY_THEME, THEME_LIGHT)) {
-            THEME_LIGHT -> setTheme(AppR.style.Theme_App_Light)
-            THEME_DARK -> setTheme(AppR.style.Theme_App_Dark)
-            THEME_DRACULA -> setTheme(AppR.style.Theme_App_Dracula)
-            else -> setTheme(AppR.style.Theme_App_Light)
+            THEME_LIGHT -> setTheme(R.style.Theme_App_Light)
+            THEME_DARK -> setTheme(R.style.Theme_App_Dark)
+            THEME_DRACULA -> setTheme(R.style.Theme_App_Dracula)
+            else -> setTheme(R.style.Theme_App_Light)
         }
     }
 
@@ -63,32 +67,6 @@ class MainActivity: AppCompatActivity() {
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         prefs.edit { putString(KEY_THEME, value) }
         recreate()
-    }
-
-    private fun setupBackPressHandler() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                val mainFragment = findMainFragment()
-                val navController = getNavControllerFromMainFragment(mainFragment)
-
-                if (navController != null) {
-                    val currentDestination = navController.currentDestination?.id
-                    val isAtHome = currentDestination == AppR.id.homeFragment
-
-                    val handled = if (!isAtHome) {
-                        navController.popBackStack(AppR.id.homeFragment, false)
-                    } else {
-                        false
-                    }
-
-                    if (!handled) {
-                        finish()
-                    }
-                } else {
-                    finish()
-                }
-            }
-        })
     }
 
     private fun findMainFragment(): Fragment? {
@@ -142,10 +120,4 @@ class MainActivity: AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        configureStatusBarAppearance()
-    }
-
 }

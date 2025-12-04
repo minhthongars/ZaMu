@@ -6,8 +6,8 @@
     android:orientation="horizontal"
     android:background="@drawable/bg_bottom_nav"
     android:elevation="8dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
     android:minHeight="64dp">
 
     <include

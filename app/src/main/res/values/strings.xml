@@ -1,8 +1,4 @@
 <resources>
     <string name="app_name">zamu</string>
-    <string name="track_cover_art">Track cover art</string>
-    <string name="repeat">Repeat</string>
-    <string name="previous">Previous track</string>
-    <string name="next">Next track</string>
-    <string name="shuffle">Shuffle</string>
+
 </resources>

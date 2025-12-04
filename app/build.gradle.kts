@@ -44,6 +44,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":core"))
+    implementation(project(":home"))
+    implementation(project(":navigation"))
+    implementation(project(":player"))
+    implementation(project(":setting"))
+    implementation(project(":mylibrary"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)

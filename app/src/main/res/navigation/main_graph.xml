@@ -6,18 +6,22 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.minhthong.zamu.home.presentation.HomeFragment"/>
+        android:label="Home"
+        android:name="com.minhthong.home.presentation.HomeFragment"/>
 
     <fragment
         android:id="@+id/playerFragment"
-        android:name="com.minhthong.zamu.player.presentation.PlayerFragment"/>
+        android:label="Play music"
+        android:name="com.minhthong.player.presentation.PlayerFragment"/>
 
     <fragment
         android:id="@+id/favoritesFragment"
-        android:name="com.minhthong.zamu.favorite.FavoriteFragment"/>
+        android:label="Favorites"
+        android:name="com.minhthong.mylibrary.FavoriteFragment"/>
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.minhthong.zamu.setting.SettingFragment"/>
+        android:label="Setting"
+        android:name="com.minhthong.setting.SettingFragment"/>
 
 </navigation>

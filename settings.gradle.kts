@@ -21,4 +21,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "zamu"
 include(":app")
- 
+include(":home")
+include(":core")
+include(":navigation")
+include(":setting")
+include(":player")
+include(":mylibrary")

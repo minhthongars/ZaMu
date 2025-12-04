@@ -6,6 +6,38 @@
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:text="Favorite"/>
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="6dp"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_back"
+            app:tint="@color/black"/>
+
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/grey_300"/>
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/main_nav_host"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -16,8 +48,9 @@
         app:defaultNavHost="true"
         tools:layout="@layout/fragment_player" />
 
-    <com.minhthong.zamu.main.CustomBottomNavigationBar
+    <com.minhthong.zamu.main.BottomNavigationBar
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
 </LinearLayout>

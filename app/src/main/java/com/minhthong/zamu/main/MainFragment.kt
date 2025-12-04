@@ -4,12 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import com.minhthong.core.Utils.collectFlowSafely
+import com.minhthong.core.player.PlayerManager
+import com.minhthong.navigation.Navigation
 import com.minhthong.zamu.R
-import com.minhthong.zamu.core.Utils.collectFlowSafely
-import com.minhthong.zamu.core.player.PlayerManager
 import com.minhthong.zamu.databinding.FragmentMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -21,12 +22,15 @@ class MainFragment: Fragment() {
     private val binding get() = _binding!!
 
     private val navController by lazy {
-        val host = childFragmentManager.findFragmentById(R.id.main_nav_host) as NavHostFragment
-        host.navController
+        val fragment = childFragmentManager.findFragmentById(R.id.main_nav_host)
+        (fragment as NavHostFragment).navController
     }
 
     @Inject
     internal lateinit var playerManager: PlayerManager
+
+    @Inject
+    internal lateinit var navigation: Navigation
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +44,14 @@ class MainFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupBackPressHandler()
+        setUpAppNavigation()
         setupBottomNavigation()
         setUpCollector()
+    }
+
+    private fun setUpAppNavigation() {
+        navigation.setNavController(navController)
     }
 
     private fun setUpCollector() {
@@ -59,31 +69,49 @@ class MainFragment: Fragment() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.bottomNavigation.setSelectedItem(destination.id)
+            binding.title.text = destination.label
         }
 
         navController.currentDestination?.id?.let { destinationId ->
             binding.bottomNavigation.setSelectedItem(destinationId)
         }
+
+        binding.ivBack.setOnClickListener {
+            handleOnBackPressed()
+        }
+    }
+
+    private fun setupBackPressHandler() {
+        activity?.onBackPressedDispatcher?.addCallback(
+            owner = this,
+            onBackPressedCallback = object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    this@MainFragment.handleOnBackPressed()
+                }
+            }
+        )
+    }
+
+    private fun handleOnBackPressed() {
+        val currentDestination = navController.currentDestination?.id
+        val isAtHome = currentDestination == R.id.homeFragment
+
+        if (!isAtHome) {
+            safeNavigate(R.id.homeFragment)
+        } else {
+            activity?.finish()
+        }
+    }
+
+    private fun safeNavigate(destination: Int) {
+        if (navController.currentDestination?.id == destination) {
+            return
+        }
+        navController.navigate(destination)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    fun safeNavigate(destination: Int) {
-        if (navController.currentDestination?.id == destination) return
-
-        val navOptions = NavOptions.Builder()
-            .setLaunchSingleTop(true)
-            .setRestoreState(true)
-            .setPopUpTo(
-                destinationId = navController.graph.startDestinationId,
-                inclusive = false,
-                saveState = true
-            )
-            .build()
-
-        navController.navigate(destination, null, navOptions)
     }
 }
