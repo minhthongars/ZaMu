@@ -188,19 +188,17 @@ class PlayerManagerImpl(
         playerInfoFlow.update { current ->
             current?.copy(
                 isLooping = isLooping.not(),
-                isShuffling = isLooping
             )
         }
     }
 
     override fun shuffle() {
-        val shuffleModeEnabled = exoPlayer.shuffleModeEnabled.not()
-        exoPlayer.shuffleModeEnabled = shuffleModeEnabled
+        val shuffleModeEnabled = exoPlayer.shuffleModeEnabled
+        exoPlayer.shuffleModeEnabled = shuffleModeEnabled.not()
 
         playerInfoFlow.update { current ->
             current?.copy(
-                isShuffling = shuffleModeEnabled,
-                isLooping = shuffleModeEnabled.not()
+                isShuffling = shuffleModeEnabled.not(),
             )
         }
     }

@@ -202,7 +202,7 @@
             android:layout_height="50dp"
             android:layout_marginStart="30dp"
             android:contentDescription="@string/shuffle"
-            android:padding="@dimen/spacing_sm"
+            android:padding="6dp"
             app:srcCompat="@drawable/ic_player_random"
             app:tint="@color/grey_500"/>
 
