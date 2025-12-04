@@ -135,10 +135,7 @@ class PlayerManagerImpl(
         }
         val safeStartIndex = startIndex.coerceIn(0, tracks.size - 1)
 
-        playerInfoFlow.update { current ->
-            current?.copy(trackInfo = tracks[safeStartIndex])
-                ?: getDefaultData(currentIndex = safeStartIndex)
-        }
+        playerInfoFlow.update { getDefaultData(currentIndex = safeStartIndex) }
 
         exoPlayer.stop()
         exoPlayer.clearMediaItems()

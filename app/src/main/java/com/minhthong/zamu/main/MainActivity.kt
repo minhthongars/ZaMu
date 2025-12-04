@@ -26,9 +26,9 @@ class MainActivity: AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         applyTheme()
+
+        super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
 
@@ -54,6 +54,7 @@ class MainActivity: AppCompatActivity() {
     }
 
     private fun applyTheme() {
+        setTheme(R.style.Theme_App_Dark)
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         when (prefs.getString(KEY_THEME, THEME_LIGHT)) {
             THEME_LIGHT -> setTheme(R.style.Theme_App_Light)

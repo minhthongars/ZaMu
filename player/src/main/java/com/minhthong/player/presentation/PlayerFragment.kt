@@ -70,7 +70,9 @@ class PlayerFragment: Fragment() {
                     viewModel.setIsSeeking(isTouching = true)
                 }
                 override fun onStopTrackingTouch(slider: Slider) {
-                    viewModel.seek(slider.value)
+                    val seekToValue = slider.value
+                    viewModel.seek(seekToValue)
+                    binding.tvCurrentTime.text = seekToValue.toLong().toDurationString()
                 }
             }
         )
@@ -84,6 +86,7 @@ class PlayerFragment: Fragment() {
     private fun setUpCollectors() {
         collectFlowSafely {
             viewModel.uiModel.collect { info ->
+                binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
                 binding.tvTrackTitle.text = info.trackName
                 binding.tvAlbum.text = info.album
                 binding.tvArtist.text = info.performer
@@ -99,7 +102,6 @@ class PlayerFragment: Fragment() {
                     ColorStateList.valueOf(info.shuffleIconColor)
                 )
                 binding.ivCoverArt.setImageBitmap(info.avatar)
-                binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
             }
         }
 
