@@ -12,23 +12,7 @@ import com.minhthong.zamu.home.presentation.adapter.viewholder.UserInfoViewHolde
 
 class HomeAdapter(
     private val listener: HomeAdapterClickListener,
-): ListAdapter<HomeAdapterItem, HomeViewHolder>(
-    object : DiffUtil.ItemCallback<HomeAdapterItem>() {
-        override fun areItemsTheSame(
-            oldItem: HomeAdapterItem,
-            newItem: HomeAdapterItem
-        ): Boolean {
-            return false
-        }
-
-        override fun areContentsTheSame(
-            oldItem: HomeAdapterItem,
-            newItem: HomeAdapterItem
-        ): Boolean {
-            return false
-        }
-    }
-) {
+): ListAdapter<HomeAdapterItem, HomeViewHolder>(ItemCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -39,7 +23,7 @@ class HomeAdapter(
 
             HomeAdapterItem.ViewType.TITLE -> TitleViewHolder.create(parent)
 
-            HomeAdapterItem.ViewType.TRACK -> TrackViewHolder.create(parent)
+            HomeAdapterItem.ViewType.TRACK -> TrackViewHolder.create(parent, listener)
 
             HomeAdapterItem.ViewType.LOADING_VIEW -> LoadingViewHolder.create(parent)
 
@@ -57,6 +41,10 @@ class HomeAdapter(
         holder.bind(item)
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return getItem(position).viewType
+    }
+
     override fun onViewAttachedToWindow(holder: HomeViewHolder) {
         super.onViewAttachedToWindow(holder)
         if (holder is LoadingViewHolder) {
@@ -71,8 +59,20 @@ class HomeAdapter(
         super.onViewDetachedFromWindow(holder)
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return getItem(position).viewType
-    }
+    private class ItemCallback: DiffUtil.ItemCallback<HomeAdapterItem>() {
+        override fun areItemsTheSame(
+            oldItem: HomeAdapterItem,
+            newItem: HomeAdapterItem
+        ): Boolean {
+            return oldItem.areItemsTheSame(newItem)
+        }
 
+        override fun areContentsTheSame(
+            oldItem: HomeAdapterItem,
+            newItem: HomeAdapterItem
+        ): Boolean {
+            return oldItem.areContentsTheSame(newItem)
+        }
+
+    }
 }

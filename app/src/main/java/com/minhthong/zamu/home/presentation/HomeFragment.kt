@@ -4,17 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.minhthong.zamu.R
+import com.minhthong.zamu.core.Utils.collectFlowSafely
 import com.minhthong.zamu.databinding.FragmentHomeBinding
 import com.minhthong.zamu.home.presentation.adapter.HomeAdapter
 import com.minhthong.zamu.home.presentation.adapter.HomeAdapterClickListener
 import com.minhthong.zamu.home.presentation.decorator.HomeRecyclerViewItemDecoration
+import com.minhthong.zamu.main.MainFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -28,6 +33,14 @@ class HomeFragment: Fragment() {
     private val homeListener = object : HomeAdapterClickListener {
         override fun onRetryClick(viewType: Int) {
             viewModel.retry(viewType)
+        }
+
+        override fun onTrackClick(trackId: Long) {
+            viewModel.onTrackClick(trackId = trackId)
+        }
+
+        override fun onSaveClick(trackId: Long) {
+            //later
         }
     }
 
@@ -48,28 +61,46 @@ class HomeFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setUpRecyclerView()
+        callData()
         collectData()
     }
 
+    private fun callData() {
+        viewModel.fetchUserInfo()
+        viewModel.getDeviceTrack()
+    }
+
     private fun collectData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.adapterItemsFlow.collect {
-                    homeAdapter.submitList(it)
-                }
+        collectFlowSafely {
+            viewModel.adapterItemsFlow.collect {
+                homeAdapter.submitList(it)
             }
         }
+
+        viewModel.uiEvent.onEach { event ->
+            when(event) {
+                is HomeUiEvent.OpenPlayer -> {
+                    (parentFragment?.parentFragment as MainFragment).safeNavigate(R.id.playerFragment)
+                }
+
+                is HomeUiEvent.Toast -> {
+                    Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun setUpRecyclerView() {
-        binding.recyclerView.itemAnimator = null
-        binding.recyclerView.adapter = homeAdapter
-        binding.recyclerView.addItemDecoration(
-            HomeRecyclerViewItemDecoration(
-                horizontalSpace = resources.getDimensionPixelSize(R.dimen.spacing_md),
-                verticalSpace = resources.getDimensionPixelSize(R.dimen.spacing_sm)
+        with(binding.recyclerView) {
+            itemAnimator = null
+            adapter = homeAdapter
+            addItemDecoration(
+                HomeRecyclerViewItemDecoration(
+                    horizontalSpace = resources.getDimensionPixelSize(R.dimen.spacing_md),
+                    verticalSpace = resources.getDimensionPixelSize(R.dimen.spacing_sm2)
+                )
             )
-        )
+        }
     }
 
     override fun onDestroyView() {

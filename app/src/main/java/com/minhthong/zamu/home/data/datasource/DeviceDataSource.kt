@@ -12,12 +12,7 @@ class DeviceDataSource(
     private val contentResolver: ContentResolver,
 ) {
 
-    var count = 0
     fun getTracksFromDevice(): List<TrackDto> {
-        if (count < 2) {
-            count++
-            throw NullPointerException()
-        }
         val tracks = ArrayList<TrackDto>()
 
         val projection = arrayOf(

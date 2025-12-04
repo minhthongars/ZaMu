@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.minhthong.zamu.R
 import com.minhthong.zamu.core.onError
 import com.minhthong.zamu.core.onSuccess
+import com.minhthong.zamu.core.player.PlayerManager
 import com.minhthong.zamu.home.domain.model.TrackEntity
 import com.minhthong.zamu.home.domain.model.UserEntity
 import com.minhthong.zamu.home.domain.usecase.FetchUserInfoUseCase
@@ -12,10 +13,12 @@ import com.minhthong.zamu.home.domain.usecase.GetTrackFromDeviceUseCase
 import com.minhthong.zamu.home.presentation.adapter.HomeAdapterItem
 import com.minhthong.zamu.home.presentation.mapper.EntityToPresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,19 +28,18 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getTrackFromDeviceUseCase: GetTrackFromDeviceUseCase,
     private val fetchUserInfoUseCase: FetchUserInfoUseCase,
+    private val playerManager: PlayerManager,
     private val mapper: EntityToPresentationMapper
 ) : ViewModel() {
-
-    init {
-        getDeviceTrack()
-        fetchUserInfo()
-    }
 
     private var userEntity: UserEntity? = null
     private val userInfoAdapterItemFlow = MutableStateFlow<HomeAdapterItem?>(null)
 
     private var deviceTrackEntities = emptyList<TrackEntity>()
     private val deviceTrackAdapterItemsFlow = MutableStateFlow<List<HomeAdapterItem>>(emptyList())
+
+    private val _uiEvent = Channel<HomeUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
 
     val adapterItemsFlow: StateFlow<List<HomeAdapterItem>> = combine(
         userInfoAdapterItemFlow,
@@ -51,7 +53,7 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    private fun fetchUserInfo() = viewModelScope.launch {
+    fun fetchUserInfo() = viewModelScope.launch {
         val userInfoSectionHeightDimenRes = R.dimen.user_info_section_height
         val loadingItem = HomeAdapterItem.LoadingView(
             viewHeight = userInfoSectionHeightDimenRes
@@ -75,7 +77,7 @@ class HomeViewModel @Inject constructor(
             }
     }
 
-    private fun getDeviceTrack() = viewModelScope.launch {
+    fun getDeviceTrack() = viewModelScope.launch {
         val titleItem = HomeAdapterItem.Title(content = "Recommend for you")
         val loadingItems = List(6) {
             HomeAdapterItem.LoadingView(
@@ -102,7 +104,7 @@ class HomeViewModel @Inject constructor(
                 if (trackEntities.isEmpty()) {
                     val errorItem = HomeAdapterItem.ErrorView(
                         type = HomeAdapterItem.ViewType.TRACK,
-                        message = "Bạn chả có nhạc gì cả, hoặc hãy cấp quyền thủ công giúp tôi",
+                        message = "Bạn chả có nhạc gì cả, đi tải đi",
                         viewHeight = R.dimen.message_section_height
                     )
                     deviceTrackAdapterItemsFlow.update {
@@ -128,4 +130,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onTrackClick(trackId: Long) {
+        val clickedIndex = deviceTrackEntities.indexOfFirst { it.id == trackId }
+
+        playerManager.setPlaylist(deviceTrackEntities, clickedIndex)
+
+        _uiEvent.trySend(HomeUiEvent.OpenPlayer)
+    }
 }

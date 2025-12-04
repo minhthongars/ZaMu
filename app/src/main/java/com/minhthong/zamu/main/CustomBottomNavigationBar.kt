@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import com.minhthong.zamu.R
 import com.minhthong.zamu.databinding.ViewCustomBottomNavBinding
 
@@ -113,6 +114,10 @@ class CustomBottomNavigationBar @JvmOverloads constructor(
 
     fun setOnItemSelectedListener(listener: (Int) -> Unit) {
         onItemSelectedListener = listener
+    }
+
+    fun showPlayerItem(isShow: Boolean) {
+        binding.navItemPlayer.root.isVisible = isShow
     }
 
     private fun applyWindowInsets() {

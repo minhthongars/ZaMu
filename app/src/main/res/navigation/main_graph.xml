@@ -4,15 +4,13 @@
     android:id="@+id/main_graph"
     app:startDestination="@id/homeFragment">
 
-
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.minhthong.zamu.home.presentation.HomeFragment">
-    </fragment>
+        android:name="com.minhthong.zamu.home.presentation.HomeFragment"/>
 
     <fragment
         android:id="@+id/playerFragment"
-        android:name="com.minhthong.zamu.player.PlayerFragment"/>
+        android:name="com.minhthong.zamu.player.presentation.PlayerFragment"/>
 
     <fragment
         android:id="@+id/favoritesFragment"

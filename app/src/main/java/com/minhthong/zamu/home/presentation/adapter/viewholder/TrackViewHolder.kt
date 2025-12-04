@@ -3,29 +3,42 @@ package com.minhthong.zamu.home.presentation.adapter.viewholder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.minhthong.zamu.databinding.ViewHolderTrackBinding
+import com.minhthong.zamu.home.presentation.adapter.HomeAdapterClickListener
 import com.minhthong.zamu.home.presentation.adapter.HomeAdapterItem
 
 class TrackViewHolder(
-    val binding: ViewHolderTrackBinding
+    val binding: ViewHolderTrackBinding,
+    val listener: HomeAdapterClickListener,
 ): HomeViewHolder(binding.root) {
 
     companion object {
-        fun create(parent: ViewGroup): HomeViewHolder {
+        fun create(
+            parent: ViewGroup,
+            listener: HomeAdapterClickListener
+        ): HomeViewHolder {
             val binding = ViewHolderTrackBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
             )
-            return TrackViewHolder(binding)
+            return TrackViewHolder(binding, listener)
         }
     }
 
     override fun bind(data: HomeAdapterItem) {
         val trackData = data as? HomeAdapterItem.Track ?: return
-        binding.tvName.text = trackData.name
-        binding.tvSize.text = trackData.sizeString
-        binding.tvPerformer.text = trackData.performer
-        binding.tvDuration.text = trackData.durationString
+
+        with(binding) {
+            tvName.text = trackData.name
+            tvSize.text = trackData.sizeString
+            tvPerformer.text = trackData.performer
+            tvDuration.text = trackData.durationString
+            ivTrackAvatar.setImageBitmap(trackData.avatarBitmap)
+
+            root.setOnClickListener {
+                listener.onTrackClick(trackData.id)
+            }
+        }
     }
 
 }

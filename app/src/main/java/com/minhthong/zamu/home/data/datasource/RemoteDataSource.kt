@@ -6,7 +6,7 @@ class RemoteDataSource {
 
     var count = 0
     fun fetchUserData(): UserDto {
-        if (count < 2) {
+        if (count < 1) {
             count++
             throw NullPointerException()
         }

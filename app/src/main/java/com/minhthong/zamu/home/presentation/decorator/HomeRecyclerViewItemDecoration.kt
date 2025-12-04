@@ -23,6 +23,10 @@ class HomeRecyclerViewItemDecoration(
         outRect.left = horizontalSpace
         outRect.right = horizontalSpace
 
+        if (position == 0) {
+            outRect.top = verticalSpace
+        }
+
         val viewType = parent.adapter?.getItemViewType(position)
         if (viewType == HomeAdapterItem.ViewType.TITLE) {
             outRect.top = verticalSpace
