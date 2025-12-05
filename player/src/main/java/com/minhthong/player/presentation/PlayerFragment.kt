@@ -34,7 +34,6 @@ class PlayerFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadData()
         setupViews()
         setUpCollectors()
     }
@@ -86,6 +85,7 @@ class PlayerFragment: Fragment() {
     private fun setUpCollectors() {
         collectFlowSafely {
             viewModel.uiModel.collect { info ->
+                binding.sliderSeek.value = 0F
                 binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
                 binding.tvTrackTitle.text = info.trackName
                 binding.tvAlbum.text = info.album
@@ -112,8 +112,8 @@ class PlayerFragment: Fragment() {
         }
 
         collectFlowSafely {
-            viewModel.currentProgressMls.collect {
-                binding.sliderSeek.value = it.toFloat()
+            viewModel.currentProgressMls.collect { mls ->
+                binding.sliderSeek.value = mls.toFloat()
             }
         }
     }

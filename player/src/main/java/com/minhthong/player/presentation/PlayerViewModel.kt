@@ -21,8 +21,9 @@ class PlayerViewModel @Inject constructor(
     private val mapper: EntityToPresentationMapper
 ) : ViewModel() {
 
-    private val _uiModel = MutableStateFlow(PlayerUiModel())
-    val uiModel = _uiModel.asStateFlow()
+    val uiModel = playerManager.playerInfo().map {
+        with(mapper) { it?.toPresentation() }
+    }.filterNotNull()
 
     private val onTouchingSeekFlow = MutableStateFlow(false)
 
@@ -32,16 +33,6 @@ class PlayerViewModel @Inject constructor(
 
     val currentProgressMls = playerManager.currentProgressMls().filter {
         onTouchingSeekFlow.value.not()
-    }
-
-    fun loadData() = viewModelScope.launch {
-        playerManager.playerInfo()
-            .filterNotNull()
-            .collect { info ->
-                _uiModel.update {
-                    with(mapper) { info.toPresentation() }
-                }
-            }
     }
 
     fun playMedia() {
