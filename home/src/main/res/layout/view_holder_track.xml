@@ -30,6 +30,7 @@
         tools:text="Take care of you đi"
         android:maxLines="2"
         android:ellipsize="end"
+        android:textColor="@color/color_text_secondary"
         android:textStyle="bold"
         android:textSize="16sp"
         android:layout_marginTop="8dp"
@@ -45,6 +46,7 @@
         tools:text="Võ Văn Minh Thông"
         android:textStyle="normal"
         android:maxLines="2"
+        android:textColor="@color/color_text_secondary"
         android:ellipsize="end"
         android:textSize="14sp"
         android:layout_marginTop="3dp"
@@ -71,6 +73,7 @@
         android:textStyle="normal"
         android:textSize="12sp"
         android:layout_marginTop="2dp"
+        android:textColor="@color/color_text_secondary"
         app:layout_constraintStart_toStartOf="@id/tv_performer"
         app:layout_constraintTop_toBottomOf="@id/tv_performer"/>
 
@@ -79,6 +82,7 @@
         android:layout_height="30dp"
         app:srcCompat="@drawable/ic_favorite_track"
         app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="@color/color_text_secondary"
         android:layout_margin="8dp"
         app:tint="@color/grey_300"
         app:layout_constraintBottom_toBottomOf="@id/cv_track_image"/>

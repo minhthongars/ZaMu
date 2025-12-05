@@ -36,7 +36,7 @@ class HomeViewModel @Inject constructor(
     private val userInfoAdapterItemFlow = MutableStateFlow<HomeAdapterItem?>(null)
 
     private var deviceTrackEntities = emptyList<TrackEntity>()
-    private val deviceTrackAdapterItemsFlow = MutableStateFlow<List<HomeAdapterItem>>(emptyList())
+    private val deviceTrackAdapterItemsFlow = MutableStateFlow(value = getDeviceTrackLoadingItems())
 
     private val _uiEvent = Channel<HomeUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -78,38 +78,25 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getDeviceTrack() = viewModelScope.launch {
-        val titleItem = HomeAdapterItem.Title(content = "Recommend for you")
-        val loadingItems = List(6) {
-            HomeAdapterItem.LoadingView(
-                viewHeight = R.dimen.device_track_item_height
-            )
-        }
+        val titleItem = getDeviceTrackTitleItem()
 
         deviceTrackAdapterItemsFlow.update {
-            listOf(titleItem) + loadingItems
+            getDeviceTrackLoadingItems()
         }
 
         getTrackFromDeviceUseCase.invoke()
             .onError { message ->
-                val errorItem = HomeAdapterItem.ErrorView(
-                    type = HomeAdapterItem.ViewType.TRACK,
-                    message = message,
-                    viewHeight = R.dimen.recommend_track_section_height
+                val errorItems = getDeviceTrackErrorItems(
+                    message = message
                 )
-                deviceTrackAdapterItemsFlow.update {
-                    listOf(titleItem, errorItem)
-                }
+                deviceTrackAdapterItemsFlow.update { errorItems }
             }
             .onSuccess { trackEntities ->
                 if (trackEntities.isEmpty()) {
-                    val errorItem = HomeAdapterItem.ErrorView(
-                        type = HomeAdapterItem.ViewType.TRACK,
-                        message = "Bạn chả có nhạc gì cả, đi tải đi",
-                        viewHeight = R.dimen.message_section_height
+                    val errorItems = getDeviceTrackErrorItems(
+                        message = "Bạn chưa có nhạc, hãy đi tải đi nhé!"
                     )
-                    deviceTrackAdapterItemsFlow.update {
-                        listOf(titleItem, errorItem)
-                    }
+                    deviceTrackAdapterItemsFlow.update { errorItems }
                     return@onSuccess
                 }
 
@@ -123,10 +110,22 @@ class HomeViewModel @Inject constructor(
             }
     }
 
+    fun showPermissionDenyError() {
+        val errorItems = getDeviceTrackErrorItems(
+            message = "Cấp quyền đi mới scan nhạc được á!"
+        )
+        deviceTrackAdapterItemsFlow.update { errorItems }
+    }
+
     fun retry(viewType: Int) {
         when(viewType) {
-            HomeAdapterItem.ViewType.USER_INFO -> fetchUserInfo()
-            HomeAdapterItem.ViewType.TRACK -> getDeviceTrack()
+            HomeAdapterItem.ViewType.USER_INFO -> {
+                fetchUserInfo()
+            }
+
+            HomeAdapterItem.ViewType.TRACK -> {
+                _uiEvent.trySend(HomeUiEvent.RequestAudioPermission)
+            }
         }
     }
 
@@ -136,5 +135,32 @@ class HomeViewModel @Inject constructor(
         playerManager.setPlaylist(deviceTrackEntities, clickedIndex)
 
         _uiEvent.trySend(HomeUiEvent.OpenPlayer)
+    }
+
+    private fun getDeviceTrackTitleItem(): HomeAdapterItem {
+        return HomeAdapterItem.Title(content = "Recommend for you")
+    }
+
+    private fun getDeviceTrackLoadingItems(): List<HomeAdapterItem> {
+        val titleItem = getDeviceTrackTitleItem()
+        val loadingItems = List(6) {
+            HomeAdapterItem.LoadingView(
+                viewHeight = R.dimen.device_track_item_height
+            )
+        }
+        return listOf(titleItem) + loadingItems
+    }
+
+    private fun getDeviceTrackErrorItems(
+        message: String
+    ) : List<HomeAdapterItem> {
+        val titleItem = getDeviceTrackTitleItem()
+        val errorItem = HomeAdapterItem.ErrorView(
+            type = HomeAdapterItem.ViewType.TRACK,
+            message = message,
+            viewHeight = R.dimen.recommend_track_section_height
+        )
+
+        return listOf(titleItem) + errorItem
     }
 }

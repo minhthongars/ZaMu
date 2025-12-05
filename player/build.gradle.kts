@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
 
     implementation("com.google.dagger:hilt-android:2.48")
+    implementation(libs.androidx.media3.session)
     ksp("com.google.dagger:hilt-android-compiler:2.48")
 
     implementation("androidx.media3:media3-exoplayer:1.8.0")

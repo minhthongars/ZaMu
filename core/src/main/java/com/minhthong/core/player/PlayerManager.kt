@@ -1,6 +1,7 @@
 package com.minhthong.core.player
 
 import android.content.Context
+import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.PlayerEntity
 import com.minhthong.core.model.TrackEntity
 import kotlinx.coroutines.flow.Flow
@@ -31,4 +32,6 @@ interface PlayerManager {
     fun setPlaylist(tracks: List<TrackEntity>, startIndex: Int)
 
     fun seek(positionMs: Long)
+
+    fun getPlayer(): ExoPlayer
 }

@@ -19,11 +19,10 @@
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
         app:layout_constraintBottom_toTopOf="@id/tv_track_title"
-        app:layout_constraintDimensionRatio="1:1.2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.75">
+        app:layout_constraintWidth_percent="0.8">
 
         <ImageView
             android:id="@+id/iv_cover_art"
@@ -40,15 +39,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="24dp"
-        android:maxLines="2"
+        android:layout_marginBottom="4dp"
+        android:maxLines="1"
         android:ellipsize="end"
         android:textColor="@color/color_on_surface"
         android:textSize="@dimen/text_huge"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cv_cover_art"
+        app:layout_constraintBottom_toTopOf="@id/tv_artist"
         tools:text="Take Care of You" />
 
     <TextView
@@ -57,13 +56,13 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:maxLines="1"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
         android:ellipsize="end"
         android:textColor="@color/color_text_secondary"
         android:textSize="@dimen/text_large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_track_title"
+        app:layout_constraintBottom_toTopOf="@id/tv_album"
         tools:text="Võ Văn Minh Thông" />
 
     <TextView
@@ -72,14 +71,13 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:maxLines="1"
-        android:layout_marginTop="6dp"
+        android:layout_marginBottom="20dp"
         android:ellipsize="end"
         android:textColor="@color/color_text_secondary"
         android:textSize="@dimen/text_medium"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_artist"
+        app:layout_constraintBottom_toTopOf="@id/ll_seek_container"
         tools:text="Album Name"
         tools:visibility="visible" />
 
@@ -88,7 +86,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/ll_controls">

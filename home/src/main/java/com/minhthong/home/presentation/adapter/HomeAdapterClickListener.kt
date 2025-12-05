@@ -6,4 +6,6 @@ interface HomeAdapterClickListener {
     fun onTrackClick(trackId: Long)
 
     fun onSaveClick(trackId: Long)
+
+    fun onSaveListingClick()
 }

@@ -1,10 +1,15 @@
 package com.minhthong.home.presentation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.minhthong.core.R
@@ -21,13 +26,13 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class HomeFragment: Fragment() {
 
+    @Inject
+    internal lateinit var navigation: Navigation
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by viewModels()
-
-    @Inject
-    internal lateinit var navigation: Navigation
 
     private val homeListener = object : HomeAdapterClickListener {
         override fun onRetryClick(viewType: Int) {
@@ -39,13 +44,28 @@ class HomeFragment: Fragment() {
         }
 
         override fun onSaveClick(trackId: Long) {
-            //later
+        }
+
+        override fun onSaveListingClick() {
+            navigation.navigateTo(Screen.FAVORITE)
         }
     }
 
     private val homeAdapter = HomeAdapter(
         listener = homeListener
     )
+
+    private val permissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { result ->
+            val granted = result.values.all { it }
+            if (granted) {
+                onPermissionGranted()
+            } else {
+                onPermissionDenied()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,14 +79,14 @@ class HomeFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpRecyclerView()
-        callData()
+        setUpViews()
         collectData()
+        loadData()
     }
 
-    private fun callData() {
+    private fun loadData() {
         viewModel.fetchUserInfo()
-        viewModel.getDeviceTrack()
+        requestAudioPermission()
     }
 
     private fun collectData() {
@@ -86,12 +106,16 @@ class HomeFragment: Fragment() {
                     is HomeUiEvent.Toast -> {
                         Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
                     }
+
+                    is HomeUiEvent.RequestAudioPermission -> {
+                        requestAudioPermission()
+                    }
                 }
             }
         }
     }
 
-    private fun setUpRecyclerView() {
+    private fun setUpViews() {
         with(binding.recyclerView) {
             itemAnimator = null
             adapter = homeAdapter
@@ -107,6 +131,48 @@ class HomeFragment: Fragment() {
                 )
             )
         }
+    }
+
+    private fun requestAudioPermission() {
+        if (hasAudioPermission()) {
+            onPermissionGranted()
+            return
+        }
+
+        val permissions = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+            }
+            else -> {
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+
+        permissionLauncher.launch(permissions)
+    }
+
+    private fun hasAudioPermission(): Boolean {
+        return when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ->
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.READ_MEDIA_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED
+
+            else ->
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun onPermissionGranted() {
+        viewModel.getDeviceTrack()
+    }
+
+    private fun onPermissionDenied() {
+        viewModel.showPermissionDenyError()
     }
 
     override fun onDestroyView() {

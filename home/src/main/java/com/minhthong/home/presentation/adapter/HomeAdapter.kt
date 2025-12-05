@@ -19,7 +19,7 @@ class HomeAdapter(
         viewType: Int
     ): HomeViewHolder {
         return when(viewType) {
-            HomeAdapterItem.ViewType.USER_INFO -> UserInfoViewHolder.create(parent)
+            HomeAdapterItem.ViewType.USER_INFO -> UserInfoViewHolder.create(parent, listener)
 
             HomeAdapterItem.ViewType.TITLE -> TitleViewHolder.create(parent)
 
@@ -74,5 +74,8 @@ class HomeAdapter(
             return oldItem.areContentsTheSame(newItem)
         }
 
+        override fun getChangePayload(oldItem: HomeAdapterItem, newItem: HomeAdapterItem): Any? {
+            return oldItem.getChangePayload(newItem)
+        }
     }
 }

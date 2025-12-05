@@ -29,10 +29,6 @@ class PlayerManagerImpl(
 
     private var currentPlaylist: List<TrackEntity> = emptyList()
 
-    private var playbackState: Int = Player.STATE_IDLE
-
-    private var playing: Boolean = false
-
     private var progressJob: Job? = null
 
     private val playerExceptionHandler = CoroutineExceptionHandler { _, e -> e.printStackTrace() }
@@ -46,10 +42,8 @@ class PlayerManagerImpl(
     override val hasSetPlaylistFlow = playerInfoFlow.map { it != null }
 
     override fun initialize(context: Context) {
-        if (::exoPlayer.isInitialized.not()) {
-            exoPlayer = ExoPlayer.Builder(context).build()
-            exoPlayer.addListener(PlayerEventListener())
-        }
+        exoPlayer = ExoPlayer.Builder(context).build()
+        exoPlayer.addListener(PlayerEventListener())
     }
 
     override fun setPlaylist(
@@ -60,14 +54,7 @@ class PlayerManagerImpl(
 
         currentPlaylist = tracks
 
-        val mediaItems = tracks.map { track ->
-            MediaItem.Builder()
-                .setUri(track.uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder().build()
-                )
-                .build()
-        }
+        val mediaItems = createMediaItems()
         val safeStartIndex = startIndex.coerceIn(0, tracks.size - 1)
 
         playerInfoFlow.update { getDefaultData(currentIndex = safeStartIndex) }
@@ -86,9 +73,9 @@ class PlayerManagerImpl(
         exoPlayer.clearMediaItems()
         exoPlayer.release()
         currentPlaylist = emptyList()
+        progressJob?.cancel()
         playerScope.cancel()
         playerInfoFlow.update { null }
-        progressJob?.cancel()
     }
 
     override fun play() {
@@ -96,6 +83,12 @@ class PlayerManagerImpl(
             exoPlayer.pause()
         } else {
             exoPlayer.play()
+        }
+
+        playerInfoFlow.update { current ->
+            current?.copy(
+                isPlaying = exoPlayer.isPlaying,
+            )
         }
     }
 
@@ -146,6 +139,29 @@ class PlayerManagerImpl(
         exoPlayer.seekToPreviousMediaItem()
     }
 
+    override fun getPlayer(): ExoPlayer {
+        return exoPlayer
+    }
+
+    private fun createMediaItems(): List<MediaItem> {
+       return currentPlaylist.mapIndexed { index, track ->
+           val metadata =  MediaMetadata.Builder()
+               .setTitle(track.title)
+               .setArtist(track.artist)
+               .setAlbumTitle(track.album)
+               .setDisplayTitle(track.displayName)
+               .setDurationMs(track.durationMs)
+               .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+               .setTrackNumber(index)
+               .build()
+
+            MediaItem.Builder()
+                .setUri(track.uri)
+                .setMediaMetadata(metadata)
+                .build()
+        }
+    }
+
     private fun getDefaultData(currentIndex: Int): PlayerEntity {
         return PlayerEntity(
             trackInfo = currentPlaylist[currentIndex],
@@ -170,25 +186,11 @@ class PlayerManagerImpl(
         progressJob?.cancel()
     }
 
-    private fun updatePlayerState() {
-        val uiIsPlaying = when (playbackState) {
-            Player.STATE_BUFFERING -> true
-            Player.STATE_READY -> playing
-            else -> false
-        }
-
-        playerInfoFlow.update { info ->
-            info?.copy(isPlaying = uiIsPlaying)
-        }
-    }
-
-    inner class PlayerEventListener : Player.Listener {
+    private inner class PlayerEventListener : Player.Listener {
         override fun onPlaybackStateChanged(state: Int) {
             if (state == Player.STATE_ENDED) {
                 moveToNext()
             }
-            playbackState = state
-            updatePlayerState()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -197,9 +199,6 @@ class PlayerManagerImpl(
             } else {
                 endProgressUpdater()
             }
-
-            playing = isPlaying
-            updatePlayerState()
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

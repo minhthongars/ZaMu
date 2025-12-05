@@ -17,7 +17,7 @@ class EntityToPresentationMapper(
         val enableColor = CR.color.blue_600
         val disableColor = CR.color.grey_500
         return PlayerUiModel(
-            trackName = trackInfo.displayName,
+            trackName = trackInfo.title,
             performer = trackInfo.artist,
             avatar = Utils.getAlbumArt(context, trackInfo.uri, 1024),
             album = trackInfo.album,
