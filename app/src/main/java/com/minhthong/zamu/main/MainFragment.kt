@@ -56,7 +56,7 @@ class MainFragment: Fragment() {
 
     private fun setUpCollector() {
         collectFlowSafely {
-            playerManager.hasSetPlaylist().collect {
+            playerManager.hasSetPlaylistFlow.collect {
                 binding.bottomNavigation.showPlayerItem(isShow = it)
             }
         }

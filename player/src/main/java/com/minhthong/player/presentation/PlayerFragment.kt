@@ -2,12 +2,14 @@ package com.minhthong.player.presentation
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
 import com.minhthong.core.Utils.collectFlowSafely
 import com.minhthong.core.Utils.toDurationString
@@ -21,6 +23,22 @@ class PlayerFragment: Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: PlayerViewModel by viewModels()
+
+    private val onSliderTouchListener = object : Slider.OnSliderTouchListener {
+        override fun onStartTrackingTouch(slider: Slider) {
+            viewModel.setIsSeeking(isTouching = true)
+        }
+
+        override fun onStopTrackingTouch(slider: Slider) {
+            val seekToValue = slider.value
+            viewModel.seek(seekToValue)
+            binding.tvCurrentTime.text = seekToValue.toDurationString()
+        }
+    }
+
+    private val sliderLabelFormatter = LabelFormatter { mls ->
+        mls.toDurationString()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,34 +81,22 @@ class PlayerFragment: Fragment() {
     }
 
     private fun setUpSliderBar() {
-        binding.sliderSeek.addOnSliderTouchListener(
-            object : Slider.OnSliderTouchListener {
-                override fun onStartTrackingTouch(slider: Slider) {
-                    viewModel.setIsSeeking(isTouching = true)
-                }
-                override fun onStopTrackingTouch(slider: Slider) {
-                    val seekToValue = slider.value
-                    viewModel.seek(seekToValue)
-                    binding.tvCurrentTime.text = seekToValue.toLong().toDurationString()
-                }
-            }
-        )
-
-        binding.sliderSeek.setLabelFormatter { value ->
-            val mls = value.toLong()
-            mls.toDurationString()
+        with(binding.sliderSeek) {
+            setLabelFormatter(sliderLabelFormatter)
+            addOnSliderTouchListener(onSliderTouchListener)
         }
     }
 
     private fun setUpCollectors() {
         collectFlowSafely {
             viewModel.uiModel.collect { info ->
-                binding.sliderSeek.value = 0F
                 binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
+
                 binding.tvTrackTitle.text = info.trackName
                 binding.tvAlbum.text = info.album
                 binding.tvArtist.text = info.performer
                 binding.tvTotalTime.text = info.duration
+
                 binding.btnPlayPause.setImageResource(info.playIcon)
 
                 ImageViewCompat.setImageTintList(
@@ -101,6 +107,7 @@ class PlayerFragment: Fragment() {
                     binding.btnShuffle,
                     ColorStateList.valueOf(info.shuffleIconColor)
                 )
+
                 binding.ivCoverArt.setImageBitmap(info.avatar)
             }
         }

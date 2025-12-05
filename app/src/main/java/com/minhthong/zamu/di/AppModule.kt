@@ -2,6 +2,7 @@ package com.minhthong.zamu.di
 
 import android.content.Context
 import com.minhthong.core.di.DefaultDispatcher
+import com.minhthong.core.di.MainDispatcher
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.player.PlayerManagerImpl
 import com.minhthong.navigation.Navigation
@@ -29,10 +30,12 @@ object AppModule {
     @Provides
     @Singleton
     fun providePlayerManager(
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher,
+        @MainDispatcher mainDispatcher: CoroutineDispatcher
     ): PlayerManager {
         return PlayerManagerImpl(
-            dispatcher = defaultDispatcher,
+            defaultDispatcher = defaultDispatcher,
+            mainDispatcher = mainDispatcher
         )
     }
 

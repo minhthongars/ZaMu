@@ -10,110 +10,45 @@ import com.minhthong.core.model.TrackEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class PlayerManagerImpl(
-    dispatcher: CoroutineDispatcher,
+    defaultDispatcher: CoroutineDispatcher,
+    private val mainDispatcher: CoroutineDispatcher,
 ): PlayerManager {
 
     private lateinit var exoPlayer: ExoPlayer
 
     private var currentPlaylist: List<TrackEntity> = emptyList()
 
-    private val playerExceptionHandler = CoroutineExceptionHandler { _, e ->
-        e.printStackTrace()
-    }
-    private val playerScope = CoroutineScope(
-        context = dispatcher + SupervisorJob() + playerExceptionHandler
-    )
+    private var playbackState: Int = Player.STATE_IDLE
 
-    private val playerInfoFlow = MutableStateFlow<PlayerEntity?>(null)
+    private var playing: Boolean = false
 
     private var progressJob: Job? = null
 
-    private val _progressFlow = MutableStateFlow(0L)
+    private val playerExceptionHandler = CoroutineExceptionHandler { _, e -> e.printStackTrace() }
 
-    private val playerEventListener = object : Player.Listener {
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            when (playbackState) {
-                Player.STATE_IDLE -> {}
-                Player.STATE_READY -> {}
-                Player.STATE_BUFFERING -> {}
+    private val playerScope = CoroutineScope(defaultDispatcher + SupervisorJob() + playerExceptionHandler)
 
-                Player.STATE_ENDED -> {
-                    moveToNext()
-                }
-            }
-        }
+    override val playerInfoFlow = MutableStateFlow<PlayerEntity?>(null)
 
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            if (isPlaying) {
-                startProgressUpdater()
-            } else {
-                endProgressUpdater()
-            }
+    override val currentProgressMlsFlow = MutableStateFlow(0L)
 
-            playerInfoFlow.update { current ->
-                current?.copy(isPlaying = exoPlayer.isPlaying)
-            }
-        }
-
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            val currentIndex = exoPlayer.currentMediaItemIndex
-            playerInfoFlow.update { current ->
-                current?.copy(
-                    trackInfo = currentPlaylist[currentIndex]
-                )
-            }
-        }
-
-        override fun onPositionDiscontinuity(
-            oldPosition: Player.PositionInfo,
-            newPosition: Player.PositionInfo,
-            reason: Int
-        )  = Unit
-    }
-
-    private fun getDefaultData(currentIndex: Int): PlayerEntity {
-        return PlayerEntity(
-            trackInfo = currentPlaylist[currentIndex],
-            isLooping = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE,
-            isShuffling = exoPlayer.shuffleModeEnabled,
-            isPlaying = false,
-        )
-    }
-
-    private fun startProgressUpdater() {
-        if (progressJob?.isActive == true) return
-
-        progressJob = playerScope.launch(Dispatchers.Main) {
-            while (isActive) {
-                _progressFlow.value = exoPlayer.currentPosition
-                delay(200L)
-            }
-        }
-    }
-
-    private fun endProgressUpdater() {
-        progressJob?.cancel()
-    }
+    override val hasSetPlaylistFlow = playerInfoFlow.map { it != null }
 
     override fun initialize(context: Context) {
         if (::exoPlayer.isInitialized.not()) {
             exoPlayer = ExoPlayer.Builder(context).build()
-            exoPlayer.addListener(playerEventListener)
+            exoPlayer.addListener(PlayerEventListener())
         }
     }
 
@@ -137,15 +72,15 @@ class PlayerManagerImpl(
 
         playerInfoFlow.update { getDefaultData(currentIndex = safeStartIndex) }
 
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        exoPlayer.addMediaItems(mediaItems)
-        exoPlayer.prepare()
-        exoPlayer.seekTo(safeStartIndex, 0L)
-        exoPlayer.play()
+        with(exoPlayer) {
+            stop()
+            clearMediaItems()
+            addMediaItems(mediaItems)
+            prepare()
+            seekTo(safeStartIndex, 0L)
+            play()
+        }
     }
-
-    override fun hasSetPlaylist(): Flow<Boolean> = playerInfoFlow.map { it != null }
 
     override fun release() {
         exoPlayer.clearMediaItems()
@@ -155,12 +90,6 @@ class PlayerManagerImpl(
         playerInfoFlow.update { null }
         progressJob?.cancel()
     }
-
-    override fun playerInfo(): StateFlow<PlayerEntity?> {
-        return playerInfoFlow.asStateFlow()
-    }
-
-    override fun currentProgressMls() = _progressFlow.asStateFlow()
 
     override fun play() {
         if (exoPlayer.isPlaying) {
@@ -215,6 +144,81 @@ class PlayerManagerImpl(
             return
         }
         exoPlayer.seekToPreviousMediaItem()
+    }
+
+    private fun getDefaultData(currentIndex: Int): PlayerEntity {
+        return PlayerEntity(
+            trackInfo = currentPlaylist[currentIndex],
+            isLooping = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE,
+            isShuffling = exoPlayer.shuffleModeEnabled,
+            isPlaying = true,
+        )
+    }
+
+    private fun startProgressUpdater() {
+        if (progressJob?.isActive == true) return
+
+        progressJob = playerScope.launch(mainDispatcher) {
+            while (isActive) {
+                currentProgressMlsFlow.update { exoPlayer.currentPosition }
+                delay(150L)
+            }
+        }
+    }
+
+    private fun endProgressUpdater() {
+        progressJob?.cancel()
+    }
+
+    private fun updatePlayerState() {
+        val uiIsPlaying = when (playbackState) {
+            Player.STATE_BUFFERING -> true
+            Player.STATE_READY -> playing
+            else -> false
+        }
+
+        playerInfoFlow.update { info ->
+            info?.copy(isPlaying = uiIsPlaying)
+        }
+    }
+
+    inner class PlayerEventListener : Player.Listener {
+        override fun onPlaybackStateChanged(state: Int) {
+            if (state == Player.STATE_ENDED) {
+                moveToNext()
+            }
+            playbackState = state
+            updatePlayerState()
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            if (isPlaying) {
+                startProgressUpdater()
+            } else {
+                endProgressUpdater()
+            }
+
+            playing = isPlaying
+            updatePlayerState()
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            endProgressUpdater()
+            currentProgressMlsFlow.update { 0 }
+
+            val currentIndex = exoPlayer.currentMediaItemIndex
+            playerInfoFlow.update { current ->
+                current?.copy(trackInfo = currentPlaylist[currentIndex])
+            }
+
+            startProgressUpdater()
+        }
+
+        override fun onPositionDiscontinuity(
+            oldPosition: Player.PositionInfo,
+            newPosition: Player.PositionInfo,
+            reason: Int
+        )  = Unit
     }
 }
 

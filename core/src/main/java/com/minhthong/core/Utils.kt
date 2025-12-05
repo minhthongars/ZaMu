@@ -72,6 +72,11 @@ object Utils {
         )
     }
 
+    fun Float.toDurationString(): String {
+        val mls = this.toLong()
+        return mls.toDurationString()
+    }
+
     fun Long.toMbString(): String {
         val mb = this / (1024.0 * 1024.0)
         return String.format(Locale.getDefault(), "%.2f MB", mb)

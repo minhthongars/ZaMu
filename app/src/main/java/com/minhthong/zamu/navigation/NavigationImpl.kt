@@ -15,9 +15,7 @@ class NavigationImpl(
     }
 
     override fun navigateTo(screen: Screen) {
-        safeNavigate(
-            destination = screenMap.getValue(screen)
-        )
+        safeNavigate(destination = screenMap.getValue(screen))
     }
 
     private fun safeNavigate(destination: Int) {
