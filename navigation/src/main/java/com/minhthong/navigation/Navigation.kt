@@ -7,4 +7,6 @@ interface Navigation {
     fun setNavController(navController: NavController)
 
     fun navigateTo(screen: Screen)
+
+    fun safeNavigate(destination: Int)
 }

@@ -1,9 +1,13 @@
 package com.minhthong.core.player
 
 import android.content.Context
+import android.util.Log
+import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.PlayerEntity
 import com.minhthong.core.model.TrackEntity
@@ -42,7 +46,9 @@ class PlayerManagerImpl(
     override val hasSetPlaylistFlow = playerInfoFlow.map { it != null }
 
     override fun initialize(context: Context) {
-        exoPlayer = ExoPlayer.Builder(context).build()
+        exoPlayer = ExoPlayer.Builder(context)
+            .setWakeMode(C.WAKE_MODE_LOCAL)
+            .build()
         exoPlayer.addListener(PlayerEventListener())
     }
 
@@ -78,18 +84,20 @@ class PlayerManagerImpl(
         playerInfoFlow.update { null }
     }
 
+    @OptIn(UnstableApi::class)
     override fun play() {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
         } else {
+            if (exoPlayer.playbackState == Player.STATE_IDLE) {
+                exoPlayer.prepare()
+            }
             exoPlayer.play()
         }
-
-        playerInfoFlow.update { current ->
-            current?.copy(
-                isPlaying = exoPlayer.isPlaying,
-            )
-        }
+        Log.e("minhthongg", exoPlayer.isReleased.toString())
+        Log.e("minhthongg", exoPlayer.isPlaying.toString())
+        Log.e("minhthongg", exoPlayer.mediaItemCount.toString())
+        Log.e("minhthongg", exoPlayer.playbackState.toString())
     }
 
     override fun seek(positionMs: Long) {
@@ -146,10 +154,10 @@ class PlayerManagerImpl(
     private fun createMediaItems(): List<MediaItem> {
        return currentPlaylist.mapIndexed { index, track ->
            val metadata =  MediaMetadata.Builder()
-               .setTitle(track.title)
+               .setTitle(track.displayName)
                .setArtist(track.artist)
                .setAlbumTitle(track.album)
-               .setDisplayTitle(track.displayName)
+               .setDisplayTitle(track.title)
                .setDurationMs(track.durationMs)
                .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
                .setTrackNumber(index)
@@ -213,11 +221,23 @@ class PlayerManagerImpl(
             startProgressUpdater()
         }
 
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            playerInfoFlow.update { current ->
+                current?.copy(
+                    isPlaying = exoPlayer.playWhenReady,
+                )
+            }
+        }
+
         override fun onPositionDiscontinuity(
             oldPosition: Player.PositionInfo,
             newPosition: Player.PositionInfo,
             reason: Int
-        )  = Unit
+        ) {
+            if (progressJob?.isActive == false) {
+                currentProgressMlsFlow.update { newPosition.positionMs }
+            }
+        }
     }
 }
 

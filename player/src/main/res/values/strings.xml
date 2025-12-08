@@ -5,4 +5,8 @@
     <string name="previous">Previous track</string>
     <string name="next">Next track</string>
     <string name="shuffle">Shuffle</string>
+    <string name="media_notification_action_play">Play</string>
+    <string name="media_notification_action_pause">Pause</string>
+    <string name="media_notification_action_previous">Previous</string>
+    <string name="media_notification_action_next">Next</string>
 </resources>

@@ -6,8 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import com.minhthong.core.Utils.collectFlowSafely
+import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.navigation.Navigation
 import com.minhthong.zamu.R
@@ -64,7 +65,7 @@ class MainFragment: Fragment() {
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { destinationId ->
-            safeNavigate(destination = destinationId)
+            navigation.safeNavigate(destination = destinationId)
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -97,17 +98,10 @@ class MainFragment: Fragment() {
         val isAtHome = currentDestination == R.id.homeFragment
 
         if (!isAtHome) {
-            safeNavigate(R.id.homeFragment)
+            navigation.safeNavigate(R.id.homeFragment)
         } else {
             activity?.finish()
         }
-    }
-
-    private fun safeNavigate(destination: Int) {
-        if (navController.currentDestination?.id == destination) {
-            return
-        }
-        navController.navigate(destination)
     }
 
     override fun onDestroyView() {

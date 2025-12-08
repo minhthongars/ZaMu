@@ -1,14 +1,16 @@
-package com.minhthong.core
+package com.minhthong.core.util
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -91,5 +93,11 @@ object Utils {
                 collect()
             }
         }
+    }
+
+    fun ImageView.loadImage(url: String) {
+        Glide.with(context)
+            .load(url)
+            .into(this)
     }
 }

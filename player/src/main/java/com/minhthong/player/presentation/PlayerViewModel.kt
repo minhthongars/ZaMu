@@ -1,7 +1,7 @@
 package com.minhthong.player.presentation
 
 import androidx.lifecycle.ViewModel
-import com.minhthong.core.Utils.toDurationString
+import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.player.presentation.mapper.EntityToPresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel

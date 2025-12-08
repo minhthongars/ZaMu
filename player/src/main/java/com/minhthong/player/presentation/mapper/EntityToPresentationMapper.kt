@@ -2,8 +2,8 @@ package com.minhthong.player.presentation.mapper
 
 import android.content.Context
 import androidx.core.content.ContextCompat
-import com.minhthong.core.Utils
-import com.minhthong.core.Utils.toDurationString
+import com.minhthong.core.util.Utils
+import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.core.model.PlayerEntity
 import com.minhthong.player.R
 import com.minhthong.player.presentation.PlayerUiModel

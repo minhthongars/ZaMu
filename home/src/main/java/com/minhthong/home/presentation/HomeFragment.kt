@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.minhthong.core.R
-import com.minhthong.core.Utils.collectFlowSafely
+import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.home.databinding.FragmentHomeBinding
 import com.minhthong.home.presentation.adapter.HomeAdapter
 import com.minhthong.home.presentation.adapter.HomeAdapterClickListener

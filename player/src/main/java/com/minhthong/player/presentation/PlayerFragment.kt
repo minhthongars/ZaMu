@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
-import com.minhthong.core.Utils.collectFlowSafely
-import com.minhthong.core.Utils.toDurationString
+import com.minhthong.core.util.Utils.collectFlowSafely
+import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.player.databinding.FragmentPlayerBinding
 import dagger.hilt.android.AndroidEntryPoint
 

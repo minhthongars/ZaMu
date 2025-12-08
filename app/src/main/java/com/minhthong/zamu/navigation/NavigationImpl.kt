@@ -1,6 +1,7 @@
 package com.minhthong.zamu.navigation
 
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
 
@@ -18,10 +19,21 @@ class NavigationImpl(
         safeNavigate(destination = screenMap.getValue(screen))
     }
 
-    private fun safeNavigate(destination: Int) {
+    override fun safeNavigate(destination: Int) {
         if (navController.currentDestination?.id == destination) {
             return
         }
-        navController.navigate(destination)
+
+        val navOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .setRestoreState(true)
+            .setPopUpTo(
+                navController.graph.startDestinationId,
+                inclusive = false,
+                saveState = true
+            )
+            .build()
+
+        navController.navigate(destination, null, navOptions)
     }
 }
