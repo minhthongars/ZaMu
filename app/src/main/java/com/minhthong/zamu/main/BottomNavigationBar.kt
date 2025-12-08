@@ -36,10 +36,10 @@ class BottomNavigationBar @JvmOverloads constructor(
             label = "Player"
         ),
         NavItem(
-            destinationId = R.id.favoritesFragment,
-            viewId = R.id.nav_item_favorites,
-            iconResId = R.drawable.ic_favorite,
-            label = "Favorites"
+            destinationId = R.id.playlistFragment,
+            viewId = R.id.nav_item_playlist,
+            iconResId = R.drawable.ic_playlist,
+            label = "Playlist"
         ),
         NavItem(
             destinationId = R.id.settingsFragment,

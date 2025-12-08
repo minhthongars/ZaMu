@@ -45,7 +45,7 @@ object AppModule {
         return mapOf(
             Screen.HOME to R.id.homeFragment,
             Screen.PLAYER to R.id.playerFragment,
-            Screen.FAVORITE to R.id.favoritesFragment,
+            Screen.PLAYLIST to R.id.playlistFragment,
             Screen.SETTING to R.id.settingsFragment
         )
     }

@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":core_common"))
 
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)

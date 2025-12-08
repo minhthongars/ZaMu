@@ -4,5 +4,5 @@ enum class Screen {
     HOME,
     PLAYER,
     SETTING,
-    FAVORITE
+    PLAYLIST
 }

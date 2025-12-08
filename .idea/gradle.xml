@@ -11,12 +11,12 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/home" />
-            <option value="$PROJECT_DIR$/mylibrary" />
+            <option value="$PROJECT_DIR$/core_common" />
+            <option value="$PROJECT_DIR$/feature_home" />
+            <option value="$PROJECT_DIR$/feature_player" />
+            <option value="$PROJECT_DIR$/feature_playlist" />
+            <option value="$PROJECT_DIR$/feature_setting" />
             <option value="$PROJECT_DIR$/navigation" />
-            <option value="$PROJECT_DIR$/player" />
-            <option value="$PROJECT_DIR$/setting" />
           </set>
         </option>
       </GradleProjectSettings>

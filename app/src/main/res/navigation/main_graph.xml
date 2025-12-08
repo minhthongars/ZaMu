@@ -15,9 +15,9 @@
         android:name="com.minhthong.player.presentation.PlayerFragment"/>
 
     <fragment
-        android:id="@+id/favoritesFragment"
+        android:id="@+id/playlistFragment"
         android:label="Favorites"
-        android:name="com.minhthong.mylibrary.FavoriteFragment"/>
+        android:name="com.minhthong.playlist.PlayListFragment"/>
 
     <fragment
         android:id="@+id/settingsFragment"
