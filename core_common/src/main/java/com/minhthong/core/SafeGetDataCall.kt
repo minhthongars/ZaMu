@@ -11,8 +11,8 @@ suspend fun <T> safeGetDataCall(
         try {
             Result.Success(getDataCall())
         } catch (e: Exception) {
-            val errorMessage = e.mapToAppError().errorMessage
-            Result.Error(errorMessage)
+            val errorMessageId = e.toAppError().errorResId
+            Result.Error(errorMessageId)
         }
     }
 }

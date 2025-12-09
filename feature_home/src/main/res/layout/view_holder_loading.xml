@@ -14,7 +14,7 @@
 
     <View
         android:id="@+id/shimmerOverlay"
-        android:layout_width="80dp"
+        android:layout_width="380dp"
         android:layout_height="match_parent"
         android:layout_marginStart="16dp"
         android:background="@drawable/shimmer_overlay_gradient"

@@ -1,6 +1,7 @@
 package com.minhthong.home.presentation
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.minhthong.core.R
+import com.minhthong.core.service.PlaybackService
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.home.databinding.FragmentHomeBinding
 import com.minhthong.home.presentation.adapter.HomeAdapter
@@ -34,38 +36,47 @@ class HomeFragment: Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
+    private val postNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted.not()) {
+            onPostNotificationPermissionDenied()
+        }
+        onNotificationPermissionGranted()
+    }
+
+    private val audioPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            onAudioPermissionGranted()
+        } else {
+            onAudioPermissionDenied()
+        }
+    }
+
+
     private val homeListener = object : HomeAdapterClickListener {
         override fun onRetryClick(viewType: Int) {
             viewModel.retry(viewType)
         }
 
         override fun onTrackClick(trackId: Long) {
-            viewModel.onTrackClick(trackId = trackId)
+            viewModel.handlePlayMusic(trackId = trackId)
         }
 
-        override fun onSaveClick(trackId: Long) {
+        override fun onAddToPlaylistClick(trackId: Long) {
+            viewModel.addToPlaylist(trackId = trackId)
         }
 
         override fun onSaveListingClick() {
-            navigation.navigateTo(Screen.PLAYLIST)
+            navigation.navigateTo(screen = Screen.PLAYLIST)
         }
     }
 
     private val homeAdapter = HomeAdapter(
         listener = homeListener
     )
-
-    private val permissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { result ->
-            val granted = result.values.all { it }
-            if (granted) {
-                onPermissionGranted()
-            } else {
-                onPermissionDenied()
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -104,11 +115,19 @@ class HomeFragment: Fragment() {
                     }
 
                     is HomeUiEvent.Toast -> {
-                        Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            getText(event.messageId),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     is HomeUiEvent.RequestAudioPermission -> {
                         requestAudioPermission()
+                    }
+
+                    is HomeUiEvent.RequestPostNotificationPermission -> {
+                        requestPostNotification()
                     }
                 }
             }
@@ -134,21 +153,23 @@ class HomeFragment: Fragment() {
     }
 
     private fun requestAudioPermission() {
-        if (hasAudioPermission()) {
-            onPermissionGranted()
+        val hasAudioPermission = hasAudioPermission()
+
+        if (hasAudioPermission) {
+            onAudioPermissionGranted()
             return
         }
 
-        val permissions = when {
+        val audioPermission = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+                Manifest.permission.READ_MEDIA_AUDIO
             }
             else -> {
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                Manifest.permission.READ_EXTERNAL_STORAGE
             }
         }
 
-        permissionLauncher.launch(permissions)
+        audioPermissionLauncher.launch(audioPermission)
     }
 
     private fun hasAudioPermission(): Boolean {
@@ -167,12 +188,48 @@ class HomeFragment: Fragment() {
         }
     }
 
-    private fun onPermissionGranted() {
+    private fun requestPostNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    onNotificationPermissionGranted()
+                }
+
+                else -> {
+                    postNotificationPermissionLauncher.launch(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                }
+            }
+        } else {
+            onNotificationPermissionGranted()
+        }
+    }
+
+    private fun onAudioPermissionGranted() {
         viewModel.getDeviceTrack()
     }
 
-    private fun onPermissionDenied() {
+    private fun onNotificationPermissionGranted() {
+        val intent = Intent(activity, PlaybackService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            activity?.startForegroundService(intent)
+        } else {
+            activity?.startService(intent)
+        }
+
+        viewModel.playMusic()
+    }
+
+    private fun onAudioPermissionDenied() {
         viewModel.showPermissionDenyError()
+    }
+
+    private fun onPostNotificationPermissionDenied() {
+        viewModel.showToast(R.string.post_notification_denied_msg)
     }
 
     override fun onDestroyView() {

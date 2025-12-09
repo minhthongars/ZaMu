@@ -38,6 +38,10 @@ class TrackViewHolder(
             root.setOnClickListener {
                 listener.onTrackClick(trackData.id)
             }
+
+            binding.ivAdd.setOnClickListener {
+                listener.onAddToPlaylistClick(trackData.id)
+            }
         }
     }
 

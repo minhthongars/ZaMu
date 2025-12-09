@@ -1,14 +1,8 @@
 package com.minhthong.zamu.main
 
-import android.Manifest
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -17,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.minhthong.core.R
-import com.minhthong.core.service.PlaybackService
 import dagger.hilt.android.AndroidEntryPoint
 import com.minhthong.zamu.R as AppR
 
@@ -32,14 +25,6 @@ class MainActivity: AppCompatActivity() {
         const val THEME_DRACULA = "dracula"
     }
 
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            startPlaybackService()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         applyTheme()
 
@@ -52,41 +37,11 @@ class MainActivity: AppCompatActivity() {
         enableEdgeToEdge()
 
         setupWindowInsets()
-
-        requestNotificationPermission()
     }
 
     override fun onResume() {
         super.onResume()
         configureStatusBarAppearance()
-    }
-
-
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    startPlaybackService()
-                }
-                else -> {
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        } else {
-            startPlaybackService()
-        }
-    }
-
-    private fun startPlaybackService() {
-        val intent = Intent(this, PlaybackService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
     }
 
     private fun attachFragment() {

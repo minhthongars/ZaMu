@@ -1,7 +1,6 @@
 package com.minhthong.core.player
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -94,10 +93,6 @@ class PlayerManagerImpl(
             }
             exoPlayer.play()
         }
-        Log.e("minhthongg", exoPlayer.isReleased.toString())
-        Log.e("minhthongg", exoPlayer.isPlaying.toString())
-        Log.e("minhthongg", exoPlayer.mediaItemCount.toString())
-        Log.e("minhthongg", exoPlayer.playbackState.toString())
     }
 
     override fun seek(positionMs: Long) {

@@ -1,6 +1,5 @@
 package com.minhthong.home.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minhthong.core.model.TrackEntity
@@ -8,11 +7,13 @@ import com.minhthong.core.onError
 import com.minhthong.core.onSuccess
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.home.R
+import com.minhthong.core.R as CR
 import com.minhthong.home.domain.model.UserEntity
 import com.minhthong.home.domain.usecase.FetchUserInfoUseCase
 import com.minhthong.home.domain.usecase.GetTrackFromDeviceUseCase
 import com.minhthong.home.presentation.adapter.HomeAdapterItem
 import com.minhthong.home.presentation.mapper.EntityToPresentationMapper
+import com.minhthong.playlist_feature_api.PlaylistBridge
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +30,12 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getTrackFromDeviceUseCase: GetTrackFromDeviceUseCase,
     private val fetchUserInfoUseCase: FetchUserInfoUseCase,
+    private val playListApi: PlaylistBridge,
     private val playerManager: PlayerManager,
     private val mapper: EntityToPresentationMapper
 ) : ViewModel() {
+
+    private var playTrackId: Long = 0
 
     private var userEntity: UserEntity? = null
     private val userInfoAdapterItemFlow = MutableStateFlow<HomeAdapterItem?>(null)
@@ -86,16 +90,16 @@ class HomeViewModel @Inject constructor(
         }
 
         getTrackFromDeviceUseCase.invoke()
-            .onError { message ->
+            .onError { messageId ->
                 val errorItems = getDeviceTrackErrorItems(
-                    message = message
+                    messageId = messageId
                 )
                 deviceTrackAdapterItemsFlow.update { errorItems }
             }
             .onSuccess { trackEntities ->
                 if (trackEntities.isEmpty()) {
                     val errorItems = getDeviceTrackErrorItems(
-                        message = "Bạn chưa có nhạc, hãy đi tải đi nhé!"
+                        messageId = CR.string.empty_list_track
                     )
                     deviceTrackAdapterItemsFlow.update { errorItems }
                     return@onSuccess
@@ -113,7 +117,7 @@ class HomeViewModel @Inject constructor(
 
     fun showPermissionDenyError() {
         val errorItems = getDeviceTrackErrorItems(
-            message = "Cấp quyền đi mới scan nhạc được á!"
+            messageId = CR.string.grant_permission_msg
         )
         deviceTrackAdapterItemsFlow.update { errorItems }
     }
@@ -130,12 +134,38 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onTrackClick(trackId: Long) {
-        val clickedIndex = deviceTrackEntities.indexOfFirst { it.id == trackId }
+    fun handlePlayMusic(trackId: Long) {
+        playTrackId = trackId
+        _uiEvent.trySend(HomeUiEvent.RequestPostNotificationPermission)
+    }
+
+    fun playMusic() {
+        val clickedIndex = deviceTrackEntities.indexOfFirst { it.id == playTrackId }
 
         playerManager.setPlaylist(deviceTrackEntities, clickedIndex)
 
         _uiEvent.trySend(HomeUiEvent.OpenPlayer)
+    }
+
+    fun addToPlaylist(trackId: Long) = viewModelScope.launch {
+        val trackEntity = deviceTrackEntities.find { it.id == trackId }
+
+        if (trackEntity == null) {
+            showToast(msgId = CR.string.common_error_mgs)
+            return@launch
+        }
+
+        playListApi.addTrackToPlaylist(trackEntity)
+            .onSuccess {
+                showToast(msgId = R.string.add_to_playlist_success)
+            }
+            .onError { msgId ->
+                showToast(msgId = msgId)
+            }
+    }
+
+    fun showToast(msgId: Int) {
+        _uiEvent.trySend(HomeUiEvent.Toast(messageId = msgId))
     }
 
     private fun getDeviceTrackTitleItem(): HomeAdapterItem {
@@ -153,12 +183,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getDeviceTrackErrorItems(
-        message: String
+        messageId: Int
     ) : List<HomeAdapterItem> {
         val titleItem = getDeviceTrackTitleItem()
         val errorItem = HomeAdapterItem.ErrorView(
             type = HomeAdapterItem.ViewType.TRACK,
-            message = message,
+            message = messageId,
             viewHeight = R.dimen.recommend_track_section_height
         )
 

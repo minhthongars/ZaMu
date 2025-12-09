@@ -43,6 +43,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(project(":core_common"))
     implementation(project(":feature_home"))
@@ -50,6 +54,7 @@ dependencies {
     implementation(project(":feature_player"))
     implementation(project(":feature_setting"))
     implementation(project(":feature_playlist"))
+    implementation(project(":feature_playlist_api"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

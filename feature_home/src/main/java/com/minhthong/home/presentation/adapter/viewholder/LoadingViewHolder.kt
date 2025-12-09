@@ -3,7 +3,7 @@ package com.minhthong.home.presentation.adapter.viewholder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import com.minhthong.home.R
+import com.minhthong.core.R
 import com.minhthong.home.databinding.ViewHolderLoadingBinding
 import com.minhthong.home.presentation.adapter.HomeAdapterItem
 

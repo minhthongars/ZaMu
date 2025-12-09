@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/feature_home" />
             <option value="$PROJECT_DIR$/feature_player" />
             <option value="$PROJECT_DIR$/feature_playlist" />
+            <option value="$PROJECT_DIR$/feature_playlist_api" />
             <option value="$PROJECT_DIR$/feature_setting" />
             <option value="$PROJECT_DIR$/navigation" />
           </set>

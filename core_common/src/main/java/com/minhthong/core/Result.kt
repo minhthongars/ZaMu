@@ -4,7 +4,7 @@ sealed class Result<out T> {
 
     data class Success<T>(val data: T) : Result<T>()
 
-    data class Error(val message: String) : Result<Nothing>()
+    data class Error(val messageId: Int) : Result<Nothing>()
 }
 
 suspend fun <T> Result<T>.onSuccess(
@@ -17,10 +17,10 @@ suspend fun <T> Result<T>.onSuccess(
 }
 
 fun <T> Result<T>.onError(
-    onError: (String) -> Unit,
+    onError: (Int) -> Unit,
 ): Result<T> {
     if (this is Result.Error) {
-        onError.invoke(this.message)
+        onError.invoke(this.messageId)
     }
     return this
 }

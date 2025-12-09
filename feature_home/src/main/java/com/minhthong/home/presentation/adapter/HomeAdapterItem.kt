@@ -2,6 +2,7 @@ package com.minhthong.home.presentation.adapter
 
 import android.graphics.Bitmap
 import androidx.annotation.DimenRes
+import androidx.annotation.StringRes
 
 sealed class HomeAdapterItem(
     val viewType: Int
@@ -38,7 +39,7 @@ sealed class HomeAdapterItem(
     }
 
     data class LoadingView(
-        @DimenRes val viewHeight: Int
+        @field:DimenRes val viewHeight: Int
     ): HomeAdapterItem(viewType = ViewType.LOADING_VIEW) {
         override fun areItemsTheSame(other: HomeAdapterItem): Boolean {
             return other is LoadingView && other.viewHeight == viewHeight
@@ -48,8 +49,8 @@ sealed class HomeAdapterItem(
     }
 
     data class ErrorView(
-        @DimenRes val viewHeight: Int,
-        val message: String,
+        @field:DimenRes val viewHeight: Int,
+        @field:StringRes val message: Int,
         val type: Int
     ): HomeAdapterItem(viewType = ViewType.ERROR_VIEW) {
         override fun areItemsTheSame(other: HomeAdapterItem): Boolean {

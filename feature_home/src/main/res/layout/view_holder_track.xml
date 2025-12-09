@@ -78,13 +78,14 @@
         app:layout_constraintTop_toBottomOf="@id/tv_performer"/>
 
     <ImageView
+        android:id="@+id/iv_add"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        app:srcCompat="@drawable/ic_favorite_track"
+        app:srcCompat="@drawable/media3_icon_plus"
         app:layout_constraintEnd_toEndOf="parent"
-        android:textColor="@color/color_text_secondary"
+        android:contentDescription="@null"
         android:layout_margin="8dp"
-        app:tint="@color/grey_300"
+        app:tint="@color/grey_700"
         app:layout_constraintBottom_toBottomOf="@id/cv_track_image"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

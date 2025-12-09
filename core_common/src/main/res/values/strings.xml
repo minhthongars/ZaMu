@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_error_mgs">Có lỗi xãy ra, hãy thử lại sau</string>
+    <string name="common_error_retry_msg">Có lỗi xãy ra, click vào để thử lại</string>
+    <string name="grant_permission_msg">Hãy cấp quyền để dùng tính năng này nhé</string>
+    <string name="empty_list_track">Bạn chưa có nhạc, hãy đi tải nhạc về máy đi nhé</string>
+    <string name="empty_list_playlist">Bạn chưa có nhạc trong playlist, click vào đây để thêm</string>
+    <string name="post_notification_denied_msg">Hãy cấp quyền để có thể phát nhạc background</string>
+    <string name="error_network">Không có kết nối mạng</string>
+    <string name="error_timeout">Kết nối bị gián đoạn</string>
+    <string name="error_server">Lỗi máy chủ</string>
+    <string name="error_database">Lỗi cơ sở dữ liệu</string>
+    <string name="error_auth">Xác thực thất bại</string>
+    <string name="error_parse">Không thể xử lý dữ liệu</string>
+    <string name="error_unknown">Đã xảy ra lỗi không xác định</string>
+</resources>

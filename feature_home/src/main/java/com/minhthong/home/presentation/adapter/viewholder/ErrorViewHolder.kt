@@ -30,7 +30,7 @@ class ErrorViewHolder(
         layoutParams.height = itemView.resources.getDimensionPixelSize(errorData.viewHeight)
         itemView.layoutParams = layoutParams
 
-        binding.tvMessage.text = errorData.message
+        binding.tvMessage.text = itemView.context.getText(errorData.message)
         binding.layoutMessage.setOnClickListener {
             listener.onRetryClick(errorData.type)
         }

@@ -5,5 +5,7 @@ sealed class HomeUiEvent {
 
     object RequestAudioPermission: HomeUiEvent()
 
-    data class Toast(val message: String): HomeUiEvent()
+    object RequestPostNotificationPermission: HomeUiEvent()
+
+    data class Toast(val messageId: Int): HomeUiEvent()
 }
