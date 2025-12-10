@@ -1,12 +1,11 @@
 package com.minhthong.core.player
 
 import android.content.Context
-import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.PlayerEntity
 import com.minhthong.core.model.TrackEntity
@@ -17,13 +16,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class PlayerManagerImpl(
+internal class PlayerManagerImpl(
     defaultDispatcher: CoroutineDispatcher,
     private val mainDispatcher: CoroutineDispatcher,
 ): PlayerManager {
@@ -83,7 +83,6 @@ class PlayerManagerImpl(
         playerInfoFlow.update { null }
     }
 
-    @OptIn(UnstableApi::class)
     override fun play() {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
@@ -92,6 +91,20 @@ class PlayerManagerImpl(
                 exoPlayer.prepare()
             }
             exoPlayer.play()
+        }
+    }
+
+    override fun bindWithPlaylist(playlistFlow: Flow<TrackEntity>) {
+
+    }
+
+    override fun removeItem(index: Int) {
+        exoPlayer.removeMediaItem(index)
+
+        playerInfoFlow.update { current ->
+            current?.copy(
+                playingTrackIndex = exoPlayer.currentMediaItemIndex,
+            )
         }
     }
 
@@ -171,7 +184,8 @@ class PlayerManagerImpl(
             isLooping = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE,
             isShuffling = exoPlayer.shuffleModeEnabled,
             isPlaying = true,
-            isSingleTrack = currentPlaylist.size == 1
+            isSingleTrack = currentPlaylist.size == 1,
+            playingTrackIndex = currentIndex
         )
     }
 
@@ -211,7 +225,10 @@ class PlayerManagerImpl(
 
             val currentIndex = exoPlayer.currentMediaItemIndex
             playerInfoFlow.update { current ->
-                current?.copy(trackInfo = currentPlaylist[currentIndex])
+                current?.copy(
+                    trackInfo = currentPlaylist[currentIndex],
+                    playingTrackIndex = currentIndex
+                )
             }
 
             startProgressUpdater()
@@ -232,6 +249,16 @@ class PlayerManagerImpl(
         ) {
             if (progressJob?.isActive == false) {
                 currentProgressMlsFlow.update { newPosition.positionMs }
+            }
+        }
+
+        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+            if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
+                playerInfoFlow.update { current ->
+                    current?.copy(
+                        playingTrackIndex = exoPlayer.currentMediaItemIndex,
+                    )
+                }
             }
         }
     }

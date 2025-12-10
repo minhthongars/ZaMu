@@ -49,18 +49,16 @@ class HomeViewModel @Inject constructor(
         deviceTrackUiItemsFlow,
         addingToPlaylistTrackIdsFlow
     ) { trackAdapterItems, addingItems ->
-        if (addingItems.isNotEmpty()) {
-            trackAdapterItems.map { item ->
-                if (item is HomeAdapterItem.Track) {
-                    val isLoading = item.id in addingItems
-                    item.copy(isLoading = isLoading)
-                } else {
-                    item
-                }
-            }
+        val newUiItems = if (addingItems.isNotEmpty()) {
+            updateTrackLoadingInfo(
+                trackAdapterItems = trackAdapterItems,
+                addingItems = addingItems
+            )
         } else {
             trackAdapterItems
         }
+
+        newUiItems
     }
 
     private val _uiEvent = MutableSharedFlow<HomeUiEvent>(
@@ -82,60 +80,96 @@ class HomeViewModel @Inject constructor(
         )
 
     fun fetchUserInfo() = viewModelScope.launch {
+        showUserInfoLoadingItem()
+
+        fetchUserInfoUseCase.invoke()
+            .onSuccess { entity ->
+                showUserInfoSuccessItem(entity = entity)
+            }
+            .onError { messageId ->
+                showUserInfoErrorItem(messageId = messageId)
+            }
+    }
+
+    fun getDeviceTrack() = viewModelScope.launch {
+        showTrackLoadingItems()
+
+        getTrackFromDeviceUseCase.invoke()
+            .onError { messageId ->
+                showTrackErrorItems(messageId)
+            }
+            .onSuccess { trackEntities ->
+                if (trackEntities.isEmpty()) {
+                    showTrackErrorItems(messageId = CR.string.empty_list_track)
+                } else {
+                    showTrackSuccessItems(trackEntities)
+                }
+            }
+    }
+
+    private fun updateTrackLoadingInfo(
+        trackAdapterItems: List<HomeAdapterItem>,
+        addingItems: Set<Long>
+    ): List<HomeAdapterItem> {
+        return trackAdapterItems.map { item ->
+            if (item is HomeAdapterItem.Track) {
+                val isLoading = item.id in addingItems
+                item.copy(isLoading = isLoading)
+            } else {
+                item
+            }
+        }
+    }
+
+    private fun showUserInfoErrorItem(messageId: Int) {
+        val userInfoSectionHeightDimenRes = R.dimen.user_info_section_height
+        val errorItem = HomeAdapterItem.ErrorView(
+            viewHeight = userInfoSectionHeightDimenRes,
+            message = messageId,
+            type = HomeAdapterItem.ViewType.USER_INFO
+        )
+        userInfoAdapterItemFlow.update { errorItem }
+    }
+
+    private fun showUserInfoSuccessItem(entity: UserEntity) {
+        userEntity = entity
+
+        val adapterItems = with(mapper) { entity.toPresentation() }
+        userInfoAdapterItemFlow.update { adapterItems }
+    }
+
+    private fun showUserInfoLoadingItem() {
         val userInfoSectionHeightDimenRes = R.dimen.user_info_section_height
         val loadingItem = HomeAdapterItem.LoadingView(
             viewHeight = userInfoSectionHeightDimenRes
         )
         userInfoAdapterItemFlow.update { loadingItem }
-
-        fetchUserInfoUseCase.invoke()
-            .onSuccess { entity ->
-                userEntity = entity
-
-                val adapterItems = with(mapper) { entity.toPresentation() }
-                userInfoAdapterItemFlow.update { adapterItems }
-            }
-            .onError { message ->
-                val errorItem = HomeAdapterItem.ErrorView(
-                    viewHeight = userInfoSectionHeightDimenRes,
-                    message = message,
-                    type = HomeAdapterItem.ViewType.USER_INFO
-                )
-                userInfoAdapterItemFlow.update { errorItem }
-            }
     }
 
-    fun getDeviceTrack() = viewModelScope.launch {
-        val titleItem = getDeviceTrackTitleItem()
-
+    private fun showTrackLoadingItems() {
         deviceTrackUiItemsFlow.update {
             getDeviceTrackLoadingItems()
         }
+    }
 
-        getTrackFromDeviceUseCase.invoke()
-            .onError { messageId ->
-                val errorItems = getDeviceTrackErrorItems(
-                    messageId = messageId
-                )
-                deviceTrackUiItemsFlow.update { errorItems }
-            }
-            .onSuccess { trackEntities ->
-                if (trackEntities.isEmpty()) {
-                    val errorItems = getDeviceTrackErrorItems(
-                        messageId = CR.string.empty_list_track
-                    )
-                    deviceTrackUiItemsFlow.update { errorItems }
-                    return@onSuccess
-                }
+    private fun showTrackErrorItems(messageId: Int) {
+        val errorItems = getDeviceTrackErrorItems(
+            messageId = messageId
+        )
+        deviceTrackUiItemsFlow.update { errorItems }
+    }
 
-                deviceTrackEntities = trackEntities
-                val trackItems = trackEntities.map {
-                    with(mapper) { it.toPresentation() }
-                }
-                deviceTrackUiItemsFlow.update {
-                    listOf(titleItem) + trackItems
-                }
-            }
+    private fun showTrackSuccessItems(trackEntities: List<TrackEntity>) {
+        deviceTrackEntities = trackEntities
+
+        val titleItem = getDeviceTrackTitleItem()
+        val trackItems = trackEntities.map {
+            with(mapper) { it.toPresentation() }
+        }
+
+        deviceTrackUiItemsFlow.update {
+            listOf(titleItem) + trackItems
+        }
     }
 
     fun showPermissionDenyError() {

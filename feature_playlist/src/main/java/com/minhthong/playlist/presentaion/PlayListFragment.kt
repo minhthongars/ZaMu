@@ -8,6 +8,7 @@ import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.minhthong.core.R
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.navigation.Navigation
@@ -30,7 +31,6 @@ class PlayListFragment: Fragment() {
 
     private val onItemClickListener: (Int) -> Unit = { id ->
         viewModel.playMusic(playlistItemId = id)
-        navigation.navigateTo(Screen.PLAYER)
     }
 
     private val onRemoveItemClick: (Int) -> Unit = { id ->
@@ -56,12 +56,19 @@ class PlayListFragment: Fragment() {
 
         setupViews()
         setUpCollector()
+        viewModel.loadPlaylist()
     }
 
     private fun setupViews() {
         binding.llLoading.isVisible = true
         binding.flError.isVisible = false
 
+        val itemAnimator = binding.recyclerView.itemAnimator
+        if (itemAnimator is SimpleItemAnimator) {
+            itemAnimator.supportsChangeAnimations = false
+            itemAnimator.moveDuration = 220
+            itemAnimator.changeDuration = 220
+        }
         binding.recyclerView.isVisible = false
 
         binding.recyclerView.adapter = adapter

@@ -15,6 +15,8 @@ sealed class PlaylistUiState {
         val trackId: Long,
         val avatar: Bitmap?,
         val name: String,
-        val performer: String
+        val performer: String,
+        val isPlaying: Boolean,
+        val isRemoving: Boolean
     )
 }

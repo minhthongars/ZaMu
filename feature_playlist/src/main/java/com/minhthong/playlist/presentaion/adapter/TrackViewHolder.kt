@@ -2,6 +2,7 @@ package com.minhthong.playlist.presentaion.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.minhthong.playlist.databinding.ViewHolderPlaylistTrackBinding
 import com.minhthong.playlist.presentaion.PlaylistUiState
@@ -31,6 +32,9 @@ class TrackViewHolder(
     }
 
     fun bind(track: PlaylistUiState.Track) {
+        updatePlayingInfo(isPlaying = track.isPlaying)
+        updateRemovingInfo(isRemoving = track.isRemoving)
+
         binding.ivTrackAvatar.setImageBitmap(track.avatar)
         binding.tvName.text = track.name
         binding.tvPerformer.text = track.performer
@@ -42,5 +46,15 @@ class TrackViewHolder(
         binding.ivClose.setOnClickListener {
             onRemoveItemClick(track.id)
         }
+    }
+
+    fun updatePlayingInfo(isPlaying: Boolean) {
+        binding.ivPlaying.isVisible = isPlaying
+        binding.ivClose.isVisible = isPlaying.not()
+    }
+
+    fun updateRemovingInfo(isRemoving: Boolean) {
+        binding.progressCircular.isVisible = isRemoving
+        binding.ivClose.isVisible = isRemoving.not()
     }
 }

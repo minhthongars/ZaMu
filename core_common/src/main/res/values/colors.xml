@@ -9,7 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- Neutral / greys -->
-    <color name="grey_50">#FAFAFB</color>
+    <color name="grey_50">#CC374151</color>
     <color name="grey_100">#F3F4F6</color>
     <color name="grey_200">#E5E7EB</color>
     <color name="grey_300">#D1D5DB</color>

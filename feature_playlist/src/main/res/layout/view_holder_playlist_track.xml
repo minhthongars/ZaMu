@@ -23,8 +23,18 @@
             android:id="@+id/iv_track_avatar"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/iv_playing"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:padding="12dp"
+            android:background="@color/grey_50"
             android:scaleType="centerCrop"
-            tools:srcCompat="@drawable/ic_sample"/>
+            android:layout_gravity="center"
+            app:tint="@color/white"
+            app:srcCompat="@drawable/media3_icon_circular_play"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -73,6 +83,13 @@
         android:tint="@color/grey_500"
         android:padding="2dp"
         android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/progress_circular"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 

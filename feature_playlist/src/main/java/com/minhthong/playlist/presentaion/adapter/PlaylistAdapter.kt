@@ -29,6 +29,27 @@ class PlaylistAdapter(
         holder.bind(track)
     }
 
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int, payloads: List<Any?>) {
+        val payload = payloads.firstOrNull()
+        val item = getItem(position)
+
+        when(payload) {
+            PAY_LOAD_PLAYING -> {
+                holder.updatePlayingInfo(
+                    isPlaying = item.isPlaying,
+                )
+            }
+
+            PAY_LOAD_REMOVING -> {
+                holder.updateRemovingInfo(
+                    isRemoving = item.isRemoving
+                )
+            }
+
+            else -> super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
     private class ItemCallback : DiffUtil.ItemCallback<PlaylistUiState.Track>() {
         override fun areItemsTheSame(
             oldItem: PlaylistUiState.Track,
@@ -43,5 +64,24 @@ class PlaylistAdapter(
         ): Boolean {
             return oldItem == newItem
         }
+
+        override fun getChangePayload(
+            oldItem: PlaylistUiState.Track,
+            newItem: PlaylistUiState.Track
+        ): Any? {
+            return if (oldItem.isPlaying != newItem.isPlaying) {
+                PAY_LOAD_PLAYING
+            } else if (oldItem.isRemoving != newItem.isRemoving) {
+                PAY_LOAD_REMOVING
+            } else {
+                null
+            }
+        }
+    }
+
+    companion object {
+        private const val PAY_LOAD_PLAYING = 10
+
+        private const val PAY_LOAD_REMOVING = 20
     }
 }

@@ -15,7 +15,9 @@ class PresentationMapper(
             name = entity.title,
             avatar = Utils.getAlbumArt(context, entity.uri),
             performer = entity.artist,
-            trackId = entity.id
+            trackId = entity.id,
+            isPlaying = false,
+            isRemoving = false
         )
     }
 

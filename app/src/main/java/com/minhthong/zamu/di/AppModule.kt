@@ -1,10 +1,6 @@
 package com.minhthong.zamu.di
 
 import android.content.Context
-import com.minhthong.core.di.DefaultDispatcher
-import com.minhthong.core.di.MainDispatcher
-import com.minhthong.core.player.PlayerManager
-import com.minhthong.core.player.PlayerManagerImpl
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
 import com.minhthong.zamu.R
@@ -14,7 +10,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
 @Module
@@ -26,18 +21,6 @@ object AppModule {
     fun provideContext(
         @ApplicationContext context: Context
     ) = context
-
-    @Provides
-    @Singleton
-    fun providePlayerManager(
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher,
-        @MainDispatcher mainDispatcher: CoroutineDispatcher
-    ): PlayerManager {
-        return PlayerManagerImpl(
-            defaultDispatcher = defaultDispatcher,
-            mainDispatcher = mainDispatcher
-        )
-    }
 
     @Provides
     @Singleton

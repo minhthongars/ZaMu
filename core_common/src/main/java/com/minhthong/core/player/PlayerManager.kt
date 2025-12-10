@@ -21,9 +21,13 @@ interface PlayerManager {
 
     fun play()
 
-    fun loop()
+    fun bindWithPlaylist(playlistFlow: Flow<TrackEntity>)
+
+    fun removeItem(index: Int)
 
     fun shuffle()
+
+    fun loop()
 
     fun moveToNext()
 
