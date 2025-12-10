@@ -4,10 +4,12 @@ import android.net.Uri
 import com.minhthong.core.model.TrackEntity
 import com.minhthong.playlist.data.model.TrackDto
 import androidx.core.net.toUri
+import com.minhthong.playlist.domain.model.PlaylistItemEntity
 
 object Mapper {
-    fun TrackDto.toDomain(): TrackEntity {
-        return TrackEntity(
+
+    private fun TrackDto.toDomain(): PlaylistItemEntity {
+        val entity = TrackEntity(
             id = id,
             sizeBytes = sizeBytes ?: 0,
             durationMs = durationMs ?: 0,
@@ -17,9 +19,13 @@ object Mapper {
             title = title.orEmpty(),
             uri = uri?.toUri() ?: Uri.EMPTY
         )
+        return PlaylistItemEntity(
+            id = fakeId,
+            entity = entity
+        )
     }
 
-    fun List<TrackDto>.toDomain(): List<TrackEntity> {
+    fun List<TrackDto>.toDomain(): List<PlaylistItemEntity> {
         return map { it.toDomain() }
     }
 

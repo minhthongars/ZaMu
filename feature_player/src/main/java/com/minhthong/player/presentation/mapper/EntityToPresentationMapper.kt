@@ -35,7 +35,8 @@ class EntityToPresentationMapper(
                 context,
                 if (isShuffling) enableColor else disableColor
             ),
-            sliderBarValue = trackInfo.durationMs
+            sliderBarValue = trackInfo.durationMs,
+            seekMediaEnable = isSingleTrack.not()
         )
     }
 }

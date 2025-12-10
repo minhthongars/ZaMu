@@ -171,6 +171,7 @@ class PlayerManagerImpl(
             isLooping = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE,
             isShuffling = exoPlayer.shuffleModeEnabled,
             isPlaying = true,
+            isSingleTrack = currentPlaylist.size == 1
         )
     }
 

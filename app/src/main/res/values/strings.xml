@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">zamu</string>
-
+    <string name="home_screen">Home</string>
+    <string name="player_screen">Player</string>
+    <string name="playlist_screen">Playlist</string>
+    <string name="setting_screen">Setting</string>
 </resources>

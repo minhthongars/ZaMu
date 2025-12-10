@@ -16,10 +16,15 @@ class NavigationImpl(
     }
 
     override fun navigateTo(screen: Screen) {
-        safeNavigate(destination = screenMap.getValue(screen))
+        val destination = screenMap[screen] ?: return
+        safeNavigate(destination)
     }
 
-    override fun safeNavigate(destination: Int) {
+    override fun navigateTo(destination: Int) {
+        safeNavigate(destination)
+    }
+
+    private fun safeNavigate(destination: Int) {
         if (navController.currentDestination?.id == destination) {
             return
         }

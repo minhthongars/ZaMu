@@ -23,7 +23,8 @@ class EntityToPresentationMapper @Inject constructor(
             performer = artist,
             durationString = durationString,
             sizeString = sizeString,
-            avatarBitmap = Utils.getAlbumArt(context, uri)
+            avatarBitmap = Utils.getAlbumArt(context, uri),
+            isLoading = false
         )
     }
 

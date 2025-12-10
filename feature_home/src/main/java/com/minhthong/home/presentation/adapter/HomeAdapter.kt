@@ -41,6 +41,22 @@ class HomeAdapter(
         holder.bind(item)
     }
 
+    override fun onBindViewHolder(holder: HomeViewHolder, position: Int, payloads: List<Any?>) {
+        val payload = payloads.firstOrNull()
+        val item = getItem(position)
+
+        when(payload) {
+            HomeAdapterItem.PlayLoad.ADDING_TO_PLAYLIST -> {
+                val isLoading = (item as? HomeAdapterItem.Track)?.isLoading == true
+                (holder as? TrackViewHolder)?.bindLoading(isLoading)
+            }
+
+            else -> {
+                super.onBindViewHolder(holder, position, payloads)
+            }
+        }
+    }
+
     override fun getItemViewType(position: Int): Int {
         return getItem(position).viewType
     }

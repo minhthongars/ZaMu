@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
@@ -15,12 +14,12 @@
         android:id="@+id/ll_loading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="16dp"
         android:orientation="vertical">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="12dp">
+            android:layout_height="@dimen/track_item_height">
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -41,7 +40,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/track_item_height"
             android:layout_marginTop="12dp">
 
             <androidx.cardview.widget.CardView
@@ -63,7 +62,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/track_item_height"
             android:layout_marginTop="12dp">
 
             <androidx.cardview.widget.CardView
@@ -85,7 +84,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/track_item_height"
             android:layout_marginTop="12dp">
 
             <androidx.cardview.widget.CardView
@@ -107,7 +106,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/track_item_height"
             android:layout_marginTop="12dp">
 
             <androidx.cardview.widget.CardView
@@ -132,8 +131,8 @@
     <FrameLayout
         android:id="@+id/fl_error"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_marginTop="8dp">
+        android:padding="16dp"
+        android:layout_height="200dp">
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

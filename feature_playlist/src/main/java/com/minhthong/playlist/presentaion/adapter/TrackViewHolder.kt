@@ -7,17 +7,25 @@ import com.minhthong.playlist.databinding.ViewHolderPlaylistTrackBinding
 import com.minhthong.playlist.presentaion.PlaylistUiState
 
 class TrackViewHolder(
-    private val binding: ViewHolderPlaylistTrackBinding
+    private val binding: ViewHolderPlaylistTrackBinding,
+    private val onItemClick: (Int) -> Unit,
+    private val onRemoveItemClick: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
 
     companion object {
-        fun create(parent: ViewGroup): TrackViewHolder {
+        fun create(
+            parent: ViewGroup,
+            onItemClick: (Int) -> Unit,
+            onItemLongClick: (Int) -> Unit
+        ): TrackViewHolder {
             return TrackViewHolder(
                 binding = ViewHolderPlaylistTrackBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                )
+                ),
+                onItemClick = onItemClick,
+                onRemoveItemClick = onItemLongClick
             )
         }
     }
@@ -26,5 +34,13 @@ class TrackViewHolder(
         binding.ivTrackAvatar.setImageBitmap(track.avatar)
         binding.tvName.text = track.name
         binding.tvPerformer.text = track.performer
+
+        binding.root.setOnClickListener {
+            onItemClick(track.id)
+        }
+
+        binding.ivClose.setOnClickListener {
+            onRemoveItemClick(track.id)
+        }
     }
 }

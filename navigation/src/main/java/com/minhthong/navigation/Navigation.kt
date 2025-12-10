@@ -8,5 +8,5 @@ interface Navigation {
 
     fun navigateTo(screen: Screen)
 
-    fun safeNavigate(destination: Int)
+    fun navigateTo(destination: Int)
 }

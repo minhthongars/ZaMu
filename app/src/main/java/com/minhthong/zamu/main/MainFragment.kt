@@ -65,7 +65,7 @@ class MainFragment: Fragment() {
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { destinationId ->
-            navigation.safeNavigate(destination = destinationId)
+            navigation.navigateTo(destination = destinationId)
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -98,7 +98,7 @@ class MainFragment: Fragment() {
         val isAtHome = currentDestination == R.id.homeFragment
 
         if (!isAtHome) {
-            navigation.safeNavigate(R.id.homeFragment)
+            navigation.navigateTo(R.id.homeFragment)
         } else {
             activity?.finish()
         }

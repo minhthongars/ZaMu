@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PlaylistDao {
 
-    @Query("SELECT * FROM ${Constant.TABLE_NAME_TRACK} ORDER BY ${Constant.COLUMN_ORDER} ASC")
+    @Query("SELECT * FROM ${Constant.TABLE_NAME_TRACK}")
     fun getPlaylist(): Flow<List<TrackDto>>
 
     @Query("""
@@ -37,9 +37,9 @@ interface PlaylistDao {
     @Query("UPDATE tracks SET ${Constant.COLUMN_ORDER} = :newOrder WHERE id = :trackId")
     suspend fun updateOrder(trackId: Long?, newOrder: Int?)
 
-    @Query("DELETE FROM ${Constant.TABLE_NAME_TRACK} WHERE ${Constant.COLUMN_ID} = :trackId")
-    suspend fun deleteTrackById(trackId: Long): Int
+    @Query("DELETE FROM ${Constant.TABLE_NAME_TRACK} WHERE ${Constant.COLUMN__ID} = :playlistItemId")
+    suspend fun deleteTrackById(playlistItemId: Int): Int
 
-    @Query("SELECT COALESCE(MIN(${Constant.COLUMN_ORDER}), -1) + 1 FROM ${Constant.TABLE_NAME_TRACK}")
+    @Query("SELECT COALESCE(MAX(${Constant.COLUMN_ORDER}), -1) + 1 FROM ${Constant.TABLE_NAME_TRACK}")
     suspend fun getNextOrderIndex(): Long
 }

@@ -7,8 +7,8 @@ import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.mapper.Mapper.toData
 import com.minhthong.playlist.data.mapper.Mapper.toDomain
 import com.minhthong.playlist.domain.PlaylistRepository
+import com.minhthong.playlist.domain.model.PlaylistItemEntity
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -19,8 +19,11 @@ class PlaylistRepositoryImpl(
 ): PlaylistRepository {
 
 
-    override fun getPlaylist(): Flow<List<TrackEntity>> {
-        return dao.getPlaylist().map { it.toDomain() }
+    override fun getPlaylist(): Flow<List<PlaylistItemEntity>> {
+        val playlist = dao.getPlaylist().map { playlist ->
+            playlist.sortedBy { it.orderIndex }
+        }
+        return playlist.map { it.toDomain() }
     }
 
     override fun observerTrackInPlaylist(trackId: Long): Flow<Boolean> {
@@ -31,7 +34,7 @@ class PlaylistRepositoryImpl(
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-                val newOrder = dao.getNextOrderIndex() - gapOrder
+                val newOrder = dao.getNextOrderIndex() + gapOrder
                 dao.insertTrack(
                     track = trackEntity.toData().copy(
                         orderIndex = newOrder
@@ -41,11 +44,11 @@ class PlaylistRepositoryImpl(
         )
     }
 
-    override suspend fun removeTrackFromPlaylist(trackId: Long): Result<Unit> {
+    override suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-                dao.deleteTrackById(trackId = trackId)
+                dao.deleteTrackById(playlistItemId = playlistItemId)
             }
         )
     }

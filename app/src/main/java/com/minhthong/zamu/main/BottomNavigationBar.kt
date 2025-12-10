@@ -27,25 +27,25 @@ class BottomNavigationBar @JvmOverloads constructor(
             destinationId = R.id.homeFragment,
             viewId = R.id.nav_item_home,
             iconResId = R.drawable.ic_home,
-            label = "Home",
+            label = context.getString(R.string.home_screen),
         ),
         NavItem(
             destinationId = R.id.playerFragment,
             viewId = R.id.nav_item_player,
             iconResId = R.drawable.ic_music,
-            label = "Player"
+            label = context.getString(R.string.player_screen)
         ),
         NavItem(
             destinationId = R.id.playlistFragment,
             viewId = R.id.nav_item_playlist,
             iconResId = R.drawable.ic_playlist,
-            label = "Playlist"
+            label = context.getString(R.string.playlist_screen)
         ),
         NavItem(
             destinationId = R.id.settingsFragment,
             viewId = R.id.nav_item_settings,
             iconResId = R.drawable.ic_setting,
-            label = "Settings"
+            label = context.getString(R.string.setting_screen)
         )
     )
 

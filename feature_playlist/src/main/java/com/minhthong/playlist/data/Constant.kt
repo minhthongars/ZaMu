@@ -13,5 +13,5 @@ object Constant {
     const val COLUMN_DURATION = "duration"
     const val COLUMN_SIZE = "size"
     const val COLUMN_PATH = "path"
-    const val GAP_ORDER = 200
+    const val GAP_ORDER = 500
 }

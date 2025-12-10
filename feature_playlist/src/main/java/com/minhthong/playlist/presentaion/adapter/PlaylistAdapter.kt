@@ -5,13 +5,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.minhthong.playlist.presentaion.PlaylistUiState
 
-class PlaylistAdapter: ListAdapter<PlaylistUiState.Track, TrackViewHolder>(ItemCallback()) {
+class PlaylistAdapter(
+    private val onItemClick: (Int) -> Unit,
+    private val onRemoveItemClick: (Int) -> Unit
+): ListAdapter<PlaylistUiState.Track, TrackViewHolder>(ItemCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
     ): TrackViewHolder {
-        return TrackViewHolder.create(parent = parent)
+        return TrackViewHolder.create(
+            parent = parent,
+            onItemClick = onItemClick,
+            onItemLongClick = onRemoveItemClick
+        )
     }
 
     override fun onBindViewHolder(

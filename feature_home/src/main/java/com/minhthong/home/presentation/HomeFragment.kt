@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.minhthong.core.R
 import com.minhthong.core.service.PlaybackService
 import com.minhthong.core.util.Utils.collectFlowSafely
@@ -23,6 +24,8 @@ import com.minhthong.home.presentation.decorator.HomeRecyclerViewItemDecoration
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -102,36 +105,34 @@ class HomeFragment: Fragment() {
 
     private fun collectData() {
         collectFlowSafely {
-            viewModel.adapterItemsFlow.collect {
+            viewModel.homeUiItemsFlow.collect {
                 homeAdapter.submitList(it)
             }
         }
 
-        collectFlowSafely {
-            viewModel.uiEvent.collect { event ->
-                when(event) {
-                    is HomeUiEvent.OpenPlayer -> {
-                        navigation.navigateTo(screen = Screen.PLAYER)
-                    }
+        viewModel.uiEvent.onEach { event ->
+            when(event) {
+                is HomeUiEvent.OpenPlayer -> {
+                    navigation.navigateTo(screen = Screen.PLAYER)
+                }
 
-                    is HomeUiEvent.Toast -> {
-                        Toast.makeText(
-                            requireContext(),
-                            getText(event.messageId),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                is HomeUiEvent.Toast -> {
+                    Toast.makeText(
+                        requireContext(),
+                        getText(event.messageId),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
-                    is HomeUiEvent.RequestAudioPermission -> {
-                        requestAudioPermission()
-                    }
+                is HomeUiEvent.RequestAudioPermission -> {
+                    requestAudioPermission()
+                }
 
-                    is HomeUiEvent.RequestPostNotificationPermission -> {
-                        requestPostNotification()
-                    }
+                is HomeUiEvent.RequestPostNotificationPermission -> {
+                    requestPostNotification()
                 }
             }
-        }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun setUpViews() {

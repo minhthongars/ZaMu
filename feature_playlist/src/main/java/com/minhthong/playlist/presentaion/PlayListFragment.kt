@@ -23,12 +23,24 @@ class PlayListFragment: Fragment() {
     private var _binding: FragmentPlayListBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = PlaylistAdapter()
-
     private val viewModel: PlaylistViewModel by viewModels()
 
     @Inject
     internal lateinit var navigation: Navigation
+
+    private val onItemClickListener: (Int) -> Unit = { id ->
+        viewModel.playMusic(playlistItemId = id)
+        navigation.navigateTo(Screen.PLAYER)
+    }
+
+    private val onRemoveItemClick: (Int) -> Unit = { id ->
+        viewModel.removePlaylistItem(playlistItemId = id)
+    }
+
+    private val adapter = PlaylistAdapter(
+        onItemClick = onItemClickListener,
+        onRemoveItemClick = onRemoveItemClick
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +61,7 @@ class PlayListFragment: Fragment() {
     private fun setupViews() {
         binding.llLoading.isVisible = true
         binding.flError.isVisible = false
+
         binding.recyclerView.isVisible = false
 
         binding.recyclerView.adapter = adapter
@@ -63,11 +76,11 @@ class PlayListFragment: Fragment() {
                     }
 
                     is PlaylistUiState.Error -> {
-                       errorContent(state.messageId)
+                       errorContent(messageId = state.messageId)
                     }
 
                     is PlaylistUiState.Success -> {
-                        successContent(state.tracks)
+                        successContent(tracks = state.tracks)
                     }
                 }
             }

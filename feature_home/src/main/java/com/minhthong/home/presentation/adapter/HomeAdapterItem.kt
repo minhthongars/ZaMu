@@ -29,7 +29,7 @@ sealed class HomeAdapterItem(
     }
 
     data class Title(
-        val content: String
+        @field:StringRes val content: Int
     ): HomeAdapterItem(viewType = ViewType.TITLE) {
         override fun areItemsTheSame(other: HomeAdapterItem): Boolean {
             return other is Title && other.content == content
@@ -69,6 +69,7 @@ sealed class HomeAdapterItem(
         val performer: String,
         val sizeString: String,
         val durationString: String,
+        val isLoading: Boolean
     ): HomeAdapterItem(viewType = ViewType.TRACK) {
         override fun areItemsTheSame(other: HomeAdapterItem): Boolean {
             return other is Track && other.id == id
@@ -77,14 +78,26 @@ sealed class HomeAdapterItem(
         override fun areContentsTheSame(other: HomeAdapterItem): Boolean {
             return other is Track && other == this
         }
+
+        override fun getChangePayload(other: HomeAdapterItem): Any? {
+            return if (other is Track && other.isLoading != isLoading) {
+                PlayLoad.ADDING_TO_PLAYLIST
+            } else {
+                null
+            }
+        }
     }
 
-    // Constant
+
     object ViewType {
         const val LOADING_VIEW = -1
         const val ERROR_VIEW = -2
         const val USER_INFO = 1
         const val TITLE = 3
         const val TRACK = 5
+    }
+
+    object PlayLoad {
+        const val ADDING_TO_PLAYLIST = -10
     }
 }

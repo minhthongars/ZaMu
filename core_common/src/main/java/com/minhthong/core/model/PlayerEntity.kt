@@ -5,4 +5,5 @@ data class PlayerEntity(
     val isPlaying: Boolean,
     val isLooping: Boolean,
     val isShuffling: Boolean,
+    val isSingleTrack: Boolean
 )

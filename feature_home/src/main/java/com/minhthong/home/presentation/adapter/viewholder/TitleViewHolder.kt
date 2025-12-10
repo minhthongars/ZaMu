@@ -22,8 +22,8 @@ class TitleViewHolder(
     }
 
     override fun bind(data: HomeAdapterItem) {
-        val content = (data as? HomeAdapterItem.Title)?.content
-        binding.title.text = content
+        val content = (data as? HomeAdapterItem.Title)?.content ?: return
+        binding.title.text = itemView.context.getString(content)
     }
 
 }

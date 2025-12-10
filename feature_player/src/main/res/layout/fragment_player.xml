@@ -161,6 +161,9 @@
             android:contentDescription="@string/previous"
             android:padding="@dimen/spacing_sm"
             app:srcCompat="@drawable/ic_player_loop"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
             app:tint="@color/grey_500" />
 
         <ImageView
@@ -171,7 +174,10 @@
             android:padding="@dimen/spacing_sm"
             android:src="@drawable/ic_player_move"
             app:tint="@color/grey_500"
-            android:rotationY="180"/>
+            android:rotationY="180"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"/>
 
         <ImageView
             android:id="@+id/btn_play_pause"
@@ -190,6 +196,9 @@
             android:layout_height="50dp"
             android:contentDescription="@string/next"
             android:padding="@dimen/spacing_sm"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
             app:srcCompat="@drawable/ic_player_move"
             app:tint="@color/grey_500"/>
 
@@ -201,6 +210,9 @@
             android:layout_marginStart="30dp"
             android:contentDescription="@string/shuffle"
             android:padding="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
             app:srcCompat="@drawable/ic_player_random"
             app:tint="@color/grey_500"/>
 
