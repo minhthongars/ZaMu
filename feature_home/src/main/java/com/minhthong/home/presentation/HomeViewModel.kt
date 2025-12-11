@@ -31,7 +31,7 @@ import com.minhthong.core.R as CR
 class HomeViewModel @Inject constructor(
     private val getTrackFromDeviceUseCase: GetTrackFromDeviceUseCase,
     private val fetchUserInfoUseCase: FetchUserInfoUseCase,
-    private val playListApi: PlaylistBridge,
+    private val playlistApi: PlaylistBridge,
     private val playerManager: PlayerManager,
     private val mapper: EntityToPresentationMapper
 ) : ViewModel() {
@@ -222,7 +222,7 @@ class HomeViewModel @Inject constructor(
         }
 
         delay(1000)
-        playListApi.addTrackToPlaylist(trackEntity)
+        playlistApi.addTrackToPlaylist(trackEntity)
             .onSuccess {
                 addingToPlaylistTrackIdsFlow.update { currentItems ->
                     currentItems - trackId

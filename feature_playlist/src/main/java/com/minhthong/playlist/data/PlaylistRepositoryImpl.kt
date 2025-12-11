@@ -18,7 +18,6 @@ class PlaylistRepositoryImpl(
     private val gapOrder: Int = Constant.GAP_ORDER
 ): PlaylistRepository {
 
-
     override fun getPlaylist(): Flow<List<PlaylistItemEntity>> {
         val playlist = dao.getPlaylist().map { playlist ->
             playlist.sortedBy { it.orderIndex }
