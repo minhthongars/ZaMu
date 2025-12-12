@@ -4,12 +4,7 @@ import com.minhthong.home.data.model.UserDto
 
 class RemoteDataSource {
 
-    var count = 0
     fun fetchUserData(): UserDto {
-        if (count < 1) {
-            count++
-            throw NullPointerException()
-        }
         val dummyData = UserDto(
             id = 12,
             name = "Võ Văn Minh Thông",

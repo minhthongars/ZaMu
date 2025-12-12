@@ -6,37 +6,42 @@ import com.minhthong.core.safeGetDataCall
 import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.mapper.Mapper.toData
 import com.minhthong.playlist.data.mapper.Mapper.toDomain
+import com.minhthong.playlist.data.sharePref.ShuffleSharePreference
 import com.minhthong.playlist.domain.PlaylistRepository
-import com.minhthong.playlist.domain.model.PlaylistItemEntity
+import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlin.random.Random
 
 class PlaylistRepositoryImpl(
     private val dao: PlaylistDao,
     private val ioDispatcher: CoroutineDispatcher,
-    private val gapOrder: Int = Constant.GAP_ORDER
+    private val shuffleSharedPreferences: ShuffleSharePreference,
+    private val gapOrder: Long = DbConstant.GAP_ORDER
 ): PlaylistRepository {
 
     override fun getPlaylist(): Flow<List<PlaylistItemEntity>> {
-        val playlist = dao.getPlaylist().map { playlist ->
-            playlist.sortedBy { it.orderIndex }
-        }
-        return playlist.map { it.toDomain() }
+        val playlist = dao.getPlaylist()
+        return playlist.map { dto -> dto.toDomain() }
     }
 
     override fun observerTrackInPlaylist(trackId: Long): Flow<Boolean> {
         return dao.observeTrackInPlaylist(trackId)
     }
 
-    override suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<Unit> {
+    override suspend fun insertTrackToPlaylist(isShuffle: Boolean, trackEntity: TrackEntity): Result<Unit> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
                 val newOrder = dao.getNextOrderIndex() + gapOrder
+                val newShuffleOrder = dao.shuffleOrderIndex() + gapOrder
+
                 dao.insertTrack(
                     track = trackEntity.toData().copy(
-                        orderIndex = newOrder
+                        orderIndex = newOrder,
+                        shuffleOrderIndex = newShuffleOrder
                     )
                 )
             }
@@ -52,11 +57,64 @@ class PlaylistRepositoryImpl(
         )
     }
 
-    override suspend fun updateTrackOrder(trackId: Long, newOrder: Int): Result<Unit> {
+    override suspend fun updatePlaylist(
+        isShuffle: Boolean,
+        tracks: List<PlaylistItemEntity>
+    ): Result<Unit> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
+                val tracksDto = tracks.mapIndexed { index, entity ->
+                    if (isShuffle) {
+                        entity.toData().copy(
+                            shuffleOrderIndex = index * gapOrder
+                        )
+                    } else {
+                        entity.toData().copy(
+                            orderIndex = index * gapOrder
+                        )
+                    }
+                }
+                dao.upsertTracks(tracks = tracksDto)
+            }
+        )
+    }
 
+    override suspend fun getIsShuffleEnable(): Result<Boolean> {
+        return safeGetDataCall(
+            dispatcher = ioDispatcher,
+            getDataCall = {
+                shuffleSharedPreferences.getIsEnable()
+            }
+        )
+    }
+
+    override suspend fun setShuffleEnable(isEnable: Boolean): Result<Unit> {
+        return safeGetDataCall(
+            dispatcher = ioDispatcher,
+            getDataCall = {
+                shuffleSharedPreferences.setIsEnable(isEnable)
+            }
+        )
+    }
+
+    override suspend fun shufflePlaylist(isShuffle: Boolean): Result<Unit> {
+        return safeGetDataCall(
+            dispatcher = ioDispatcher,
+            getDataCall = {
+                val trackDtoList = dao.getPlaylist().first()
+                val newList = if (isShuffle) {
+                    trackDtoList.map { dto ->
+                        val shuffleIndex = Random.nextLong(0, 10_000)
+                        dto.copy(shuffleOrderIndex = shuffleIndex)
+                    }
+                } else {
+                    trackDtoList.map { dto ->
+                        dto.copy(shuffleOrderIndex = dto.orderIndex)
+                    }
+                }
+
+                dao.upsertTracks(newList)
             }
         )
     }

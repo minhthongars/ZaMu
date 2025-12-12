@@ -8,7 +8,10 @@ sealed class PlaylistUiState {
 
     data class Error(val messageId: Int): PlaylistUiState()
 
-    data class Success(val tracks: List<Track>): PlaylistUiState()
+    data class Success(
+        val tracks: List<Track>,
+        val isShuffling: Boolean
+    ): PlaylistUiState()
 
     data class Track(
         val id: Int,

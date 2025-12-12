@@ -110,9 +110,6 @@ class PlayerFragment: Fragment() {
                 )
 
                 binding.ivCoverArt.setImageBitmap(info.avatar)
-
-                binding.btnNext.isVisible = info.seekMediaEnable
-                binding.btnPrevious.isVisible = info.seekMediaEnable
             }
         }
 

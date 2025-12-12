@@ -7,7 +7,7 @@ import com.minhthong.playlist.data.model.TrackDto
 
 @Database(
     entities = [TrackDto::class],
-    version = Constant.DB_VERSION
+    version = DbConstant.DB_VERSION
 )
 abstract class PlaylistDatabase: RoomDatabase() {
 

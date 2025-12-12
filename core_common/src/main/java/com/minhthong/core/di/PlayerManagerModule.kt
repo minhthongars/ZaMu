@@ -16,12 +16,10 @@ class PlayerManagerModule {
     @Provides
     @Singleton
     fun providePlayerManager(
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher,
-        @MainDispatcher mainDispatcher: CoroutineDispatcher
+        @MainDispatcher mainDispatcher: CoroutineDispatcher,
     ): PlayerManager {
         return PlayerManagerImpl(
-            defaultDispatcher = defaultDispatcher,
-            mainDispatcher = mainDispatcher
+            mainDispatcher = mainDispatcher,
         )
     }
 }

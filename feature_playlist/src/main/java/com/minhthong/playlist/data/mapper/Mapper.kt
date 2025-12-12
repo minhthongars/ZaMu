@@ -4,13 +4,13 @@ import android.net.Uri
 import com.minhthong.core.model.TrackEntity
 import com.minhthong.playlist.data.model.TrackDto
 import androidx.core.net.toUri
-import com.minhthong.playlist.domain.model.PlaylistItemEntity
+import com.minhthong.core.model.PlaylistItemEntity
 
 object Mapper {
 
     private fun TrackDto.toDomain(): PlaylistItemEntity {
         val entity = TrackEntity(
-            id = id,
+            id = trackId,
             sizeBytes = sizeBytes ?: 0,
             durationMs = durationMs ?: 0,
             displayName = title.orEmpty(),
@@ -20,8 +20,11 @@ object Mapper {
             uri = uri?.toUri() ?: Uri.EMPTY
         )
         return PlaylistItemEntity(
-            id = fakeId,
-            entity = entity
+            id = id,
+            entity = entity,
+            orderIndex = orderIndex ?: 0,
+            shuffleOrderIndex = shuffleOrderIndex ?: 0,
+            isPlaying = false
         )
     }
 
@@ -31,14 +34,32 @@ object Mapper {
 
     fun TrackEntity.toData(): TrackDto {
         return TrackDto(
-            id = id,
+            trackId = id,
             title = title,
             album = album,
             artist = artist,
             orderIndex = null,
             durationMs = durationMs,
             sizeBytes = sizeBytes,
-            uri = uri.toString()
+            uri = uri.toString(),
+            isPlaying = false,
+            shuffleOrderIndex = 0
+        )
+    }
+
+    fun PlaylistItemEntity.toData(): TrackDto {
+        return TrackDto(
+            trackId = entity.id,
+            title = entity.title,
+            album = entity.album,
+            artist = entity.artist,
+            orderIndex = orderIndex,
+            durationMs = entity.durationMs,
+            sizeBytes = entity.sizeBytes,
+            uri = entity.uri.toString(),
+            id = id,
+            isPlaying = isPlaying,
+            shuffleOrderIndex = shuffleOrderIndex
         )
     }
 }

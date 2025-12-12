@@ -17,7 +17,7 @@ class TrackViewHolder(
         fun create(
             parent: ViewGroup,
             onItemClick: (Int) -> Unit,
-            onItemLongClick: (Int) -> Unit
+            onItemRemoveClick: (Int) -> Unit
         ): TrackViewHolder {
             return TrackViewHolder(
                 binding = ViewHolderPlaylistTrackBinding.inflate(
@@ -26,7 +26,7 @@ class TrackViewHolder(
                     false
                 ),
                 onItemClick = onItemClick,
-                onRemoveItemClick = onItemLongClick
+                onRemoveItemClick = onItemRemoveClick
             )
         }
     }

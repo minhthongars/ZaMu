@@ -16,14 +16,12 @@ class HomeRepositoryImpl(
     private val remoteDataSource: RemoteDataSource,
     private val mapper: DataToDomainMapper,
     private val ioDispatcher: CoroutineDispatcher,
-    private val defaultDispatcher: CoroutineDispatcher,
 ): HomeRepository {
 
     override suspend fun getTrackFromDeviceStore(): Result<List<TrackEntity>> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-                delay(700)
                 deviceDataSource.getTracksFromDevice().map { trackDto ->
                     with(mapper) { trackDto.toDomain() }
                 }
@@ -35,7 +33,7 @@ class HomeRepositoryImpl(
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-                delay(1700L)
+                delay(1000)
                 val response = remoteDataSource.fetchUserData()
                 with(mapper) { response.toDomain() }
             }

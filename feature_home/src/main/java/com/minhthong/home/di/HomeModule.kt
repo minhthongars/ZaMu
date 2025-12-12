@@ -41,7 +41,6 @@ object HomeModule {
     fun provideHomeRepository(
         dataSource: DeviceDataSource,
         remoteDataSource: RemoteDataSource,
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): HomeRepository {
         return HomeRepositoryImpl(
@@ -49,7 +48,6 @@ object HomeModule {
             mapper = DataToDomainMapper(),
             remoteDataSource = remoteDataSource,
             ioDispatcher = ioDispatcher,
-            defaultDispatcher = defaultDispatcher
         )
     }
 

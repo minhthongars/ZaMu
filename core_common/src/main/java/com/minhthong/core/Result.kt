@@ -25,3 +25,14 @@ fun <T> Result<T>.onError(
     return this
 }
 
+fun <T> Result<T>.onFinish(
+    callBack: () -> Unit,
+): Result<T> {
+    callBack()
+    return this
+}
+
+fun <T> Result<T>.getData(): T? {
+    return (this as? Result.Success)?.data
+}
+

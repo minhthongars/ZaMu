@@ -94,6 +94,7 @@ class HomeViewModel @Inject constructor(
     fun getDeviceTrack() = viewModelScope.launch {
         showTrackLoadingItems()
 
+        delay(800)
         getTrackFromDeviceUseCase.invoke()
             .onError { messageId ->
                 showTrackErrorItems(messageId)
@@ -196,16 +197,17 @@ class HomeViewModel @Inject constructor(
         _uiEvent.tryEmit(HomeUiEvent.RequestPostNotificationPermission)
     }
 
-    fun playMusic() {
+    fun playMusic() = viewModelScope.launch {
         val clickedTrack = deviceTrackEntities.find { it.id == playTrackId }
 
         if (clickedTrack == null) {
             showToast(CR.string.common_error_retry_msg)
-            return
+            return@launch
         }
 
-        playerManager.setPlaylist(listOf(clickedTrack), 0)
-
+        playerManager.seekToLastMediaItem()
+        playlistApi.addTrackToPlaylistAwareShuffle(trackEntity = clickedTrack)
+        delay(50)
         _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
     }
 
@@ -221,8 +223,8 @@ class HomeViewModel @Inject constructor(
             currentItems + trackId
         }
 
-        delay(1000)
-        playlistApi.addTrackToPlaylist(trackEntity)
+        delay(150)
+        playlistApi.addTrackToPlaylistAwareShuffle(trackEntity)
             .onSuccess {
                 addingToPlaylistTrackIdsFlow.update { currentItems ->
                     currentItems - trackId

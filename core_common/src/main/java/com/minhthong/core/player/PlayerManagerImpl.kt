@@ -5,9 +5,9 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.PlayerEntity
+import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.model.TrackEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -16,7 +16,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -24,19 +23,46 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 internal class PlayerManagerImpl(
-    defaultDispatcher: CoroutineDispatcher,
     private val mainDispatcher: CoroutineDispatcher,
 ): PlayerManager {
 
     private lateinit var exoPlayer: ExoPlayer
 
-    private var currentPlaylist: List<TrackEntity> = emptyList()
+    private lateinit var currentPlaylistItems: List<PlaylistItemEntity>
 
-    private var progressJob: Job? = null
+    private lateinit var playerExceptionHandler: CoroutineExceptionHandler
 
-    private val playerExceptionHandler = CoroutineExceptionHandler { _, e -> e.printStackTrace() }
+    private lateinit var playerScope: CoroutineScope
 
-    private val playerScope = CoroutineScope(defaultDispatcher + SupervisorJob() + playerExceptionHandler)
+    private var updatePlayingPositionJob: Job? = null
+
+    private var currentTrackIndex = 0
+    private var isLooping = false
+    private var registerSeekToLastMediaItem = false
+
+    private fun playMusic(index: Int) {
+        if(currentPlaylistItems.isEmpty()) return
+
+        val safeIndex = getSafeIndex(index)
+
+        currentTrackIndex = safeIndex
+
+        val track = currentPlaylistItems[safeIndex]
+
+        playerInfoFlow.update { current ->
+            current?.copy(trackInfo = track) ?: getDefaultData()
+        }
+
+        val mediaItem = createMediaItem(track = track.entity)
+
+        exoPlayer.stop()
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+        exoPlayer.seekTo(0)
+        exoPlayer.play()
+    }
+
+    /*implementation*/
 
     override val playerInfoFlow = MutableStateFlow<PlayerEntity?>(null)
 
@@ -45,40 +71,55 @@ internal class PlayerManagerImpl(
     override val hasSetPlaylistFlow = playerInfoFlow.map { it != null }
 
     override fun initialize(context: Context) {
+        currentPlaylistItems = emptyList()
+
+        playerExceptionHandler = CoroutineExceptionHandler { _, e ->
+            e.printStackTrace()
+        }
+
+        val coroutineContext = mainDispatcher + playerExceptionHandler + SupervisorJob()
+        playerScope = CoroutineScope(coroutineContext)
+
         exoPlayer = ExoPlayer.Builder(context)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
         exoPlayer.addListener(PlayerEventListener())
     }
 
-    override fun setPlaylist(
-        tracks: List<TrackEntity>,
-        startIndex: Int
-    ) {
-        if (tracks.isEmpty()) return
+    override fun setPlaylist(playlistItemEntities: List<PlaylistItemEntity>) {
+        val playingTrack = currentPlaylistItems.getOrNull(currentTrackIndex)
+        currentPlaylistItems = playlistItemEntities
 
-        currentPlaylist = tracks
+        if (playingTrack == null) {
+            playMusic(index = 0)
+            exoPlayer.stop()
 
-        val mediaItems = createMediaItems()
-        val safeStartIndex = startIndex.coerceIn(0, tracks.size - 1)
-
-        playerInfoFlow.update { getDefaultData(currentIndex = safeStartIndex) }
-
-        with(exoPlayer) {
-            stop()
-            clearMediaItems()
-            addMediaItems(mediaItems)
-            prepare()
-            seekTo(safeStartIndex, 0L)
-            play()
+            return
         }
+
+        if (registerSeekToLastMediaItem) {
+            registerSeekToLastMediaItem = false
+            playMusic(index = playlistItemEntities.size - 1)
+        } else {
+            val newPlayingIndex = currentPlaylistItems.indexOfFirst { it.id == playingTrack.id }
+            currentTrackIndex = newPlayingIndex
+        }
+    }
+
+    override fun seekToMediaItem(playlistItemId: Int) {
+        val index = currentPlaylistItems.indexOfFirst { it.id == playlistItemId }
+        playMusic(index = index)
+    }
+
+    override fun seekToLastMediaItem() {
+        registerSeekToLastMediaItem = true
     }
 
     override fun release() {
         exoPlayer.clearMediaItems()
         exoPlayer.release()
-        currentPlaylist = emptyList()
-        progressJob?.cancel()
+        currentPlaylistItems = emptyList()
+        updatePlayingPositionJob?.cancel()
         playerScope.cancel()
         playerInfoFlow.update { null }
     }
@@ -94,114 +135,89 @@ internal class PlayerManagerImpl(
         }
     }
 
-    override fun bindWithPlaylist(playlistFlow: Flow<TrackEntity>) {
-
-    }
-
-    override fun removeItem(index: Int) {
-        exoPlayer.removeMediaItem(index)
-
-        playerInfoFlow.update { current ->
-            current?.copy(
-                playingTrackIndex = exoPlayer.currentMediaItemIndex,
-            )
-        }
-    }
-
     override fun seek(positionMs: Long) {
         exoPlayer.seekTo(positionMs)
     }
 
     override fun loop() {
-        val isLooping = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE
-        if (isLooping) {
-            exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
-        } else {
-            exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-        }
+        isLooping = isLooping.not()
 
         playerInfoFlow.update { current ->
-            current?.copy(
-                isLooping = isLooping.not(),
-            )
-        }
-    }
-
-    override fun shuffle() {
-        val shuffleModeEnabled = exoPlayer.shuffleModeEnabled
-        exoPlayer.shuffleModeEnabled = shuffleModeEnabled.not()
-
-        playerInfoFlow.update { current ->
-            current?.copy(
-                isShuffling = shuffleModeEnabled.not(),
-            )
+            current?.copy(isLooping = isLooping)
         }
     }
 
     override fun moveToNext() {
-        if (exoPlayer.hasNextMediaItem().not()) {
-            exoPlayer.seekTo(0, 0)
-            return
+        val newIndex = if (isLooping) {
+            currentTrackIndex
+        } else {
+            currentTrackIndex + 1
         }
-        exoPlayer.seekToNextMediaItem()
+        playMusic(index = newIndex)
     }
 
     override fun moveToPrevious() {
-        if (exoPlayer.hasPreviousMediaItem().not()) {
-            val lastPosition = exoPlayer.mediaItemCount - 1
-            exoPlayer.seekTo(lastPosition, 0)
-            return
+        val newIndex = if (isLooping) {
+            currentTrackIndex
+        } else {
+            currentTrackIndex - 1
         }
-        exoPlayer.seekToPreviousMediaItem()
+        playMusic(index = newIndex)
     }
 
     override fun getPlayer(): ExoPlayer {
         return exoPlayer
     }
 
-    private fun createMediaItems(): List<MediaItem> {
-       return currentPlaylist.mapIndexed { index, track ->
-           val metadata =  MediaMetadata.Builder()
-               .setTitle(track.displayName)
-               .setArtist(track.artist)
-               .setAlbumTitle(track.album)
-               .setDisplayTitle(track.title)
-               .setDurationMs(track.durationMs)
-               .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
-               .setTrackNumber(index)
-               .build()
+    private fun createMediaItem(track: TrackEntity): MediaItem {
+        val metadata = MediaMetadata.Builder()
+            .setTitle(track.displayName)
+            .setArtist(track.artist)
+            .setAlbumTitle(track.album)
+            .setDisplayTitle(track.title)
+            .setDurationMs(track.durationMs)
+            .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+            .build()
 
-            MediaItem.Builder()
-                .setUri(track.uri)
-                .setMediaMetadata(metadata)
-                .build()
-        }
-    }
-
-    private fun getDefaultData(currentIndex: Int): PlayerEntity {
-        return PlayerEntity(
-            trackInfo = currentPlaylist[currentIndex],
-            isLooping = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE,
-            isShuffling = exoPlayer.shuffleModeEnabled,
-            isPlaying = true,
-            isSingleTrack = currentPlaylist.size == 1,
-            playingTrackIndex = currentIndex
-        )
+        return MediaItem.Builder()
+            .setUri(track.uri)
+            .setMediaMetadata(metadata)
+            .build()
     }
 
     private fun startProgressUpdater() {
-        if (progressJob?.isActive == true) return
+        if (updatePlayingPositionJob?.isActive == true) return
 
-        progressJob = playerScope.launch(mainDispatcher) {
+        updatePlayingPositionJob = playerScope.launch(mainDispatcher) {
             while (isActive) {
                 currentProgressMlsFlow.update { exoPlayer.currentPosition }
-                delay(150L)
+                delay(200)
             }
         }
     }
 
     private fun endProgressUpdater() {
-        progressJob?.cancel()
+        updatePlayingPositionJob?.cancel()
+    }
+
+    private fun getSafeIndex(index: Int): Int {
+        val trackSize = currentPlaylistItems.size
+        return if (index >= trackSize) {
+            0
+        } else if (index < 0) {
+            trackSize - 1
+        } else {
+            index
+        }
+    }
+
+    private fun getDefaultData(): PlayerEntity {
+        return PlayerEntity(
+            trackInfo = currentPlaylistItems[currentTrackIndex],
+            isLooping = isLooping,
+            isShuffling = false,
+            isPlaying = false,
+        )
     }
 
     private inner class PlayerEventListener : Player.Listener {
@@ -222,23 +238,12 @@ internal class PlayerManagerImpl(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             endProgressUpdater()
             currentProgressMlsFlow.update { 0 }
-
-            val currentIndex = exoPlayer.currentMediaItemIndex
-            playerInfoFlow.update { current ->
-                current?.copy(
-                    trackInfo = currentPlaylist[currentIndex],
-                    playingTrackIndex = currentIndex
-                )
-            }
-
             startProgressUpdater()
         }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             playerInfoFlow.update { current ->
-                current?.copy(
-                    isPlaying = exoPlayer.playWhenReady,
-                )
+                current?.copy(isPlaying = exoPlayer.playWhenReady)
             }
         }
 
@@ -247,18 +252,8 @@ internal class PlayerManagerImpl(
             newPosition: Player.PositionInfo,
             reason: Int
         ) {
-            if (progressJob?.isActive == false) {
+            if (updatePlayingPositionJob?.isActive == false) {
                 currentProgressMlsFlow.update { newPosition.positionMs }
-            }
-        }
-
-        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-            if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
-                playerInfoFlow.update { current ->
-                    current?.copy(
-                        playingTrackIndex = exoPlayer.currentMediaItemIndex,
-                    )
-                }
             }
         }
     }

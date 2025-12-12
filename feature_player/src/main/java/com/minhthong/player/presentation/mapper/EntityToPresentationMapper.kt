@@ -16,12 +16,15 @@ class EntityToPresentationMapper(
     fun PlayerEntity.toPresentation(): PlayerUiModel {
         val enableColor = CR.color.blue_600
         val disableColor = CR.color.grey_500
+
+        val trackEntity = trackInfo.entity
+
         return PlayerUiModel(
-            trackName = trackInfo.title,
-            performer = trackInfo.artist,
-            avatar = Utils.getAlbumArt(context, trackInfo.uri, 1024),
-            album = trackInfo.album,
-            duration = trackInfo.durationMs.toDurationString(),
+            trackName = trackEntity.title,
+            performer = trackEntity.artist,
+            avatar = Utils.getAlbumArt(context, trackEntity.uri, 1024),
+            album = trackEntity.album,
+            duration = trackEntity.durationMs.toDurationString(),
             playIcon = if (isPlaying) {
                 R.drawable.ic_player_pause
             } else {
@@ -35,8 +38,7 @@ class EntityToPresentationMapper(
                 context,
                 if (isShuffling) enableColor else disableColor
             ),
-            sliderBarValue = trackInfo.durationMs,
-            seekMediaEnable = isSingleTrack.not()
+            sliderBarValue = trackEntity.durationMs,
         )
     }
 }

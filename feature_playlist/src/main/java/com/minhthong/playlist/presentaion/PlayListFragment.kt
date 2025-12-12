@@ -1,19 +1,25 @@
 package com.minhthong.playlist.presentaion
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.minhthong.core.R
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
 import com.minhthong.playlist.databinding.FragmentPlayListBinding
+import com.minhthong.playlist.presentaion.adapter.ItemTouchHelperCallback
 import com.minhthong.playlist.presentaion.adapter.PlaylistAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -31,6 +37,7 @@ class PlayListFragment: Fragment() {
 
     private val onItemClickListener: (Int) -> Unit = { id ->
         viewModel.playMusic(playlistItemId = id)
+        //navigation.navigateTo(Screen.PLAYER)
     }
 
     private val onRemoveItemClick: (Int) -> Unit = { id ->
@@ -41,6 +48,19 @@ class PlayListFragment: Fragment() {
         onItemClick = onItemClickListener,
         onRemoveItemClick = onRemoveItemClick
     )
+
+    private val onMoveCallback = { fromPosition: Int, toPosition: Int ->
+        adapter.moveItem(
+            fromPosition = fromPosition,
+            toPosition = toPosition
+        )
+    }
+
+    private val onDropCallback: () -> Unit = {
+        viewModel.updatePlaylistPosition(
+            trackItems = adapter.currentList
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,22 +76,26 @@ class PlayListFragment: Fragment() {
 
         setupViews()
         setUpCollector()
-        viewModel.loadPlaylist()
+        viewModel.loadData()
     }
 
     private fun setupViews() {
-        binding.llLoading.isVisible = true
-        binding.flError.isVisible = false
-
         val itemAnimator = binding.recyclerView.itemAnimator
         if (itemAnimator is SimpleItemAnimator) {
             itemAnimator.supportsChangeAnimations = false
             itemAnimator.moveDuration = 220
             itemAnimator.changeDuration = 220
         }
-        binding.recyclerView.isVisible = false
 
         binding.recyclerView.adapter = adapter
+
+        val callback = ItemTouchHelperCallback(onMoveCallback, onDropCallback)
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(binding.recyclerView)
+
+        binding.ivShuffle.setOnClickListener {
+            viewModel.updateShufflePlaylist()
+        }
     }
 
     private fun setUpCollector() {
@@ -87,7 +111,7 @@ class PlayListFragment: Fragment() {
                     }
 
                     is PlaylistUiState.Success -> {
-                        successContent(tracks = state.tracks)
+                        successContent(tracks = state.tracks, isShuffling = state.isShuffling)
                     }
                 }
             }
@@ -114,13 +138,34 @@ class PlayListFragment: Fragment() {
         }
     }
 
-    private fun successContent(tracks: List<PlaylistUiState.Track>) {
+    private fun successContent(tracks: List<PlaylistUiState.Track>, isShuffling: Boolean) {
         binding.llLoading.isVisible = false
         binding.flError.isVisible = false
         binding.recyclerView.isVisible = true
         clearLoadingAnimation()
 
-        adapter.submitList(tracks)
+        val color = ContextCompat.getColor(
+            requireContext(),
+            if (isShuffling) R.color.blue_600
+            else R.color.grey_700
+        )
+        ImageViewCompat.setImageTintList(
+            binding.ivShuffle,
+            ColorStateList.valueOf(color)
+        )
+
+       saveStateSubmitList(tracks)
+    }
+
+    private fun saveStateSubmitList(tracks: List<PlaylistUiState.Track>) {
+        val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
+        val scrollPosition = layoutManager.findFirstVisibleItemPosition()
+        val view = layoutManager.findViewByPosition(scrollPosition)
+        val scrollOffset = view?.top ?: 0
+
+        adapter.submitList(tracks) {
+            layoutManager.scrollToPositionWithOffset(scrollPosition, scrollOffset)
+        }
     }
 
     private fun startLoadingAnimation() {

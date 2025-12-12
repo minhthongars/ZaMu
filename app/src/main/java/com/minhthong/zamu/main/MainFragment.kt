@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.minhthong.core.util.Utils.collectFlowSafely
@@ -27,8 +28,7 @@ class MainFragment: Fragment() {
         (fragment as NavHostFragment).navController
     }
 
-    @Inject
-    internal lateinit var playerManager: PlayerManager
+    private val viewModel: MainViewModel by viewModels()
 
     @Inject
     internal lateinit var navigation: Navigation
@@ -57,10 +57,12 @@ class MainFragment: Fragment() {
 
     private fun setUpCollector() {
         collectFlowSafely {
-            playerManager.hasSetPlaylistFlow.collect {
+            viewModel.hasSetPlaylistFlow.collect {
                 binding.bottomNavigation.showPlayerItem(isShow = it)
             }
         }
+
+        viewModel.observerPlaylist()
     }
 
     private fun setupBottomNavigation() {

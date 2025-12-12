@@ -12,5 +12,4 @@ data class PlayerUiModel(
     val loopIconColor: Int = 0,
     val shuffleIconColor: Int = 0,
     val sliderBarValue: Long = 0,
-    val seekMediaEnable: Boolean = false
 )

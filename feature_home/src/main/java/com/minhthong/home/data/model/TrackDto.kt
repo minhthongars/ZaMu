@@ -10,5 +10,5 @@ data class TrackDto(
     val album: String?,
     val durationMs: Long?,
     val sizeBytes: Long?,
-    val uri: Uri?
+    val uri: Uri?,
 )

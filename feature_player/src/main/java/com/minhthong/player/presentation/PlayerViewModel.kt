@@ -49,7 +49,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun shuffleMedia() {
-        playerManager.shuffle()
+        //playerManager.shuffle()
     }
 
     fun seek(mls: Float) {

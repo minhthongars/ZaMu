@@ -3,35 +3,41 @@ package com.minhthong.playlist.data.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.minhthong.playlist.data.Constant
+import com.minhthong.playlist.data.DbConstant
 
-@Entity(tableName = Constant.TABLE_NAME_TRACK)
+@Entity(tableName = DbConstant.TABLE_NAME_TRACK)
 data class TrackDto(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = Constant.COLUMN__ID)
-    val fakeId: Int = 0,
+    @ColumnInfo(name = DbConstant.COLUMN_ID)
+    val id: Int = 0,
 
-    @ColumnInfo(name = Constant.COLUMN_ID)
-    val id: Long,
+    @ColumnInfo(name = DbConstant.COLUMN_TRACK_ID)
+    val trackId: Long,
 
-    @ColumnInfo(name = Constant.COLUMN_ORDER)
+    @ColumnInfo(name = DbConstant.COLUMN_ORDER)
     val orderIndex: Long?,
 
-    @ColumnInfo(name = Constant.COLUMN_TITLE)
+    @ColumnInfo(name = DbConstant.COLUMN_SHUFFLE_ORDER)
+    val shuffleOrderIndex: Long?,
+
+    @ColumnInfo(name = DbConstant.COLUMN_TITLE)
     val title: String?,
 
-    @ColumnInfo(name = Constant.COLUMN_ARTIST)
+    @ColumnInfo(name = DbConstant.COLUMN_ARTIST)
     val artist: String?,
 
-    @ColumnInfo(name = Constant.COLUMN_ALBUM)
+    @ColumnInfo(name = DbConstant.COLUMN_ALBUM)
     val album: String?,
 
-    @ColumnInfo(name = Constant.COLUMN_DURATION)
+    @ColumnInfo(name = DbConstant.COLUMN_DURATION)
     val durationMs: Long?,
 
-    @ColumnInfo(name = Constant.COLUMN_SIZE)
+    @ColumnInfo(name = DbConstant.COLUMN_SIZE)
     val sizeBytes: Long?,
 
-    @ColumnInfo(name = Constant.COLUMN_PATH)
-    val uri: String?
+    @ColumnInfo(name = DbConstant.COLUMN_PATH)
+    val uri: String?,
+
+    @ColumnInfo(name = DbConstant.COLUMN_IS_PLAYING)
+    val isPlaying: Boolean
 )

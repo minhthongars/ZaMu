@@ -1,15 +1,15 @@
 package com.minhthong.playlist.domain.usecase
 
+import com.minhthong.core.Result
 import com.minhthong.playlist.domain.PlaylistRepository
-import com.minhthong.playlist.domain.model.PlaylistItemEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetPlaylistUseCase @Inject constructor(
+class SaveShuffleEnableUseCase @Inject constructor(
     private val repository: PlaylistRepository
 ) {
 
-    operator fun invoke(): Flow<List<PlaylistItemEntity>> {
-        return repository.getPlaylist()
+    suspend operator fun invoke(isEnable: Boolean): Result<Unit> {
+        return repository.setShuffleEnable(isEnable)
     }
 }
