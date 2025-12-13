@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.minhthong.core.R
 import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.onError
+import com.minhthong.core.onFinish
 import com.minhthong.core.onSuccess
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.toAppError
@@ -12,18 +13,18 @@ import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
 import com.minhthong.playlist.domain.usecase.GetShuffleEnableUseCase
 import com.minhthong.playlist.domain.usecase.RemoveTrackFromPlaylistUseCase
 import com.minhthong.playlist.domain.usecase.SaveShuffleEnableUseCase
-import com.minhthong.playlist.domain.usecase.ShufflePlaylistUseCase
 import com.minhthong.playlist.domain.usecase.UpdatePlaylistUseCase
 import com.minhthong.playlist.presentaion.mapper.PresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -38,9 +39,8 @@ class PlaylistViewModel @Inject constructor(
     private val updatePlaylistUseCase: UpdatePlaylistUseCase,
     private val getShuffleEnableUseCase: GetShuffleEnableUseCase,
     private val saveShuffleEnableUseCase: SaveShuffleEnableUseCase,
-    private val shufflePlaylistUseCase: ShufflePlaylistUseCase,
     private val playerManager: PlayerManager,
-    private val mapper: PresentationMapper
+    private val mapper: PresentationMapper,
 ): ViewModel() {
 
     private var playlistItemEntities: Map<Int, PlaylistItemEntity> = emptyMap()
@@ -77,14 +77,8 @@ class PlaylistViewModel @Inject constructor(
             initialValue = PlaylistUiState.Loading
         )
 
-    fun loadData() {
-        bindDatabase()
-        updateIsShuffling()
-    }
-
     private fun bindDatabase() {
         getPlaylistUseCase.invoke()
-            .filter { isShufflingFlow.value != null }
             .map { playlist ->
                 if (playlist.isEmpty()) {
                     showEmptyState()
@@ -95,16 +89,20 @@ class PlaylistViewModel @Inject constructor(
             .catch { throwable ->
                 showErrorState(throwable = throwable)
             }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
-    private fun updateIsShuffling() = viewModelScope.launch {
+    fun updateIsShuffling() = viewModelScope.launch {
         getShuffleEnableUseCase.invoke()
-            .onSuccess { isShuffling ->
-                isShufflingFlow.update { isShuffling }
+            .onSuccess { isEnable ->
+                isShufflingFlow.update { isEnable }
             }
             .onError {
                 isShufflingFlow.update { false }
+            }
+            .onFinish {
+                bindDatabase()
             }
     }
 
@@ -113,12 +111,14 @@ class PlaylistViewModel @Inject constructor(
 
         saveShuffleEnableUseCase
             .invoke(isEnable = isShuffling.not())
-            .onSuccess {
-                updateIsShuffling()
+            .onSuccess { isEnable ->
+                isShufflingFlow.update { isEnable }
 
-                shufflePlaylistUseCase.invoke(
-                    isEnableShuffle = isShuffling.not()
-                )
+                if (isEnable) {
+                    shufflePlaylist()
+                } else {
+                    restorePlaylist()
+                }
             }
     }
 
@@ -128,7 +128,6 @@ class PlaylistViewModel @Inject constructor(
     }
 
     fun removePlaylistItem(playlistItemId: Int) = viewModelScope.launch {
-
         addRemovingItemId(playlistItemId = playlistItemId)
 
         delay(300)
@@ -139,7 +138,6 @@ class PlaylistViewModel @Inject constructor(
     fun updatePlaylistPosition(
         trackItems: List<PlaylistUiState.Track>
     ) = viewModelScope.launch {
-
         val playlistItems = trackItems.mapNotNull { uiItem ->
             playlistItemEntities[uiItem.id]
         }
@@ -197,5 +195,42 @@ class PlaylistViewModel @Inject constructor(
 
         val trackUiItems = with(mapper) { playlistItems.toPresentation() }
         _uiState.update { PlaylistUiState.Success(tracks = trackUiItems, isShuffling = false) }
+    }
+
+    private fun shufflePlaylist() {
+        val successUiItem = (uiState.value as? PlaylistUiState.Success) ?: return
+        val currentTrackUiItems = successUiItem.tracks
+
+        val newTrackUiItems = currentTrackUiItems.shuffled()
+        _uiState.update { current ->
+            (current as PlaylistUiState.Success).copy(
+                tracks = newTrackUiItems
+            )
+        }
+
+        updatePlaylistPosition(
+            trackItems = newTrackUiItems
+        )
+    }
+
+    private fun restorePlaylist() {
+        if (uiState.value !is PlaylistUiState.Success) return
+
+        val newTrackUiItems = playlistItemEntities.values
+            .sortedBy { it.orderIndex }
+            .let { entities ->
+                with(mapper) { entities.toPresentation() }
+            }
+
+
+        _uiState.update { current ->
+            (current as PlaylistUiState.Success).copy(
+                tracks = newTrackUiItems
+            )
+        }
+
+        updatePlaylistPosition(
+            trackItems = newTrackUiItems
+        )
     }
 }

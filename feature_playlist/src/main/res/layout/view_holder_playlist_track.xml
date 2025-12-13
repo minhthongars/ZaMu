@@ -12,8 +12,8 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_track_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         app:cardElevation="0dp"
         app:cardCornerRadius="8dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,14 +21,14 @@
 
         <ImageView
             android:id="@+id/iv_track_avatar"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:scaleType="centerCrop" />
 
         <ImageView
             android:id="@+id/iv_playing"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:padding="12dp"
             android:background="@color/grey_50"
             android:scaleType="centerCrop"
@@ -49,6 +49,7 @@
         android:textStyle="bold"
         android:textSize="14sp"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cv_track_image"
         app:layout_constraintTop_toTopOf="@id/cv_track_image"
@@ -80,11 +81,11 @@
         android:layout_width="26dp"
         android:layout_height="26dp"
         android:src="@drawable/media3_icon_playlist_remove"
-        android:tint="@color/grey_500"
         android:padding="2dp"
         android:foreground="?attr/selectableItemBackground"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/grey_500" />
 
     <ProgressBar
         android:id="@+id/progress_circular"

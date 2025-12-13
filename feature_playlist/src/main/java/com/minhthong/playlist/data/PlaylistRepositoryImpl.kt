@@ -89,7 +89,7 @@ class PlaylistRepositoryImpl(
         )
     }
 
-    override suspend fun setShuffleEnable(isEnable: Boolean): Result<Unit> {
+    override suspend fun setShuffleEnable(isEnable: Boolean): Result<Boolean> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {

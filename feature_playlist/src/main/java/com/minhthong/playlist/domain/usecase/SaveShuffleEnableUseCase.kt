@@ -9,7 +9,7 @@ class SaveShuffleEnableUseCase @Inject constructor(
     private val repository: PlaylistRepository
 ) {
 
-    suspend operator fun invoke(isEnable: Boolean): Result<Unit> {
+    suspend operator fun invoke(isEnable: Boolean): Result<Boolean> {
         return repository.setShuffleEnable(isEnable)
     }
 }

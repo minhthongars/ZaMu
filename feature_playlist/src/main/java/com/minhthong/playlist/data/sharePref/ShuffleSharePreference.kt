@@ -5,7 +5,7 @@ import android.content.Context.MODE_PRIVATE
 import androidx.core.content.edit
 
 class ShuffleSharePreference(
-    private val context: Context
+    context: Context
 ) {
 
     companion object {
@@ -15,8 +15,10 @@ class ShuffleSharePreference(
 
     private val prefs = context.getSharedPreferences(PREFS, MODE_PRIVATE)
 
-    fun setIsEnable(isEnable: Boolean) {
+    fun setIsEnable(isEnable: Boolean): Boolean {
         prefs.edit { putBoolean(KEY_SHUFFLE_ENABLE, isEnable) }
+
+        return prefs.getBoolean(KEY_SHUFFLE_ENABLE, false)
     }
 
     fun getIsEnable(): Boolean {

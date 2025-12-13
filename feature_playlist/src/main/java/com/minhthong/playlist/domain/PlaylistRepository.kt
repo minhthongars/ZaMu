@@ -18,7 +18,7 @@ interface PlaylistRepository {
 
     suspend fun getIsShuffleEnable(): Result<Boolean>
 
-    suspend fun setShuffleEnable(isEnable: Boolean): Result<Unit>
+    suspend fun setShuffleEnable(isEnable: Boolean): Result<Boolean>
 
     suspend fun shufflePlaylist(isShuffle: Boolean): Result<Unit>
 }

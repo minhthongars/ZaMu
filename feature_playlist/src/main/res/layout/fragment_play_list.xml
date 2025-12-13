@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
+        android:id="@+id/ll_success"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -13,14 +14,21 @@
             android:id="@+id/iv_shuffle"
             android:layout_width="34dp"
             android:layout_height="34dp"
-            android:layout_margin="4dp"
+            android:layout_margin="6dp"
             android:layout_gravity="end"
             app:srcCompat="@drawable/media3_icon_shuffle_on"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/grey_200"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingTop="6dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     </LinearLayout>

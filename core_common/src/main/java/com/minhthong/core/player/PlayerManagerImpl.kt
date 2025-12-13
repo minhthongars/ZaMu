@@ -58,7 +58,7 @@ internal class PlayerManagerImpl(
         exoPlayer.stop()
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
-        exoPlayer.seekTo(0)
+        exoPlayer.seekTo(0, 0)
         exoPlayer.play()
     }
 
@@ -83,10 +83,12 @@ internal class PlayerManagerImpl(
         exoPlayer = ExoPlayer.Builder(context)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
-        exoPlayer.addListener(PlayerEventListener())
+        exoPlayer.addListener(playerEventListener)
     }
 
-    override fun setPlaylist(playlistItemEntities: List<PlaylistItemEntity>) {
+    override fun setPlaylist(
+        playlistItemEntities: List<PlaylistItemEntity>
+    ) {
         val playingTrack = currentPlaylistItems.getOrNull(currentTrackIndex)
         currentPlaylistItems = playlistItemEntities
 
@@ -116,6 +118,7 @@ internal class PlayerManagerImpl(
     }
 
     override fun release() {
+        exoPlayer.removeListener(playerEventListener)
         exoPlayer.clearMediaItems()
         exoPlayer.release()
         currentPlaylistItems = emptyList()
@@ -220,7 +223,7 @@ internal class PlayerManagerImpl(
         )
     }
 
-    private inner class PlayerEventListener : Player.Listener {
+    private val playerEventListener = object : Player.Listener {
         override fun onPlaybackStateChanged(state: Int) {
             if (state == Player.STATE_ENDED) {
                 moveToNext()

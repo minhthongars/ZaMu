@@ -76,7 +76,7 @@ class PlayListFragment: Fragment() {
 
         setupViews()
         setUpCollector()
-        viewModel.loadData()
+        viewModel.updateIsShuffling()
     }
 
     private fun setupViews() {
@@ -121,7 +121,7 @@ class PlayListFragment: Fragment() {
     private fun loadingContent() {
         binding.llLoading.isVisible = true
         binding.flError.isVisible = false
-        binding.recyclerView.isVisible = false
+        binding.llSuccess.isVisible = false
 
         startLoadingAnimation()
     }
@@ -129,7 +129,7 @@ class PlayListFragment: Fragment() {
     private fun errorContent(messageId: Int) {
         binding.llLoading.isVisible = false
         binding.flError.isVisible = true
-        binding.recyclerView.isVisible = false
+        binding.llSuccess.isVisible = false
         clearLoadingAnimation()
 
         binding.tvErrorMessage.text = getText(messageId)
@@ -141,7 +141,7 @@ class PlayListFragment: Fragment() {
     private fun successContent(tracks: List<PlaylistUiState.Track>, isShuffling: Boolean) {
         binding.llLoading.isVisible = false
         binding.flError.isVisible = false
-        binding.recyclerView.isVisible = true
+        binding.llSuccess.isVisible = true
         clearLoadingAnimation()
 
         val color = ContextCompat.getColor(
