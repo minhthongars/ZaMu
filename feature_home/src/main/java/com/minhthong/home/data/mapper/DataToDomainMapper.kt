@@ -13,7 +13,6 @@ class DataToDomainMapper {
         return TrackEntity(
             id = dto.id ?: 0,
             title = dto.title.orEmpty(),
-            displayName = dto.displayName.orEmpty(),
             artist = dto.artist.orEmpty(),
             album = dto.album.orEmpty(),
             durationMs = dto.durationMs ?: 0,

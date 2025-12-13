@@ -6,7 +6,7 @@ import com.minhthong.core.model.TrackEntity
 import kotlinx.coroutines.flow.Flow
 
 interface PlaylistBridge {
-    suspend fun addTrackToPlaylistAwareShuffle(trackEntity: TrackEntity): Result<Unit>
+    suspend fun addTrackToPlaylistAwareShuffle(trackEntity: TrackEntity): Result<PlaylistItemEntity>
 
     suspend fun observerTrackInPlaylist(trackId: Long): Flow<Boolean>
 

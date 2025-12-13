@@ -25,7 +25,10 @@ interface PlaylistDao {
     fun observeTrackInPlaylist(trackId: Long): Flow<Boolean>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTrack(track: TrackDto)
+    suspend fun insertTrack(track: TrackDto): Long
+
+    @Query("SELECT * FROM ${DbConstant.TABLE_NAME_TRACK} WHERE ${DbConstant.COLUMN_ORDER} = :order")
+    suspend fun getTrackByOrder(order: Long): TrackDto?
 
     @Query("DELETE FROM ${DbConstant.TABLE_NAME_TRACK} WHERE ${DbConstant.COLUMN_ID} = :playlistItemId")
     suspend fun deleteTrackById(playlistItemId: Int): Int

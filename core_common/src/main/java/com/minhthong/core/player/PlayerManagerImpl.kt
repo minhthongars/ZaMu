@@ -36,9 +36,8 @@ internal class PlayerManagerImpl(
 
     private var updatePlayingPositionJob: Job? = null
 
-    private var currentTrackIndex = 0
+    private var currentTrackIndex = -1
     private var isLooping = false
-    private var registerSeekToLastMediaItem = false
 
     private fun playMusic(index: Int) {
         if(currentPlaylistItems.isEmpty()) return
@@ -89,22 +88,24 @@ internal class PlayerManagerImpl(
     override fun setPlaylist(
         playlistItemEntities: List<PlaylistItemEntity>
     ) {
+        if (playlistItemEntities.isEmpty()) {
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+            playerInfoFlow.update { null }
+            return
+        }
         val playingTrack = currentPlaylistItems.getOrNull(currentTrackIndex)
         currentPlaylistItems = playlistItemEntities
 
-        if (playingTrack == null) {
-            playMusic(index = 0)
-            exoPlayer.stop()
-
-            return
-        }
-
-        if (registerSeekToLastMediaItem) {
-            registerSeekToLastMediaItem = false
-            playMusic(index = playlistItemEntities.size - 1)
-        } else {
+        if (playingTrack != null) {
             val newPlayingIndex = currentPlaylistItems.indexOfFirst { it.id == playingTrack.id }
-            currentTrackIndex = newPlayingIndex
+            if (newPlayingIndex == -1) {
+                playMusic(index = 0)
+            } else {
+                currentTrackIndex = newPlayingIndex
+            }
+        } else {
+            playMusic(index = 0)
         }
     }
 
@@ -113,8 +114,9 @@ internal class PlayerManagerImpl(
         playMusic(index = index)
     }
 
-    override fun seekToLastMediaItem() {
-        registerSeekToLastMediaItem = true
+    override fun seekToLastMediaItem(playlistItem: PlaylistItemEntity) {
+        currentPlaylistItems = currentPlaylistItems + playlistItem
+        playMusic(index = currentPlaylistItems.size - 1)
     }
 
     override fun release() {
@@ -174,7 +176,7 @@ internal class PlayerManagerImpl(
 
     private fun createMediaItem(track: TrackEntity): MediaItem {
         val metadata = MediaMetadata.Builder()
-            .setTitle(track.displayName)
+            .setTitle(track.title)
             .setArtist(track.artist)
             .setAlbumTitle(track.album)
             .setDisplayTitle(track.title)

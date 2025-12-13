@@ -1,5 +1,6 @@
 package com.minhthong.playlist.data
 
+import android.util.Log
 import com.minhthong.core.Result
 import com.minhthong.core.model.TrackEntity
 import com.minhthong.core.safeGetDataCall
@@ -31,7 +32,7 @@ class PlaylistRepositoryImpl(
         return dao.observeTrackInPlaylist(trackId)
     }
 
-    override suspend fun insertTrackToPlaylist(isShuffle: Boolean, trackEntity: TrackEntity): Result<Unit> {
+    override suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
@@ -44,6 +45,11 @@ class PlaylistRepositoryImpl(
                         shuffleOrderIndex = newShuffleOrder
                     )
                 )
+
+                val insertedTrack = dao.getTrackByOrder(order = newOrder)
+                    ?: throw IllegalStateException("Track not found after insert")
+
+                insertedTrack.toDomain()
             }
         )
     }

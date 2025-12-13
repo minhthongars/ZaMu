@@ -35,9 +35,12 @@ class PlayListFragment: Fragment() {
     @Inject
     internal lateinit var navigation: Navigation
 
-    private val onItemClickListener: (Int) -> Unit = { id ->
-        viewModel.playMusic(playlistItemId = id)
-        //navigation.navigateTo(Screen.PLAYER)
+    private val onItemClickListener: (Int, Boolean) -> Unit = { id, isPlaying ->
+        if (isPlaying) {
+            navigation.navigateTo(Screen.PLAYER)
+        } else {
+            viewModel.playMusic(playlistItemId = id)
+        }
     }
 
     private val onRemoveItemClick: (Int) -> Unit = { id ->

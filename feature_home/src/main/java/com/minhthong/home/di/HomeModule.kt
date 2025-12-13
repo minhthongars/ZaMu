@@ -1,7 +1,6 @@
 package com.minhthong.home.di
 
 import android.content.Context
-import com.minhthong.core.di.DefaultDispatcher
 import com.minhthong.core.di.IoDispatcher
 import com.minhthong.home.data.HomeRepositoryImpl
 import com.minhthong.home.data.datasource.DeviceDataSource

@@ -205,10 +205,14 @@ class HomeViewModel @Inject constructor(
             return@launch
         }
 
-        playerManager.seekToLastMediaItem()
         playlistApi.addTrackToPlaylistAwareShuffle(trackEntity = clickedTrack)
-        delay(50)
-        _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
+            .onSuccess { playlistItem ->
+                playerManager.seekToLastMediaItem(playlistItem)
+                _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
+            }
+            .onError { messageId ->
+                showToast(messageId)
+            }
     }
 
     fun addToPlaylist(trackId: Long) = viewModelScope.launch {

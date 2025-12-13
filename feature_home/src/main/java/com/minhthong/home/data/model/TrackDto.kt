@@ -5,7 +5,6 @@ import android.net.Uri
 data class TrackDto(
     val id: Long?,
     val title: String?,
-    val displayName: String?,
     val artist: String?,
     val album: String?,
     val durationMs: Long?,

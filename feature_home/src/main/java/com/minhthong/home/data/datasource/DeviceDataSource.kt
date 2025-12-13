@@ -37,7 +37,6 @@ class DeviceDataSource(
         contentResolver.query(queryUri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-            val displayNameCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
             val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
             val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
@@ -46,7 +45,6 @@ class DeviceDataSource(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val title = cursor.getString(titleCol) ?: ""
-                val displayName = cursor.getString(displayNameCol) ?: ""
                 val artist = cursor.getString(artistCol) ?: ""
                 val album = cursor.getString(albumCol) ?: ""
                 val duration = cursor.getLong(durationCol)
@@ -58,7 +56,6 @@ class DeviceDataSource(
                     TrackDto(
                         id = id,
                         title = title,
-                        displayName = displayName,
                         artist = artist,
                         album = album,
                         durationMs = duration,

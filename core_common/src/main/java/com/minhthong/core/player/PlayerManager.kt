@@ -23,7 +23,7 @@ interface PlayerManager {
 
     fun seekToMediaItem(playlistItemId: Int)
 
-    fun seekToLastMediaItem()
+    fun seekToLastMediaItem(playlistItem: PlaylistItemEntity)
 
     fun play()
 

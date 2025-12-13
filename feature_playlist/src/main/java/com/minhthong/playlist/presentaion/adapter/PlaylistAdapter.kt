@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.minhthong.playlist.presentaion.PlaylistUiState
 
 class PlaylistAdapter(
-    private val onItemClick: (Int) -> Unit,
+    private val onItemClick: (Int, Boolean) -> Unit,
     private val onRemoveItemClick: (Int) -> Unit
 ): ListAdapter<PlaylistUiState.Track, TrackViewHolder>(ItemCallback()) {
 
@@ -38,7 +38,7 @@ class PlaylistAdapter(
         val item = getItem(position)
 
         when(payload) {
-            PAY_LOAD_PLAYING -> holder.updatePlayingInfo(isPlaying = item.isPlaying)
+            PAY_LOAD_PLAYING -> holder.updatePlayingInfo(isPlaying = item.isPlaying, trackId = item.id)
 
             PAY_LOAD_REMOVING -> holder.updateRemovingInfo(isRemoving = item.isRemoving)
 

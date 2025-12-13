@@ -15,7 +15,7 @@ class PlaylistBridgeImpl(
     private val getPlaylistAwareShuffleUseCase: GetPlaylistAwareShuffleUseCase,
 ) : PlaylistBridge {
 
-    override suspend fun addTrackToPlaylistAwareShuffle(trackEntity: TrackEntity): Result<Unit> {
+    override suspend fun addTrackToPlaylistAwareShuffle(trackEntity: TrackEntity): Result<PlaylistItemEntity> {
         return addTrackToPlaylistUseCase.invoke(trackEntity)
     }
 

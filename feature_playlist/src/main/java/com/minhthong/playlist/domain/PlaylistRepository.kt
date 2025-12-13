@@ -10,7 +10,7 @@ interface PlaylistRepository {
 
     fun observerTrackInPlaylist(trackId: Long): Flow<Boolean>
 
-    suspend fun insertTrackToPlaylist(isShuffle: Boolean, trackEntity: TrackEntity): Result<Unit>
+    suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity>
 
     suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit>
 

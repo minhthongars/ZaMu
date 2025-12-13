@@ -15,10 +15,10 @@ data class TrackDto(
     val trackId: Long,
 
     @ColumnInfo(name = DbConstant.COLUMN_ORDER)
-    val orderIndex: Long?,
+    val orderIndex: Long,
 
     @ColumnInfo(name = DbConstant.COLUMN_SHUFFLE_ORDER)
-    val shuffleOrderIndex: Long?,
+    val shuffleOrderIndex: Long,
 
     @ColumnInfo(name = DbConstant.COLUMN_TITLE)
     val title: String?,

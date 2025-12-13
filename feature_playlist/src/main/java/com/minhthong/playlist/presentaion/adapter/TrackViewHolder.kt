@@ -9,14 +9,14 @@ import com.minhthong.playlist.presentaion.PlaylistUiState
 
 class TrackViewHolder(
     private val binding: ViewHolderPlaylistTrackBinding,
-    private val onItemClick: (Int) -> Unit,
+    private val onItemClick: (Int, Boolean) -> Unit,
     private val onRemoveItemClick: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         fun create(
             parent: ViewGroup,
-            onItemClick: (Int) -> Unit,
+            onItemClick: (Int, Boolean) -> Unit,
             onItemRemoveClick: (Int) -> Unit
         ): TrackViewHolder {
             return TrackViewHolder(
@@ -32,25 +32,27 @@ class TrackViewHolder(
     }
 
     fun bind(track: PlaylistUiState.Track) {
-        updatePlayingInfo(isPlaying = track.isPlaying)
+        updatePlayingInfo(
+            isPlaying = track.isPlaying,
+            trackId = track.id
+        )
         updateRemovingInfo(isRemoving = track.isRemoving)
 
         binding.ivTrackAvatar.setImageBitmap(track.avatar)
         binding.tvName.text = track.name
         binding.tvPerformer.text = track.performer
 
-        binding.root.setOnClickListener {
-            onItemClick(track.id)
-        }
-
         binding.ivClose.setOnClickListener {
             onRemoveItemClick(track.id)
         }
     }
 
-    fun updatePlayingInfo(isPlaying: Boolean) {
+    fun updatePlayingInfo(trackId: Int, isPlaying: Boolean) {
         binding.ivPlaying.isVisible = isPlaying
-        binding.ivClose.isVisible = isPlaying.not()
+
+        binding.root.setOnClickListener {
+            onItemClick(trackId, isPlaying)
+        }
     }
 
     fun updateRemovingInfo(isRemoving: Boolean) {

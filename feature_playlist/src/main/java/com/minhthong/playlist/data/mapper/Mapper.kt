@@ -8,12 +8,11 @@ import com.minhthong.core.model.PlaylistItemEntity
 
 object Mapper {
 
-    private fun TrackDto.toDomain(): PlaylistItemEntity {
+    fun TrackDto.toDomain(): PlaylistItemEntity {
         val entity = TrackEntity(
             id = trackId,
             sizeBytes = sizeBytes ?: 0,
             durationMs = durationMs ?: 0,
-            displayName = title.orEmpty(),
             artist = artist.orEmpty(),
             album = album.orEmpty(),
             title = title.orEmpty(),
@@ -22,8 +21,8 @@ object Mapper {
         return PlaylistItemEntity(
             id = id,
             entity = entity,
-            orderIndex = orderIndex ?: 0,
-            shuffleOrderIndex = shuffleOrderIndex ?: 0,
+            orderIndex = orderIndex,
+            shuffleOrderIndex = shuffleOrderIndex,
             isPlaying = false
         )
     }
@@ -38,7 +37,7 @@ object Mapper {
             title = title,
             album = album,
             artist = artist,
-            orderIndex = null,
+            orderIndex = 0,
             durationMs = durationMs,
             sizeBytes = sizeBytes,
             uri = uri.toString(),

@@ -7,10 +7,8 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.minhthong.core.util.Utils.collectFlowSafely
-import com.minhthong.core.player.PlayerManager
 import com.minhthong.navigation.Navigation
 import com.minhthong.zamu.R
 import com.minhthong.zamu.databinding.FragmentMainBinding

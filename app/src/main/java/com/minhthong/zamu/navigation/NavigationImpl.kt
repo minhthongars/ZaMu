@@ -32,11 +32,6 @@ class NavigationImpl(
         val navOptions = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .setRestoreState(true)
-            .setPopUpTo(
-                navController.graph.startDestinationId,
-                inclusive = false,
-                saveState = true
-            )
             .build()
 
         navController.navigate(destination, null, navOptions)
