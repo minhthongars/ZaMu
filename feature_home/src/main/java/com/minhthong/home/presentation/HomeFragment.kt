@@ -1,7 +1,6 @@
 package com.minhthong.home.presentation
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -15,7 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.minhthong.core.R
-import com.minhthong.core.service.PlaybackService
+import com.minhthong.core.util.NotificationPermissionHelper
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.home.databinding.FragmentHomeBinding
 import com.minhthong.home.presentation.adapter.HomeAdapter
@@ -26,6 +25,7 @@ import com.minhthong.navigation.Screen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,14 +39,9 @@ class HomeFragment: Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    private val postNotificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted.not()) {
-            onPostNotificationPermissionDenied()
-        }
-        onNotificationPermissionGranted()
-    }
+    private val notificationPermissionHelper = NotificationPermissionHelper(
+        wFragment = WeakReference(this)
+    )
 
     private val audioPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -190,39 +185,18 @@ class HomeFragment: Fragment() {
     }
 
     private fun requestPostNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when {
-                ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    onNotificationPermissionGranted()
-                }
-
-                else -> {
-                    postNotificationPermissionLauncher.launch(
-                        Manifest.permission.POST_NOTIFICATIONS
-                    )
-                }
+        notificationPermissionHelper.requestPermissionAndStartService(
+            onGranted = {
+                viewModel.playMusic()
+            },
+            onDenied = {
+                onPostNotificationPermissionDenied()
             }
-        } else {
-            onNotificationPermissionGranted()
-        }
+        )
     }
 
     private fun onAudioPermissionGranted() {
         viewModel.getDeviceTrack()
-    }
-
-    private fun onNotificationPermissionGranted() {
-        val intent = Intent(activity, PlaybackService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            activity?.startForegroundService(intent)
-        } else {
-            activity?.startService(intent)
-        }
-
-        viewModel.playMusic()
     }
 
     private fun onAudioPermissionDenied() {
@@ -235,6 +209,7 @@ class HomeFragment: Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        notificationPermissionHelper.cleanup()
         _binding = null
     }
 }

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.minhthong.core.R
+import com.minhthong.core.util.NotificationPermissionHelper
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
@@ -22,6 +23,7 @@ import com.minhthong.playlist.databinding.FragmentPlayListBinding
 import com.minhthong.playlist.presentaion.adapter.ItemTouchHelperCallback
 import com.minhthong.playlist.presentaion.adapter.PlaylistAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -35,11 +37,15 @@ class PlayListFragment: Fragment() {
     @Inject
     internal lateinit var navigation: Navigation
 
+    private val notificationPermissionHelper = NotificationPermissionHelper(
+        wFragment = WeakReference(this)
+    )
+
     private val onItemClickListener: (Int, Boolean) -> Unit = { id, isPlaying ->
         if (isPlaying) {
             navigation.navigateTo(Screen.PLAYER)
         } else {
-            viewModel.playMusic(playlistItemId = id)
+            requestNotificationPermissionAndPlayMusic(playlistItemId = id)
         }
     }
 
@@ -192,8 +198,20 @@ class PlayListFragment: Fragment() {
         }
     }
 
+    private fun requestNotificationPermissionAndPlayMusic(playlistItemId: Int) {
+        notificationPermissionHelper.requestPermissionAndStartService(
+            onGranted = {
+                viewModel.playMusic(playlistItemId = playlistItemId)
+            },
+            onDenied = {
+                viewModel.playMusic(playlistItemId = playlistItemId)
+            }
+        )
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        notificationPermissionHelper.cleanup()
         _binding = null
     }
 }

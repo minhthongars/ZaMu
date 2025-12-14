@@ -99,13 +99,13 @@ internal class PlayerManagerImpl(
 
         if (playingTrack != null) {
             val newPlayingIndex = currentPlaylistItems.indexOfFirst { it.id == playingTrack.id }
-            if (newPlayingIndex == -1) {
-                playMusic(index = 0)
+            currentTrackIndex = if (newPlayingIndex == -1) {
+                0
             } else {
-                currentTrackIndex = newPlayingIndex
+                newPlayingIndex
             }
         } else {
-            playMusic(index = 0)
+            currentTrackIndex = 0
         }
     }
 
