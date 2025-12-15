@@ -1,5 +1,6 @@
 package com.minhthong.navigation
 
+import android.app.Activity
 import androidx.navigation.NavController
 
 interface Navigation {
@@ -9,4 +10,6 @@ interface Navigation {
     fun navigateTo(screen: Screen)
 
     fun navigateTo(destination: Int)
+
+    fun getActivity(): Class<out Activity>
 }

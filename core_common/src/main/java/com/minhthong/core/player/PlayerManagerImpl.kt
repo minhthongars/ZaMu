@@ -39,7 +39,7 @@ internal class PlayerManagerImpl(
     private var currentTrackIndex = -1
     private var isLooping = false
 
-    private fun playMusic(index: Int) {
+    private fun playMediaItem(index: Int) {
         if(currentPlaylistItems.isEmpty()) return
 
         val safeIndex = getSafeIndex(index)
@@ -70,11 +70,11 @@ internal class PlayerManagerImpl(
     override val hasSetPlaylistFlow = playerInfoFlow.map { it != null }
 
     override fun initialize(context: Context) {
-        currentPlaylistItems = emptyList()
-
         playerExceptionHandler = CoroutineExceptionHandler { _, e ->
             e.printStackTrace()
         }
+
+        currentPlaylistItems = emptyList()
 
         val coroutineContext = mainDispatcher + playerExceptionHandler + SupervisorJob()
         playerScope = CoroutineScope(coroutineContext)
@@ -89,44 +89,36 @@ internal class PlayerManagerImpl(
         playlistItemEntities: List<PlaylistItemEntity>
     ) {
         if (playlistItemEntities.isEmpty()) {
-            exoPlayer.stop()
-            exoPlayer.clearMediaItems()
-            playerInfoFlow.update { null }
+            onClearAllItems()
             return
         }
+
         val playingTrack = currentPlaylistItems.getOrNull(currentTrackIndex)
         currentPlaylistItems = playlistItemEntities
 
-        if (playingTrack != null) {
-            val newPlayingIndex = currentPlaylistItems.indexOfFirst { it.id == playingTrack.id }
-            currentTrackIndex = if (newPlayingIndex == -1) {
-                0
-            } else {
-                newPlayingIndex
-            }
-        } else {
-            currentTrackIndex = 0
-        }
+        calculateNewTrackIndex(playingTrack)
     }
 
     override fun seekToMediaItem(playlistItemId: Int) {
         val index = currentPlaylistItems.indexOfFirst { it.id == playlistItemId }
-        playMusic(index = index)
+        playMediaItem(index = index)
     }
 
     override fun seekToLastMediaItem(playlistItem: PlaylistItemEntity) {
         currentPlaylistItems = currentPlaylistItems + playlistItem
-        playMusic(index = currentPlaylistItems.size - 1)
+        playMediaItem(index = currentPlaylistItems.size - 1)
     }
 
     override fun release() {
         exoPlayer.removeListener(playerEventListener)
         exoPlayer.clearMediaItems()
         exoPlayer.release()
-        currentPlaylistItems = emptyList()
+
         updatePlayingPositionJob?.cancel()
         playerScope.cancel()
+
         playerInfoFlow.update { null }
+        currentProgressMlsFlow.update { 0 }
     }
 
     override fun play() {
@@ -158,7 +150,7 @@ internal class PlayerManagerImpl(
         } else {
             currentTrackIndex + 1
         }
-        playMusic(index = newIndex)
+        playMediaItem(index = newIndex)
     }
 
     override fun moveToPrevious() {
@@ -167,7 +159,7 @@ internal class PlayerManagerImpl(
         } else {
             currentTrackIndex - 1
         }
-        playMusic(index = newIndex)
+        playMediaItem(index = newIndex)
     }
 
     override fun getPlayer(): ExoPlayer {
@@ -207,6 +199,7 @@ internal class PlayerManagerImpl(
 
     private fun getSafeIndex(index: Int): Int {
         val trackSize = currentPlaylistItems.size
+
         return if (index >= trackSize) {
             0
         } else if (index < 0) {
@@ -216,12 +209,32 @@ internal class PlayerManagerImpl(
         }
     }
 
+    private fun onClearAllItems() {
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
+        playerInfoFlow.update { null }
+        currentPlaylistItems = emptyList()
+    }
+
+    private fun calculateNewTrackIndex(playingTrack: PlaylistItemEntity?) {
+        if (playingTrack != null) {
+            val newPlayingIndex = currentPlaylistItems.indexOfFirst { it.id == playingTrack.id }
+            if (newPlayingIndex == -1) {
+                playMediaItem(index = currentTrackIndex)
+            } else {
+                currentTrackIndex = newPlayingIndex
+            }
+        } else {
+            currentTrackIndex = 0
+        }
+    }
+
     private fun getDefaultData(): PlayerEntity {
         return PlayerEntity(
             trackInfo = currentPlaylistItems[currentTrackIndex],
             isLooping = isLooping,
             isShuffling = false,
-            isPlaying = false,
+            isPlaying = true,
         )
     }
 

@@ -34,6 +34,9 @@ android {
 }
 
 dependencies {
+
+    implementation(project(":navigation"))
+
     api(libs.androidx.core.ktx)
     api(libs.androidx.appcompat)
     api(libs.material)
@@ -48,4 +51,6 @@ dependencies {
     implementation(libs.androidx.media3.session)
 
     implementation(libs.glide)
+
+    api("androidx.media:media:1.6.0")
 }

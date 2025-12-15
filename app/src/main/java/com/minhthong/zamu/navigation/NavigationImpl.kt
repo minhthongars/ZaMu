@@ -1,9 +1,11 @@
 package com.minhthong.zamu.navigation
 
+import android.app.Activity
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
+import com.minhthong.zamu.main.MainActivity
 
 class NavigationImpl(
     private val screenMap: Map<Screen, Int>
@@ -35,5 +37,9 @@ class NavigationImpl(
             .build()
 
         navController.navigate(destination, null, navOptions)
+    }
+
+    override fun getActivity(): Class<out Activity> {
+        return MainActivity::class.java
     }
 }
