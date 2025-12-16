@@ -12,9 +12,8 @@ import com.minhthong.playlist.domain.PlaylistBridgeImpl
 import com.minhthong.playlist.domain.PlaylistRepository
 import com.minhthong.playlist.domain.usecase.AddTrackToPlaylistUseCase
 import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
-import com.minhthong.playlist.domain.usecase.ObserverTrackInPlaylistUseCase
 import com.minhthong.playlist.presentaion.mapper.PresentationMapper
-import com.minhthong.playlist_feature_api.PlaylistBridge
+import com.minhthong.playlist_feature_api.PlaylistApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,10 +71,9 @@ object DatabaseModule {
     @Singleton
     fun providePlaylistApi(
         repository: PlaylistRepository
-    ): PlaylistBridge {
+    ): PlaylistApi {
         return PlaylistBridgeImpl(
             addTrackToPlaylistUseCase = AddTrackToPlaylistUseCase(repository),
-            observerTrackInPlaylistUseCase = ObserverTrackInPlaylistUseCase(repository),
             getPlaylistAwareShuffleUseCase = GetPlaylistAwareShuffleUseCase(repository)
         )
     }

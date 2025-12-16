@@ -52,5 +52,5 @@ dependencies {
 
     implementation(libs.glide)
 
-    api("androidx.media:media:1.6.0")
+    api(libs.androidx.media)
 }

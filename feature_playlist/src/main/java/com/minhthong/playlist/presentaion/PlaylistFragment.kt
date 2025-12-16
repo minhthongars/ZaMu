@@ -27,7 +27,7 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PlayListFragment: Fragment() {
+class PlaylistFragment: Fragment() {
 
     private var _binding: FragmentPlayListBinding? = null
     private val binding get() = _binding!!
@@ -168,12 +168,17 @@ class PlayListFragment: Fragment() {
 
     private fun saveStateSubmitList(tracks: List<PlaylistUiState.Track>) {
         val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
-        val scrollPosition = layoutManager.findFirstVisibleItemPosition()
+        val scrollPosition = layoutManager.findLastCompletelyVisibleItemPosition()
         val view = layoutManager.findViewByPosition(scrollPosition)
         val scrollOffset = view?.top ?: 0
 
         adapter.submitList(tracks) {
-            layoutManager.scrollToPositionWithOffset(scrollPosition, scrollOffset)
+            if (isAdded) {
+                layoutManager.scrollToPositionWithOffset(
+                    scrollPosition,
+                    scrollOffset
+                )
+            }
         }
     }
 

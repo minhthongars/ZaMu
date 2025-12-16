@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface PlaylistRepository {
     fun getPlaylist(): Flow<List<PlaylistItemEntity>>
 
-    fun observerTrackInPlaylist(trackId: Long): Flow<Boolean>
-
     suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity>
 
     suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit>

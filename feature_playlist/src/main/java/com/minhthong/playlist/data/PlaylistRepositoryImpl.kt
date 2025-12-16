@@ -1,7 +1,7 @@
 package com.minhthong.playlist.data
 
-import android.util.Log
 import com.minhthong.core.Result
+import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.model.TrackEntity
 import com.minhthong.core.safeGetDataCall
 import com.minhthong.playlist.data.dao.PlaylistDao
@@ -9,7 +9,6 @@ import com.minhthong.playlist.data.mapper.Mapper.toData
 import com.minhthong.playlist.data.mapper.Mapper.toDomain
 import com.minhthong.playlist.data.sharePref.ShuffleSharePreference
 import com.minhthong.playlist.domain.PlaylistRepository
-import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,10 +25,6 @@ class PlaylistRepositoryImpl(
     override fun getPlaylist(): Flow<List<PlaylistItemEntity>> {
         val playlist = dao.getPlaylist()
         return playlist.map { dto -> dto.toDomain() }
-    }
-
-    override fun observerTrackInPlaylist(trackId: Long): Flow<Boolean> {
-        return dao.observeTrackInPlaylist(trackId)
     }
 
     override suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity> {

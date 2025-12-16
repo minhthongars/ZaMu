@@ -39,7 +39,6 @@ android {
 
 dependencies {
     implementation(project(":core_common"))
-    implementation(project(":navigation"))
 
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)

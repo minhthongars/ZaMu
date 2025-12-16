@@ -17,7 +17,7 @@
     <fragment
         android:id="@+id/playlistFragment"
         android:label="Playlist"
-        android:name="com.minhthong.playlist.presentaion.PlayListFragment"/>
+        android:name="com.minhthong.playlist.presentaion.PlaylistFragment"/>
 
     <fragment
         android:id="@+id/settingsFragment"

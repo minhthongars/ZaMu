@@ -15,15 +15,6 @@ interface PlaylistDao {
     @Query("SELECT * FROM ${DbConstant.TABLE_NAME_TRACK}")
     fun getPlaylist(): Flow<List<TrackDto>>
 
-    @Query("""
-        SELECT EXISTS(
-            SELECT 1 FROM ${DbConstant.TABLE_NAME_TRACK}
-            WHERE ${DbConstant.COLUMN_TRACK_ID} = :trackId
-        )
-        """
-    )
-    fun observeTrackInPlaylist(trackId: Long): Flow<Boolean>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrack(track: TrackDto): Long
 

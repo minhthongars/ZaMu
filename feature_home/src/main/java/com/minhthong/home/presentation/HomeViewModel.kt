@@ -12,7 +12,7 @@ import com.minhthong.home.domain.usecase.FetchUserInfoUseCase
 import com.minhthong.home.domain.usecase.GetTrackFromDeviceUseCase
 import com.minhthong.home.presentation.adapter.HomeAdapterItem
 import com.minhthong.home.presentation.mapper.EntityToPresentationMapper
-import com.minhthong.playlist_feature_api.PlaylistBridge
+import com.minhthong.playlist_feature_api.PlaylistApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,7 +31,7 @@ import com.minhthong.core.R as CR
 class HomeViewModel @Inject constructor(
     private val getTrackFromDeviceUseCase: GetTrackFromDeviceUseCase,
     private val fetchUserInfoUseCase: FetchUserInfoUseCase,
-    private val playlistApi: PlaylistBridge,
+    private val playlistApi: PlaylistApi,
     private val playerManager: PlayerManager,
     private val mapper: EntityToPresentationMapper
 ) : ViewModel() {
