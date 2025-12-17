@@ -9,6 +9,7 @@ import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.core.onError
 import com.minhthong.core.onSuccess
 import com.minhthong.core.player.PlayerManager
+import com.minhthong.core.util.Utils
 import com.minhthong.home.R
 import com.minhthong.home.domain.model.RemoteTrackEntity
 import com.minhthong.home.domain.model.UserEntity
@@ -53,7 +54,6 @@ class HomeViewModel @Inject constructor(
 
     private var remoteTrackEntities = emptyList<RemoteTrackEntity>()
     private val remoteTrackUiItemsFlow = MutableStateFlow(value = getRemoteTrackLoadingItems())
-    private val addingToPlaylistRemoteTrackIdsFlow = MutableStateFlow<Set<Long>>(emptySet())
 
     private val deviceTrackUiItemsWithLoadingFlow = combine(
         deviceTrackUiItemsFlow,
@@ -256,7 +256,7 @@ class HomeViewModel @Inject constructor(
             return@launch
         }
 
-        addTrackToPlaylist(trackEntity = clickedTrack)
+        addTrackToPlaylist(deviceTrack = clickedTrack)
             .onSuccess { playlistItem ->
                 playerManager.seekToLastMediaItem(playlistItem)
                 _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
@@ -274,10 +274,9 @@ class HomeViewModel @Inject constructor(
             return@launch
         }
 
-        addTrackToPlaylist(remoteTrackEntity = clickedTrack)
-            .onSuccess { playlistItem ->
-                playerManager.seekToLastMediaItem(playlistItem)
-                _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
+        addTrackToPlaylist(remoteTrack = clickedTrack)
+            .onSuccess { _ ->
+                showToast(msgId = R.string.add_track_to_playlist_successful)
             }
             .onError { messageId ->
                 showToast(messageId)
@@ -297,7 +296,7 @@ class HomeViewModel @Inject constructor(
         }
 
         delay(150)
-        addTrackToPlaylist(trackEntity = trackEntity)
+        addTrackToPlaylist(deviceTrack = trackEntity)
             .onSuccess {
                 addingToPlaylistTrackIdsFlow.update { currentItems ->
                     currentItems - trackId
@@ -315,21 +314,29 @@ class HomeViewModel @Inject constructor(
         _uiEvent.tryEmit(HomeUiEvent.Toast(messageId = msgId))
     }
 
-    private suspend fun addTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity> {
+    private suspend fun addTrackToPlaylist(
+        deviceTrack: TrackEntity
+    ): Result<PlaylistItemEntity> {
         return playlistApi.addTrackToPlaylistAwareShuffle(
-            title = trackEntity.title,
-            performer = trackEntity.artist,
-            trackId = trackEntity.id,
-            uri = trackEntity.uri.toString()
+            title = deviceTrack.title,
+            performer = deviceTrack.artist,
+            trackId = deviceTrack.id,
+            uri = deviceTrack.uri.toString(),
+            source = PlaylistItemEntity.Source.DEVICE,
+            avatarUrl = null
         )
     }
 
-    private suspend fun addTrackToPlaylist(remoteTrackEntity: RemoteTrackEntity): Result<PlaylistItemEntity> {
+    private suspend fun addTrackToPlaylist(
+        remoteTrack: RemoteTrackEntity
+    ): Result<PlaylistItemEntity> {
         return playlistApi.addTrackToPlaylistAwareShuffle(
-            title = remoteTrackEntity.name,
-            performer = remoteTrackEntity.performer,
-            trackId = remoteTrackEntity.id,
-            uri = remoteTrackEntity.mp3Url.toUri().toString()
+            title = remoteTrack.name,
+            performer = remoteTrack.performer,
+            trackId = remoteTrack.id,
+            uri = remoteTrack.mp3Url.toUri().toString(),
+            source = PlaylistItemEntity.Source.REMOTE,
+            avatarUrl = remoteTrack.avatarUrl
         )
     }
 

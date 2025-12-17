@@ -19,8 +19,8 @@
 
         <ImageView
             android:id="@+id/iv_track_avatar"
-            android:layout_width="70dp"
-            android:layout_height="80dp"
+            android:layout_width="88dp"
+            android:layout_height="92dp"
             android:scaleType="centerCrop"
             tools:srcCompat="@drawable/ic_launcher_background"/>
 

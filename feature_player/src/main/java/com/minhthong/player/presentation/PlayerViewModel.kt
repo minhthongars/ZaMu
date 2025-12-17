@@ -20,16 +20,15 @@ class PlayerViewModel @Inject constructor(
 
     val uiModel = playerManager.controllerInfoFlow
         .filterNotNull()
-        .filter { it.duration > 0 }
         .map { controllerInfo ->
             with(mapper) { controllerInfo.toPresentation() }
         }
 
-    private val onTouchingSeekFlow = MutableStateFlow(false)
-
     val currentProgressString = playerManager.currentProgressMlsFlow.map {
         it.toDurationString()
     }
+
+    private val onTouchingSeekFlow = MutableStateFlow(false)
 
     val currentProgressMls = playerManager.currentProgressMlsFlow.filter {
         onTouchingSeekFlow.value.not()

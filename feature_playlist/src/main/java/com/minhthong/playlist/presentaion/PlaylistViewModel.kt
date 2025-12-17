@@ -196,7 +196,7 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
-    private fun showSuccessState(playlistItems: List<PlaylistItemEntity>) {
+    private suspend fun showSuccessState(playlistItems: List<PlaylistItemEntity>) {
         playlistItemEntities = playlistItems.associateBy { it.id }
 
         val trackUiItems = with(mapper) { playlistItems.toPresentation() }
@@ -219,7 +219,7 @@ class PlaylistViewModel @Inject constructor(
         )
     }
 
-    private fun restorePlaylist() {
+    private suspend fun restorePlaylist() {
         if (uiState.value !is PlaylistUiState.Success) return
 
         val newTrackUiItems = playlistItemEntities.values

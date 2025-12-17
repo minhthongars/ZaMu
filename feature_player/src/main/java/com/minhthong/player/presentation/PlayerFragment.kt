@@ -91,7 +91,9 @@ class PlayerFragment: Fragment() {
     private fun setUpCollectors() {
         collectFlowSafely {
             viewModel.uiModel.collect { info ->
-                binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
+                if (info.sliderBarValue > 0) {
+                    binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
+                }
 
                 binding.tvTrackTitle.text = info.trackName
                 binding.tvAlbum.text = info.album

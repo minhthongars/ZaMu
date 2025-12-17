@@ -14,6 +14,8 @@ object DbConstant {
     const val COLUMN_DURATION = "duration"
     const val COLUMN_SIZE = "size"
     const val COLUMN_PATH = "path"
+    const val COLUMN_SOURCE = "source"
+    const val COLUMN_ART = "art"
     const val COLUMN_IS_PLAYING = "is_playing"
     const val GAP_ORDER = 500L
 }

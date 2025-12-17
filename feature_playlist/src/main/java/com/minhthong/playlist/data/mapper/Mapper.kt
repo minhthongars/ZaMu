@@ -1,13 +1,14 @@
 package com.minhthong.playlist.data.mapper
 
 import android.net.Uri
-import com.minhthong.playlist.data.model.TrackDto
 import androidx.core.net.toUri
 import com.minhthong.core.model.PlaylistItemEntity
+import com.minhthong.playlist.data.model.TrackDto
 
 object Mapper {
 
     fun TrackDto.toDomain(): PlaylistItemEntity {
+        val source = PlaylistItemEntity.Source.toSource(source)
         return PlaylistItemEntity(
             id = id,
             orderIndex = orderIndex,
@@ -15,7 +16,9 @@ object Mapper {
             trackId = trackId,
             artist = artist.orEmpty(),
             title = title.orEmpty(),
-            uri = uri?.toUri() ?: Uri.EMPTY
+            uri = uri?.toUri() ?: Uri.EMPTY,
+            source = source,
+            avatarUrl = avatarUrl
         )
     }
 
@@ -31,7 +34,9 @@ object Mapper {
             artist = artist,
             orderIndex = orderIndex,
             uri = uri.toString(),
-            shuffleOrderIndex = shuffleOrderIndex
+            shuffleOrderIndex = shuffleOrderIndex,
+            source = source.ordinal,
+            avatarUrl = avatarUrl
         )
     }
 }

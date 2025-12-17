@@ -27,6 +27,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Zamu">
+
+        <profileable android:shell="true" />
+
         <activity
             android:name=".main.MainActivity"
             android:exported="true"

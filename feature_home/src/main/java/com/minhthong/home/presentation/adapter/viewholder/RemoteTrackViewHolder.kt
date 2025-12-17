@@ -3,10 +3,8 @@ package com.minhthong.home.presentation.adapter.viewholder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import com.minhthong.core.util.Utils
 import com.minhthong.core.util.Utils.loadImage
 import com.minhthong.home.databinding.ViewHolderRemoteTrackBinding
-import com.minhthong.home.databinding.ViewHolderTrackBinding
 import com.minhthong.home.presentation.adapter.HomeAdapterClickListener
 import com.minhthong.home.presentation.adapter.HomeAdapterItem
 
@@ -41,17 +39,9 @@ class RemoteTrackViewHolder(
                 listener.onRemoteTrackClick(trackData.id)
             }
 
-            binding.ivAdd.setOnClickListener {
-                //listener.onAddToPlaylistClick(trackData.id)
-            }
+            binding.ivAdd.isVisible = false
+            binding.progressCircular.isVisible = false
         }
-
-        bindLoading(isLoading = trackData.isLoading)
-    }
-
-    fun bindLoading(isLoading: Boolean) {
-        binding.progressCircular.isVisible = isLoading
-        binding.ivAdd.isVisible = isLoading.not()
     }
 
 }

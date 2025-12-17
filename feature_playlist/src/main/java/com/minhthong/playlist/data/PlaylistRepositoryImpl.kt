@@ -31,7 +31,9 @@ class PlaylistRepositoryImpl(
         trackId: Long,
         title: String,
         performer: String,
-        uri: String
+        uri: String,
+        source: PlaylistItemEntity.Source,
+        avatarUrl: String?
     ): Result<PlaylistItemEntity> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
@@ -45,7 +47,9 @@ class PlaylistRepositoryImpl(
                     artist = performer,
                     uri = uri,
                     orderIndex = newOrder,
-                    shuffleOrderIndex = newShuffleOrder
+                    shuffleOrderIndex = newShuffleOrder,
+                    source = source.ordinal,
+                    avatarUrl = avatarUrl
                 )
 
                 dao.insertTrack(dto)

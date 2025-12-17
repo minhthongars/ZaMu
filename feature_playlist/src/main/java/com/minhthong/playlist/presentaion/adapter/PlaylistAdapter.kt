@@ -69,7 +69,11 @@ class PlaylistAdapter(
             oldItem: PlaylistUiState.Track,
             newItem: PlaylistUiState.Track
         ): Boolean {
-            return oldItem == newItem
+            return oldItem.isRemoving == newItem.isRemoving
+                    && oldItem.isPlaying == newItem.isPlaying
+                    && oldItem.trackId == newItem.trackId
+                    && oldItem.performer == newItem.performer
+                    && oldItem.name == newItem.name
         }
 
         override fun getChangePayload(

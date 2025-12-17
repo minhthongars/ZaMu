@@ -187,7 +187,7 @@
             android:layout_marginStart="20dp"
             android:contentDescription="@null"
             app:tint="@color/grey_500"
-            app:srcCompat="@drawable/ic_player_playing" />
+            app:srcCompat="@drawable/ic_player_pause" />
 
         <!-- Next Button -->
         <ImageView

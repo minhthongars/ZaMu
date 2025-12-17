@@ -2,6 +2,7 @@ package com.minhthong.playlist.domain
 
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
+import com.minhthong.core.model.PlaylistItemEntity.Source
 import com.minhthong.playlist.domain.usecase.AddTrackToPlaylistUseCase
 import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
 import com.minhthong.playlist_feature_api.PlaylistApi
@@ -16,9 +17,11 @@ class PlaylistBridgeImpl(
         trackId: Long,
         title: String,
         performer: String,
-        uri: String
+        uri: String,
+        source: Source,
+        avatarUrl: String?
     ): Result<PlaylistItemEntity> {
-        return addTrackToPlaylistUseCase.invoke(trackId, title, performer, uri)
+        return addTrackToPlaylistUseCase.invoke(trackId, title, performer, uri, source, avatarUrl)
     }
 
     override fun observerPlaylist(): Flow<List<PlaylistItemEntity>> {

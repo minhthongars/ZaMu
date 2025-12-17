@@ -1,6 +1,7 @@
 package com.minhthong.home.presentation.mapper
 
 import android.content.Context
+import com.minhthong.core.util.BitmapUtils
 import com.minhthong.core.util.Utils
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.core.util.Utils.toMbString
@@ -24,7 +25,7 @@ class EntityToPresentationMapper @Inject constructor(
             performer = artist,
             durationString = durationString,
             sizeString = sizeString,
-            avatarBitmap = Utils.getAlbumArt(context, uri),
+            avatarBitmap = BitmapUtils.getAlbumArt(context, uri),
             isLoading = false
         )
     }

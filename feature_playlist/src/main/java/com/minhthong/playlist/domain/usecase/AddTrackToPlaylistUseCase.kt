@@ -2,6 +2,7 @@ package com.minhthong.playlist.domain.usecase
 
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
+import com.minhthong.core.model.PlaylistItemEntity.Source
 import com.minhthong.playlist.domain.PlaylistRepository
 import javax.inject.Inject
 
@@ -13,8 +14,10 @@ class AddTrackToPlaylistUseCase @Inject constructor(
         trackId: Long,
         title: String,
         performer: String,
-        uri: String
+        uri: String,
+        source: Source,
+        avatarUrl: String?
     ): Result<PlaylistItemEntity> {
-        return repository.insertTrackToPlaylist(trackId, title, performer, uri)
+        return repository.insertTrackToPlaylist(trackId, title, performer, uri, source, avatarUrl)
     }
 }

@@ -51,16 +51,7 @@ class HomeAdapter(
         when(payload) {
             HomeAdapterItem.PlayLoad.ADDING_TO_PLAYLIST -> {
                 val isLoading = (item as? HomeAdapterItem.Track)?.isLoading == true
-
-                when(holder) {
-                    is TrackViewHolder -> {
-                        holder.bindLoading(isLoading)
-                    }
-
-                    is RemoteTrackViewHolder -> {
-                        holder.bindLoading(isLoading)
-                    }
-                }
+                (holder as? TrackViewHolder)?.bindLoading(isLoading)
             }
 
             else -> {

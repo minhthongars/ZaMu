@@ -9,11 +9,11 @@ class PresentationMapper(
     private val context: Context
 ) {
 
-    private fun PlaylistItemEntity.toPresentation(): PlaylistUiState.Track {
+    private suspend fun PlaylistItemEntity.toPresentation(): PlaylistUiState.Track {
         return PlaylistUiState.Track(
             id = id,
             name = title,
-            avatar = Utils.getAlbumArt(context, uri),
+            avatar = getAvatarBitmap(context),
             performer = artist,
             trackId = trackId,
             isPlaying = false,
@@ -21,7 +21,7 @@ class PresentationMapper(
         )
     }
 
-    fun List<PlaylistItemEntity>.toPresentation(): List<PlaylistUiState.Track> {
+    suspend fun List<PlaylistItemEntity>.toPresentation(): List<PlaylistUiState.Track> {
         return map { it.toPresentation() }
     }
 }

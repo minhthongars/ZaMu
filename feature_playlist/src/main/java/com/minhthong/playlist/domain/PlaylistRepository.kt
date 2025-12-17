@@ -11,7 +11,9 @@ interface PlaylistRepository {
         trackId: Long,
         title: String,
         performer: String,
-        uri: String
+        uri: String,
+        source: PlaylistItemEntity.Source,
+        avatarUrl: String?
     ): Result<PlaylistItemEntity>
 
     suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit>

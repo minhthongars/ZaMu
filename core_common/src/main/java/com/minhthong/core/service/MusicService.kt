@@ -16,7 +16,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media3.session.R
-import com.minhthong.core.model.ControllerEntity
+import com.minhthong.core.model.ControllerState
 import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.receiver.NotificationDismissReceiver
@@ -140,7 +140,7 @@ class MusicService : Service() {
     }
 
     private fun buildNotification(
-        playerInfo: ControllerEntity?
+        playerInfo: ControllerState?
     ): Notification {
         val info = playerInfo ?: playerManager.controllerInfoFlow.value
         val trackInfo = info?.playingItem
@@ -180,7 +180,7 @@ class MusicService : Service() {
         mediaSession.setPlaybackState(state)
     }
 
-    private fun updateNotification(controller: ControllerEntity?) {
+    private suspend fun updateNotification(controller: ControllerState?) {
         val track = controller?.playingItem ?: return
 
         mediaSession.setMetadata(buildMetadata(track = track, durationMs = controller.duration))
@@ -192,14 +192,14 @@ class MusicService : Service() {
             )
     }
 
-    private fun buildMetadata(
+    private suspend fun buildMetadata(
         track: PlaylistItemEntity,
         durationMs: Long
     ): MediaMetadataCompat {
         return MediaMetadataCompat.Builder()
             .putBitmap(
                 MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-                Utils.getAlbumArt(baseContext, track.uri)
+                track.getAvatarBitmap(baseContext)
             )
             .putString(
                 MediaMetadataCompat.METADATA_KEY_ARTIST,
@@ -249,7 +249,7 @@ class MusicService : Service() {
         }
     }
 
-    private fun showNotification(info: ControllerEntity?) {
+    private fun showNotification(info: ControllerState?) {
         if (!isForeground) {
             startForeground(
                 NOTIFICATION_ID,

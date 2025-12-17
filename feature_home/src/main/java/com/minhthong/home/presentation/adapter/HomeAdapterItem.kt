@@ -15,9 +15,9 @@ sealed class HomeAdapterItem(
 
     data class UserInfo(
         val id: Long,
-        val name: String = "",
-        val tier: String = "",
-        val avatarUrl: String = "",
+        val name: String,
+        val tier: String,
+        val avatarUrl: String,
     ): HomeAdapterItem(viewType = ViewType.USER_INFO) {
         override fun areItemsTheSame(other: HomeAdapterItem): Boolean {
             return other is UserInfo && other.id == id
@@ -101,14 +101,6 @@ sealed class HomeAdapterItem(
 
         override fun areContentsTheSame(other: HomeAdapterItem): Boolean {
             return other is RemoteTrack && other == this
-        }
-
-        override fun getChangePayload(other: HomeAdapterItem): Any? {
-            return if (other is RemoteTrack && other.isLoading != isLoading) {
-                PlayLoad.ADDING_TO_PLAYLIST
-            } else {
-                null
-            }
         }
     }
 

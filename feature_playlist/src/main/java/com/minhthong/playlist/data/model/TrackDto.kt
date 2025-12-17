@@ -28,4 +28,10 @@ data class TrackDto(
 
     @ColumnInfo(name = DbConstant.COLUMN_PATH)
     val uri: String?,
+
+    @ColumnInfo(name = DbConstant.COLUMN_SOURCE)
+    val source: Int?,
+
+    @ColumnInfo(name = DbConstant.COLUMN_ART)
+    val avatarUrl: String?
 )
