@@ -1,16 +1,19 @@
 package com.minhthong.core.util
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
+import com.minhthong.core.service.MusicService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -27,8 +30,6 @@ object Utils {
             val embeddedPicture = mmr.embeddedPicture ?: return null
 
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeByteArray(embeddedPicture, 0, embeddedPicture.size, options)
-
             options.inSampleSize = calculateInSampleSize(options, maxSize, maxSize)
 
             options.inJustDecodeBounds = false
@@ -99,5 +100,19 @@ object Utils {
         Glide.with(context)
             .load(url)
             .into(this)
+    }
+
+    fun startPlaybackService(context: Context?) {
+        val intent = Intent(context, MusicService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context?.startForegroundService(intent)
+        } else {
+            context?.startService(intent)
+        }
+    }
+
+    fun stopPlaybackService(context: Context?) {
+        val intent = Intent(context, MusicService::class.java)
+        context?.stopService(intent)
     }
 }

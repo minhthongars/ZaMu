@@ -55,7 +55,7 @@
             android:foregroundServiceType="mediaPlayback" />
 
         <receiver
-            android:name="com.minhthong.core.service.NotificationDismissReceiver"
+            android:name="com.minhthong.core.receiver.NotificationDismissReceiver"
             android:exported="false" />
 
     </application>

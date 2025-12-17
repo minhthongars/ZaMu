@@ -2,6 +2,7 @@
 <resources>
     <dimen name="user_info_section_height">70dp</dimen>
     <dimen name="device_track_item_height">110dp</dimen>
+    <dimen name="remote_track_item_height">80dp</dimen>
     <dimen name="recommend_track_section_height">400dp</dimen>
     <dimen name="message_section_height">120dp</dimen>
 

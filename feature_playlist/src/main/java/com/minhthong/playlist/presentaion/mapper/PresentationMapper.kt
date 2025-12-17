@@ -12,10 +12,10 @@ class PresentationMapper(
     private fun PlaylistItemEntity.toPresentation(): PlaylistUiState.Track {
         return PlaylistUiState.Track(
             id = id,
-            name = entity.title,
-            avatar = Utils.getAlbumArt(context, entity.uri),
-            performer = entity.artist,
-            trackId = entity.id,
+            name = title,
+            avatar = Utils.getAlbumArt(context, uri),
+            performer = artist,
+            trackId = trackId,
             isPlaying = false,
             isRemoving = false
         )

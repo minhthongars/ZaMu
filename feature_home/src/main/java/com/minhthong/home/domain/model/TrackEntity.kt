@@ -1,4 +1,4 @@
-package com.minhthong.core.model
+package com.minhthong.home.domain.model
 
 import android.net.Uri
 

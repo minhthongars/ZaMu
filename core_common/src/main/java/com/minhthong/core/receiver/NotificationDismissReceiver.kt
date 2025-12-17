@@ -1,8 +1,9 @@
-package com.minhthong.core.service
+package com.minhthong.core.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.minhthong.core.service.MusicService
 
 class NotificationDismissReceiver : BroadcastReceiver() {
 

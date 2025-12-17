@@ -1,13 +1,18 @@
 package com.minhthong.home.presentation
 
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.minhthong.core.model.TrackEntity
+import com.minhthong.core.Result
+import com.minhthong.core.model.PlaylistItemEntity
+import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.core.onError
 import com.minhthong.core.onSuccess
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.home.R
+import com.minhthong.home.domain.model.RemoteTrackEntity
 import com.minhthong.home.domain.model.UserEntity
+import com.minhthong.home.domain.usecase.FetchPremiumTrackUseCase
 import com.minhthong.home.domain.usecase.FetchUserInfoUseCase
 import com.minhthong.home.domain.usecase.GetTrackFromDeviceUseCase
 import com.minhthong.home.presentation.adapter.HomeAdapterItem
@@ -31,6 +36,7 @@ import com.minhthong.core.R as CR
 class HomeViewModel @Inject constructor(
     private val getTrackFromDeviceUseCase: GetTrackFromDeviceUseCase,
     private val fetchUserInfoUseCase: FetchUserInfoUseCase,
+    private val fetchPremiumTrackUseCase: FetchPremiumTrackUseCase,
     private val playlistApi: PlaylistApi,
     private val playerManager: PlayerManager,
     private val mapper: EntityToPresentationMapper
@@ -44,6 +50,10 @@ class HomeViewModel @Inject constructor(
     private var deviceTrackEntities = emptyList<TrackEntity>()
     private val deviceTrackUiItemsFlow = MutableStateFlow(value = getDeviceTrackLoadingItems())
     private val addingToPlaylistTrackIdsFlow = MutableStateFlow<Set<Long>>(emptySet())
+
+    private var remoteTrackEntities = emptyList<RemoteTrackEntity>()
+    private val remoteTrackUiItemsFlow = MutableStateFlow(value = getRemoteTrackLoadingItems())
+    private val addingToPlaylistRemoteTrackIdsFlow = MutableStateFlow<Set<Long>>(emptySet())
 
     private val deviceTrackUiItemsWithLoadingFlow = combine(
         deviceTrackUiItemsFlow,
@@ -69,9 +79,10 @@ class HomeViewModel @Inject constructor(
 
     val homeUiItemsFlow: StateFlow<List<HomeAdapterItem>> = combine(
         userInfoAdapterItemFlow,
-        deviceTrackUiItemsWithLoadingFlow
-    ) { userInfo, deviceTracks ->
-        listOfNotNull(userInfo) + deviceTracks
+        deviceTrackUiItemsWithLoadingFlow,
+        remoteTrackUiItemsFlow
+    ) { userInfo, deviceTracks, remoteTracks ->
+        listOfNotNull(userInfo) + remoteTracks + deviceTracks
     }
         .stateIn(
             scope = viewModelScope,
@@ -94,7 +105,7 @@ class HomeViewModel @Inject constructor(
     fun getDeviceTrack() = viewModelScope.launch {
         showTrackLoadingItems()
 
-        delay(800)
+        delay(400)
         getTrackFromDeviceUseCase.invoke()
             .onError { messageId ->
                 showTrackErrorItems(messageId)
@@ -104,6 +115,23 @@ class HomeViewModel @Inject constructor(
                     showTrackErrorItems(messageId = CR.string.empty_list_track)
                 } else {
                     showTrackSuccessItems(trackEntities)
+                }
+            }
+    }
+
+    fun fetchPremiumTrack() = viewModelScope.launch {
+        showRemoteTrackLoadingItems()
+
+        delay(700)
+        fetchPremiumTrackUseCase.invoke()
+            .onError {
+                hideRemoteTrack()
+            }
+            .onSuccess { trackEntities ->
+                if (trackEntities.isEmpty()) {
+                    hideRemoteTrack()
+                } else {
+                    showRemoteTrackSuccessItems(trackEntities)
                 }
             }
     }
@@ -153,6 +181,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun showRemoteTrackLoadingItems() {
+        remoteTrackUiItemsFlow.update {
+            getRemoteTrackLoadingItems()
+        }
+    }
+
+    private fun hideRemoteTrack() {
+        remoteTrackUiItemsFlow.update { emptyList() }
+    }
+
     private fun showTrackErrorItems(messageId: Int) {
         val errorItems = getDeviceTrackErrorItems(
             messageId = messageId
@@ -169,6 +207,19 @@ class HomeViewModel @Inject constructor(
         }
 
         deviceTrackUiItemsFlow.update {
+            listOf(titleItem) + trackItems
+        }
+    }
+
+    private fun showRemoteTrackSuccessItems(trackEntities: List<RemoteTrackEntity>) {
+        remoteTrackEntities = trackEntities
+
+        val titleItem = getRemoteTrackTitleItem()
+        val trackItems = trackEntities.map {
+            with(mapper) { it.toPresentation() }
+        }
+
+        remoteTrackUiItemsFlow.update {
             listOf(titleItem) + trackItems
         }
     }
@@ -205,7 +256,25 @@ class HomeViewModel @Inject constructor(
             return@launch
         }
 
-        playlistApi.addTrackToPlaylistAwareShuffle(trackEntity = clickedTrack)
+        addTrackToPlaylist(trackEntity = clickedTrack)
+            .onSuccess { playlistItem ->
+                playerManager.seekToLastMediaItem(playlistItem)
+                _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
+            }
+            .onError { messageId ->
+                showToast(messageId)
+            }
+    }
+
+    fun playRemoteMusic(trackId: Long) = viewModelScope.launch {
+        val clickedTrack = remoteTrackEntities.find { it.id == trackId }
+
+        if (clickedTrack == null) {
+            showToast(CR.string.common_error_retry_msg)
+            return@launch
+        }
+
+        addTrackToPlaylist(remoteTrackEntity = clickedTrack)
             .onSuccess { playlistItem ->
                 playerManager.seekToLastMediaItem(playlistItem)
                 _uiEvent.tryEmit(HomeUiEvent.OpenPlayer)
@@ -228,7 +297,7 @@ class HomeViewModel @Inject constructor(
         }
 
         delay(150)
-        playlistApi.addTrackToPlaylistAwareShuffle(trackEntity)
+        addTrackToPlaylist(trackEntity = trackEntity)
             .onSuccess {
                 addingToPlaylistTrackIdsFlow.update { currentItems ->
                     currentItems - trackId
@@ -246,8 +315,30 @@ class HomeViewModel @Inject constructor(
         _uiEvent.tryEmit(HomeUiEvent.Toast(messageId = msgId))
     }
 
+    private suspend fun addTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity> {
+        return playlistApi.addTrackToPlaylistAwareShuffle(
+            title = trackEntity.title,
+            performer = trackEntity.artist,
+            trackId = trackEntity.id,
+            uri = trackEntity.uri.toString()
+        )
+    }
+
+    private suspend fun addTrackToPlaylist(remoteTrackEntity: RemoteTrackEntity): Result<PlaylistItemEntity> {
+        return playlistApi.addTrackToPlaylistAwareShuffle(
+            title = remoteTrackEntity.name,
+            performer = remoteTrackEntity.performer,
+            trackId = remoteTrackEntity.id,
+            uri = remoteTrackEntity.mp3Url.toUri().toString()
+        )
+    }
+
     private fun getDeviceTrackTitleItem(): HomeAdapterItem {
         return HomeAdapterItem.Title(content = R.string.recommend_for_you)
+    }
+
+    private fun getRemoteTrackTitleItem(): HomeAdapterItem {
+        return HomeAdapterItem.Title(content = R.string.premium_track)
     }
 
     private fun getDeviceTrackLoadingItems(): List<HomeAdapterItem> {
@@ -255,6 +346,16 @@ class HomeViewModel @Inject constructor(
         val loadingItems = List(6) {
             HomeAdapterItem.LoadingView(
                 viewHeight = R.dimen.device_track_item_height
+            )
+        }
+        return listOf(titleItem) + loadingItems
+    }
+
+    private fun getRemoteTrackLoadingItems(): List<HomeAdapterItem> {
+        val titleItem = getRemoteTrackTitleItem()
+        val loadingItems = List(4) {
+            HomeAdapterItem.LoadingView(
+                viewHeight = R.dimen.remote_track_item_height
             )
         }
         return listOf(titleItem) + loadingItems

@@ -1,14 +1,18 @@
 package com.minhthong.playlist.domain
 
 import com.minhthong.core.Result
-import com.minhthong.core.model.TrackEntity
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.flow.Flow
 
 interface PlaylistRepository {
     fun getPlaylist(): Flow<List<PlaylistItemEntity>>
 
-    suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity>
+    suspend fun insertTrackToPlaylist(
+        trackId: Long,
+        title: String,
+        performer: String,
+        uri: String
+    ): Result<PlaylistItemEntity>
 
     suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit>
 

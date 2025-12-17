@@ -6,7 +6,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
@@ -17,9 +16,10 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media3.session.R
-import com.minhthong.core.model.PlayerEntity
-import com.minhthong.core.model.TrackEntity
+import com.minhthong.core.model.ControllerEntity
+import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.player.PlayerManager
+import com.minhthong.core.receiver.NotificationDismissReceiver
 import com.minhthong.core.util.Utils
 import com.minhthong.navigation.Navigation
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +29,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.system.exitProcess
+import androidx.media.app.NotificationCompat as MediaNotificationCompat
 
 @SuppressLint("MissingPermission")
 @AndroidEntryPoint
@@ -113,7 +113,7 @@ class MusicService : Service() {
     private fun buildPlaybackState(
         positionMls: Long?
     ): PlaybackStateCompat {
-        val info = playerManager.playerInfoFlow.value
+        val info = playerManager.controllerInfoFlow.value
         val isPlaying = info?.isPlaying == true
 
         val state = if (isPlaying) {
@@ -140,10 +140,10 @@ class MusicService : Service() {
     }
 
     private fun buildNotification(
-        playerInfo: PlayerEntity?
+        playerInfo: ControllerEntity?
     ): Notification {
-        val info = playerInfo ?: playerManager.playerInfoFlow.value
-        val trackInfo = info?.trackInfo?.entity
+        val info = playerInfo ?: playerManager.controllerInfoFlow.value
+        val trackInfo = info?.playingItem
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.media_session_service_notification_ic_music_note)
@@ -155,24 +155,14 @@ class MusicService : Service() {
             .setOnlyAlertOnce(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setStyle(
-                androidx.media.app.NotificationCompat.MediaStyle()
+                MediaNotificationCompat.MediaStyle()
                     .setMediaSession(mediaSession.sessionToken)
             )
             .build()
     }
 
     private fun contentIntent(): PendingIntent {
-        val intent = Intent(this, navigator.getActivity()).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-
-        return PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        return navigator.appLaunchIntent(baseContext)
     }
 
     private fun deleteIntent(): PendingIntent {
@@ -190,19 +180,22 @@ class MusicService : Service() {
         mediaSession.setPlaybackState(state)
     }
 
-    private fun updateNotification(playerEntity: PlayerEntity?) {
-        val track = playerEntity?.trackInfo?.entity ?: return
+    private fun updateNotification(controller: ControllerEntity?) {
+        val track = controller?.playingItem ?: return
 
-        mediaSession.setMetadata(buildMetadata(track = track))
+        mediaSession.setMetadata(buildMetadata(track = track, durationMs = controller.duration))
 
         NotificationManagerCompat.from(this)
             .notify(
                 NOTIFICATION_ID,
-                buildNotification(playerEntity)
+                buildNotification(controller)
             )
     }
 
-    private fun buildMetadata(track: TrackEntity): MediaMetadataCompat {
+    private fun buildMetadata(
+        track: PlaylistItemEntity,
+        durationMs: Long
+    ): MediaMetadataCompat {
         return MediaMetadataCompat.Builder()
             .putBitmap(
                 MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
@@ -218,21 +211,21 @@ class MusicService : Service() {
             )
             .putLong(
                 MediaMetadataCompat.METADATA_KEY_DURATION,
-                track.durationMs
+                durationMs
             )
             .build()
     }
 
     private fun observePlayerState() {
         serviceScope.launch {
-            playerManager.playerInfoFlow.collect { playerInfo ->
+            playerManager.controllerInfoFlow.collect { playerInfo ->
                 if (playerInfo == null) {
                     hideNotification()
                 } else {
                     showNotification(info = playerInfo)
 
                     updatePlaybackState(positionMls = null)
-                    updateNotification(playerEntity = playerInfo)
+                    updateNotification(controller = playerInfo)
                 }
             }
         }
@@ -256,9 +249,12 @@ class MusicService : Service() {
         }
     }
 
-    private fun showNotification(info: PlayerEntity?) {
+    private fun showNotification(info: ControllerEntity?) {
         if (!isForeground) {
-            startForeground(NOTIFICATION_ID, buildNotification(info))
+            startForeground(
+                NOTIFICATION_ID,
+                buildNotification(playerInfo = null)
+            )
             isForeground = true
         } else {
             NotificationManagerCompat.from(this)
@@ -268,12 +264,14 @@ class MusicService : Service() {
 
     private fun hideNotification() {
         if (isForeground) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                Utils.stopPlaybackService(baseContext)
+            }
             isForeground = false
         }
     }
 
-    private inner class LocalBinder : Binder() {
-        fun getService(): MusicService = this@MusicService
-    }
+    private class LocalBinder : Binder()
 }

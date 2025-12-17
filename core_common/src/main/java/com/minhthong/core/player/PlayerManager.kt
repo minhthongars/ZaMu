@@ -2,7 +2,7 @@ package com.minhthong.core.player
 
 import android.content.Context
 import androidx.media3.exoplayer.ExoPlayer
-import com.minhthong.core.model.PlayerEntity
+import com.minhthong.core.model.ControllerEntity
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,11 +13,11 @@ interface PlayerManager {
 
     val currentProgressMlsFlow: StateFlow<Long>
 
-    val playerInfoFlow: StateFlow<PlayerEntity?>
+    val controllerInfoFlow: StateFlow<ControllerEntity?>
 
     fun initialize(context: Context)
 
-    fun setPlaylist(playlistItemEntities: List<PlaylistItemEntity>)
+    fun setPlaylist(playlistItems: List<PlaylistItemEntity>)
 
     fun release()
 

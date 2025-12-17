@@ -88,6 +88,30 @@ sealed class HomeAdapterItem(
         }
     }
 
+    data class RemoteTrack(
+        val id: Long,
+        val name: String,
+        val performer: String,
+        val avatar: String,
+        val isLoading: Boolean
+    ): HomeAdapterItem(ViewType.REMOTE_TRACK) {
+        override fun areItemsTheSame(other: HomeAdapterItem): Boolean {
+            return other is RemoteTrack && other.id == id
+        }
+
+        override fun areContentsTheSame(other: HomeAdapterItem): Boolean {
+            return other is RemoteTrack && other == this
+        }
+
+        override fun getChangePayload(other: HomeAdapterItem): Any? {
+            return if (other is RemoteTrack && other.isLoading != isLoading) {
+                PlayLoad.ADDING_TO_PLAYLIST
+            } else {
+                null
+            }
+        }
+    }
+
 
     object ViewType {
         const val LOADING_VIEW = -1
@@ -95,6 +119,7 @@ sealed class HomeAdapterItem(
         const val USER_INFO = 1
         const val TITLE = 3
         const val TRACK = 5
+        const val REMOTE_TRACK = 6
     }
 
     object PlayLoad {

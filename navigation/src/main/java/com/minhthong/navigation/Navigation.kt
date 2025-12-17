@@ -1,6 +1,8 @@
 package com.minhthong.navigation
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.content.Context
 import androidx.navigation.NavController
 
 interface Navigation {
@@ -11,5 +13,5 @@ interface Navigation {
 
     fun navigateTo(destination: Int)
 
-    fun getActivity(): Class<out Activity>
+    fun appLaunchIntent(context: Context): PendingIntent
 }

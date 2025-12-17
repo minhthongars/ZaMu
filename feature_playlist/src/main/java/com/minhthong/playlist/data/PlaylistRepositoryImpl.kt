@@ -2,11 +2,11 @@ package com.minhthong.playlist.data
 
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
-import com.minhthong.core.model.TrackEntity
 import com.minhthong.core.safeGetDataCall
 import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.mapper.Mapper.toData
 import com.minhthong.playlist.data.mapper.Mapper.toDomain
+import com.minhthong.playlist.data.model.TrackDto
 import com.minhthong.playlist.data.sharePref.ShuffleSharePreference
 import com.minhthong.playlist.domain.PlaylistRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -27,19 +27,28 @@ class PlaylistRepositoryImpl(
         return playlist.map { dto -> dto.toDomain() }
     }
 
-    override suspend fun insertTrackToPlaylist(trackEntity: TrackEntity): Result<PlaylistItemEntity> {
+    override suspend fun insertTrackToPlaylist(
+        trackId: Long,
+        title: String,
+        performer: String,
+        uri: String
+    ): Result<PlaylistItemEntity> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
                 val newOrder = dao.getNextOrderIndex() + gapOrder
                 val newShuffleOrder = dao.shuffleOrderIndex() + gapOrder
 
-                dao.insertTrack(
-                    track = trackEntity.toData().copy(
-                        orderIndex = newOrder,
-                        shuffleOrderIndex = newShuffleOrder
-                    )
+                val dto = TrackDto(
+                    trackId = trackId,
+                    title = title,
+                    artist = performer,
+                    uri = uri,
+                    orderIndex = newOrder,
+                    shuffleOrderIndex = newShuffleOrder
                 )
+
+                dao.insertTrack(dto)
 
                 val insertedTrack = dao.getTrackByOrder(order = newOrder)
                     ?: throw IllegalStateException("Track not found after insert")
@@ -66,14 +75,11 @@ class PlaylistRepositoryImpl(
             dispatcher = ioDispatcher,
             getDataCall = {
                 val tracksDto = tracks.mapIndexed { index, entity ->
+                    val dto = entity.toData()
                     if (isShuffle) {
-                        entity.toData().copy(
-                            shuffleOrderIndex = index * gapOrder
-                        )
+                        dto.copy(shuffleOrderIndex = index * gapOrder)
                     } else {
-                        entity.toData().copy(
-                            orderIndex = index * gapOrder
-                        )
+                        dto.copy(orderIndex = index * gapOrder)
                     }
                 }
                 dao.upsertTracks(tracks = tracksDto)

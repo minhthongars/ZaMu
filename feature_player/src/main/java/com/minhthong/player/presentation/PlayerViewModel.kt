@@ -18,9 +18,12 @@ class PlayerViewModel @Inject constructor(
     private val mapper: EntityToPresentationMapper
 ) : ViewModel() {
 
-    val uiModel = playerManager.playerInfoFlow.map {
-        with(mapper) { it?.toPresentation() }
-    }.filterNotNull()
+    val uiModel = playerManager.controllerInfoFlow
+        .filterNotNull()
+        .filter { it.duration > 0 }
+        .map { controllerInfo ->
+            with(mapper) { controllerInfo.toPresentation() }
+        }
 
     private val onTouchingSeekFlow = MutableStateFlow(false)
 
@@ -49,7 +52,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun shuffleMedia() {
-        //playerManager.shuffle()
+
     }
 
     fun seek(mls: Float) {

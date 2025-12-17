@@ -70,6 +70,14 @@ class HomeFragment: Fragment() {
         override fun onSaveListingClick() {
             navigation.navigateTo(screen = Screen.PLAYLIST)
         }
+
+        override fun onAddRemoteTrackToPlaylistClick(trackId: Long) {
+
+        }
+
+        override fun onRemoteTrackClick(trackId: Long) {
+            viewModel.playRemoteMusic(trackId)
+        }
     }
 
     private val homeAdapter = HomeAdapter(
@@ -95,6 +103,7 @@ class HomeFragment: Fragment() {
 
     private fun loadData() {
         viewModel.fetchUserInfo()
+        viewModel.fetchPremiumTrack()
         requestAudioPermission()
     }
 

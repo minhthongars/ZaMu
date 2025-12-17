@@ -5,7 +5,11 @@ interface HomeAdapterClickListener {
 
     fun onTrackClick(trackId: Long)
 
+    fun onRemoteTrackClick(trackId: Long)
+
     fun onAddToPlaylistClick(trackId: Long)
+
+    fun onAddRemoteTrackToPlaylistClick(trackId: Long)
 
     fun onSaveListingClick()
 }

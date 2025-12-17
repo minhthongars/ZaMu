@@ -1,6 +1,8 @@
 package com.minhthong.zamu.navigation
 
-import android.app.Activity
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.minhthong.navigation.Navigation
@@ -39,7 +41,17 @@ class NavigationImpl(
         navController.navigate(destination, null, navOptions)
     }
 
-    override fun getActivity(): Class<out Activity> {
-        return MainActivity::class.java
+    override fun appLaunchIntent(context: Context): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+
+        return PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 }

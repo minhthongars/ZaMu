@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.minhthong.home.presentation.adapter.viewholder.ErrorViewHolder
 import com.minhthong.home.presentation.adapter.viewholder.HomeViewHolder
 import com.minhthong.home.presentation.adapter.viewholder.LoadingViewHolder
+import com.minhthong.home.presentation.adapter.viewholder.RemoteTrackViewHolder
 import com.minhthong.home.presentation.adapter.viewholder.TitleViewHolder
 import com.minhthong.home.presentation.adapter.viewholder.TrackViewHolder
 import com.minhthong.home.presentation.adapter.viewholder.UserInfoViewHolder
@@ -24,6 +25,8 @@ class HomeAdapter(
             HomeAdapterItem.ViewType.TITLE -> TitleViewHolder.create(parent)
 
             HomeAdapterItem.ViewType.TRACK -> TrackViewHolder.create(parent, listener)
+
+            HomeAdapterItem.ViewType.REMOTE_TRACK -> RemoteTrackViewHolder.create(parent, listener)
 
             HomeAdapterItem.ViewType.LOADING_VIEW -> LoadingViewHolder.create(parent)
 
@@ -48,7 +51,16 @@ class HomeAdapter(
         when(payload) {
             HomeAdapterItem.PlayLoad.ADDING_TO_PLAYLIST -> {
                 val isLoading = (item as? HomeAdapterItem.Track)?.isLoading == true
-                (holder as? TrackViewHolder)?.bindLoading(isLoading)
+
+                when(holder) {
+                    is TrackViewHolder -> {
+                        holder.bindLoading(isLoading)
+                    }
+
+                    is RemoteTrackViewHolder -> {
+                        holder.bindLoading(isLoading)
+                    }
+                }
             }
 
             else -> {

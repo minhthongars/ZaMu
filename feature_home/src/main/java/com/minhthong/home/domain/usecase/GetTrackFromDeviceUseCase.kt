@@ -1,7 +1,7 @@
 package com.minhthong.home.domain.usecase
 
 import com.minhthong.core.Result
-import com.minhthong.core.model.TrackEntity
+import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.home.domain.HomeRepository
 import javax.inject.Inject
 

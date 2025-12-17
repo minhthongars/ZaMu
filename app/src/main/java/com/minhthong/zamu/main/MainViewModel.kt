@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
         playlistBridge
             .observerPlaylist()
             .map { items ->
-                playerManager.setPlaylist(playlistItemEntities = items)
+                playerManager.setPlaylist(playlistItems = items)
             }
             .launchIn(viewModelScope)
     }

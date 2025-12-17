@@ -17,6 +17,7 @@ import com.minhthong.playlist.domain.usecase.UpdatePlaylistUseCase
 import com.minhthong.playlist.presentaion.mapper.PresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,10 +52,12 @@ class PlaylistViewModel @Inject constructor(
 
     private val isShufflingFlow: MutableStateFlow<Boolean?> = MutableStateFlow(null)
 
+    private var syncDatabaseJob: Job? = null
+
     val uiState: StateFlow<PlaylistUiState> = combine(
         _uiState,
         removingItemIdFlow,
-        playerManager.playerInfoFlow,
+        playerManager.controllerInfoFlow,
         isShufflingFlow.filterNotNull()
     ) { currentState, removingItems, playerInfo, isShuffling ->
 
@@ -63,7 +66,7 @@ class PlaylistViewModel @Inject constructor(
                 isShuffling = isShuffling,
                 trackUiItems = currentState.tracks,
                 removingItems = removingItems,
-                playingItemId = playerInfo?.trackInfo?.id
+                playingItemId = playerInfo?.playingItem?.id
             )
         } else {
             currentState
@@ -137,15 +140,18 @@ class PlaylistViewModel @Inject constructor(
 
     fun updatePlaylistPosition(
         trackItems: List<PlaylistUiState.Track>
-    ) = viewModelScope.launch {
-        val playlistItems = trackItems.mapNotNull { uiItem ->
-            playlistItemEntities[uiItem.id]
-        }
+    ) {
+        syncDatabaseJob?.cancel()
+        syncDatabaseJob = viewModelScope.launch {
+            val playlistItems = trackItems.mapNotNull { uiItem ->
+                playlistItemEntities[uiItem.id]
+            }
 
-        updatePlaylistUseCase.invoke(
-            isShuffle = isShufflingFlow.value ?: false,
-            tracks = playlistItems
-        )
+            updatePlaylistUseCase.invoke(
+                isShuffle = isShufflingFlow.value ?: false,
+                tracks = playlistItems
+            )
+        }
     }
 
     private fun updatePlayingInfo(
@@ -221,7 +227,6 @@ class PlaylistViewModel @Inject constructor(
             .let { entities ->
                 with(mapper) { entities.toPresentation() }
             }
-
 
         _uiState.update { current ->
             (current as PlaylistUiState.Success).copy(

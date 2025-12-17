@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.minhthong.core.service.MusicService
-import com.minhthong.core.service.PlaybackService
 import java.lang.ref.WeakReference
 
 class NotificationPermissionHelper(
@@ -57,13 +56,7 @@ class NotificationPermissionHelper(
     }
 
     private fun startPlaybackService() {
-        //val intent = Intent(fragment.requireActivity(), PlaybackService::class.java)
-        val intent = Intent(fragment.requireActivity(), MusicService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            fragment.requireActivity().startForegroundService(intent)
-        } else {
-            fragment.requireActivity().startService(intent)
-        }
+        Utils.startPlaybackService(context = fragment.context)
     }
 
     fun cleanup() {
@@ -72,6 +65,7 @@ class NotificationPermissionHelper(
         onDeniedCallback = null
     }
 }
+
 
 
 

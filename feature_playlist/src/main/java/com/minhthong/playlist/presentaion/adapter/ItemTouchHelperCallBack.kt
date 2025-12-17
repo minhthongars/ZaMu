@@ -22,8 +22,8 @@ class ItemTouchHelperCallback(
         target: RecyclerView.ViewHolder
     ): Boolean {
         onMoveCallback(
-            viewHolder.absoluteAdapterPosition,
-            target.absoluteAdapterPosition
+            viewHolder.adapterPosition,
+            target.adapterPosition
         )
         return true
     }

@@ -1,9 +1,13 @@
 package com.minhthong.core.model
 
+import android.net.Uri
+
 data class PlaylistItemEntity(
     val id: Int,
     val orderIndex: Long,
     val shuffleOrderIndex: Long,
-    val isPlaying: Boolean,
-    val entity: TrackEntity
+    val trackId: Long,
+    val title: String,
+    val artist: String,
+    val uri: Uri
 )

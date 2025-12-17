@@ -26,18 +26,6 @@ data class TrackDto(
     @ColumnInfo(name = DbConstant.COLUMN_ARTIST)
     val artist: String?,
 
-    @ColumnInfo(name = DbConstant.COLUMN_ALBUM)
-    val album: String?,
-
-    @ColumnInfo(name = DbConstant.COLUMN_DURATION)
-    val durationMs: Long?,
-
-    @ColumnInfo(name = DbConstant.COLUMN_SIZE)
-    val sizeBytes: Long?,
-
     @ColumnInfo(name = DbConstant.COLUMN_PATH)
     val uri: String?,
-
-    @ColumnInfo(name = DbConstant.COLUMN_IS_PLAYING)
-    val isPlaying: Boolean
 )
