@@ -67,6 +67,12 @@ class MainFragment: Fragment() {
             }
         }
 
+        collectFlowSafely {
+            viewModel.showMiniPlayerFlow.collect { isShow ->
+                binding.llMiniPlayer.isVisible = isShow
+            }
+        }
+
         viewModel.observerPlaylist()
     }
 
@@ -76,10 +82,10 @@ class MainFragment: Fragment() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            binding.llMiniPlayer.isVisible = destination.id != R.id.playerFragment
-
             binding.bottomNavigation.setSelectedItem(destination.id)
             binding.title.text = destination.label
+
+            viewModel.setCurrentScreen(screenId = destination.id)
         }
 
         navController.currentDestination?.id?.let { destinationId ->
@@ -92,44 +98,39 @@ class MainFragment: Fragment() {
     }
 
     private fun bindMiniPlayer(controllerState: ControllerState?) {
-        val isVisible = navController.currentDestination?.id != R.id.playerFragment
-        if(controllerState == null || isVisible.not()) {
-            binding.llMiniPlayer.isVisible = false
-        } else {
-            binding.llMiniPlayer.isVisible = true
+        if (controllerState == null) return
 
-            val playingItem = controllerState.playingItem
-            binding.tvTrackTitle.text = playingItem.title
+        val playingItem = controllerState.playingItem
+        binding.tvTrackTitle.text = playingItem.title
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                binding.ivAvatar.setImageBitmap(
-                    playingItem.getAvatarBitmap(requireContext())
-                )
-            }
-
-            binding.ivPlay.setImageResource(
-                if (controllerState.isPlaying) {
-                    PR.drawable.ic_player_pause
-                } else {
-                    PR.drawable.ic_player_playing
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            binding.ivAvatar.setImageBitmap(
+                playingItem.getAvatarBitmap(requireContext())
             )
+        }
 
-            binding.ivPlay.setOnClickListener {
-                viewModel.play()
+        binding.ivPlay.setImageResource(
+            if (controllerState.isPlaying) {
+                PR.drawable.ic_player_pause
+            } else {
+                PR.drawable.ic_player_playing
             }
+        )
 
-            binding.ivMoveToNext.setOnClickListener {
-                viewModel.moveToNext()
-            }
+        binding.ivPlay.setOnClickListener {
+            viewModel.play()
+        }
 
-            binding.ivMoveToPrev.setOnClickListener {
-                viewModel.moveToPrev()
-            }
+        binding.ivMoveToNext.setOnClickListener {
+            viewModel.moveToNext()
+        }
 
-            binding.llMiniPlayer.setOnClickListener {
-                navigation.navigateTo(Screen.PLAYER)
-            }
+        binding.ivMoveToPrev.setOnClickListener {
+            viewModel.moveToPrev()
+        }
+
+        binding.llMiniPlayer.setOnClickListener {
+            navigation.navigateTo(Screen.PLAYER)
         }
     }
 

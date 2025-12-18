@@ -9,6 +9,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -39,6 +40,12 @@ class MusicService : Service() {
         const val CHANNEL_ID = "music_playback"
         const val CHANNEL_NAME = "Music Playback"
         const val NOTIFICATION_ID = 1001
+
+        const val ACTION_REPEAT_ONE = "Loop"
+
+        const val ACTION_REPEAT_OFF = "action_loop"
+
+        const val NAME_REPEAT_ACTION = "On/off loop"
     }
 
     @Inject
@@ -75,6 +82,17 @@ class MusicService : Service() {
         override fun onSeekTo(pos: Long) {
             playerManager.seek(pos)
         }
+
+        override fun onCustomAction(action: String?, extras: Bundle?) {
+            when(action) {
+                ACTION_REPEAT_OFF -> {
+                    playerManager.loop()
+                }
+                ACTION_REPEAT_ONE -> {
+                    playerManager.loop()
+                }
+            }
+        }
     }
 
     override fun onCreate() {
@@ -110,35 +128,6 @@ class MusicService : Service() {
         }
     }
 
-    private fun buildPlaybackState(
-        positionMls: Long?
-    ): PlaybackStateCompat {
-        val info = playerManager.controllerInfoFlow.value
-        val isPlaying = info?.isPlaying == true
-
-        val state = if (isPlaying) {
-            PlaybackStateCompat.STATE_PLAYING
-        }
-        else {
-            PlaybackStateCompat.STATE_PAUSED
-        }
-
-        val currentPosition = positionMls ?: playerManager.currentProgressMlsFlow.value
-
-        val actions = PlaybackStateCompat.ACTION_PLAY or
-                PlaybackStateCompat.ACTION_PAUSE or
-                PlaybackStateCompat.ACTION_SEEK_TO or
-                PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-
-        return PlaybackStateCompat.Builder()
-            .setActions(actions)
-            .setState(state, currentPosition, 1f)
-            .build()
-
-    }
-
     private fun buildNotification(
         playerInfo: ControllerState?
     ): Notification {
@@ -159,6 +148,41 @@ class MusicService : Service() {
                     .setMediaSession(mediaSession.sessionToken)
             )
             .build()
+    }
+
+    private fun buildPlaybackState(
+        positionMls: Long?
+    ): PlaybackStateCompat {
+        val info = playerManager.controllerInfoFlow.value
+        val isPlaying = info?.isPlaying == true
+        val isLooping = info?.isLooping == true
+
+        val (loopActionIcon, loopAction) = if (isLooping) {
+            Pair(R.drawable.media3_icon_repeat_one, ACTION_REPEAT_ONE)
+        } else {
+            Pair(R.drawable.media3_icon_repeat_off, ACTION_REPEAT_OFF)
+        }
+
+        val state = if (isPlaying) {
+            PlaybackStateCompat.STATE_PLAYING
+        }
+        else {
+            PlaybackStateCompat.STATE_PAUSED
+        }
+
+        val currentPosition = positionMls ?: playerManager.currentProgressMlsFlow.value
+
+        val actions = PlaybackStateCompat.ACTION_SEEK_TO or
+                PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or PlaybackStateCompat.ACTION_SET_RATING
+
+        return PlaybackStateCompat.Builder()
+            .setActions(actions)
+            .addCustomAction(loopAction, NAME_REPEAT_ACTION, loopActionIcon)
+            .setState(state, currentPosition, 1f)
+            .build()
+
     }
 
     private fun contentIntent(): PendingIntent {
