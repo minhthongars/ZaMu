@@ -86,7 +86,7 @@ class MusicService : Service() {
 
         initMediaSession()
 
-        showNotification(null)
+        showNotification(info = null)
     }
 
     override fun onBind(intent: Intent?): IBinder = LocalBinder()

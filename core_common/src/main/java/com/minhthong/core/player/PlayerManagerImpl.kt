@@ -28,7 +28,7 @@ internal class PlayerManagerImpl(
 
     override val currentProgressMlsFlow = MutableStateFlow(0L)
 
-    override val hasSetPlaylistFlow = controllerInfoFlow.map { it != null }
+    override val currentBufferMlsFlow = MutableStateFlow(0L)
 
     override fun initialize(context: Context) {
         initPlayer(context)
@@ -83,6 +83,8 @@ internal class PlayerManagerImpl(
 
         playTrack()
 
+        cancelBufferUpdater()
+
         updateControllerInfo(duration = 0)
     }
 
@@ -123,8 +125,24 @@ internal class PlayerManagerImpl(
         }
     }
 
+    private fun startBufferUpdater() {
+        if (updateBufferPositionJob?.isActive == true) return
+
+        updateBufferPositionJob = playerScope.launch(mainDispatcher) {
+            while (isActive) {
+                currentBufferMlsFlow.update { exoPlayer.bufferedPosition }
+                delay(300)
+            }
+        }
+    }
+
     private fun endProgressUpdater() {
         updatePlayingPositionJob?.cancel()
+    }
+
+    private fun cancelBufferUpdater() {
+        currentBufferMlsFlow.update { 0 }
+        updateBufferPositionJob?.cancel()
     }
 
     private fun getSafeIndex(index: Int): Int {
@@ -186,8 +204,9 @@ internal class PlayerManagerImpl(
         playerScope = CoroutineScope(coroutineContext)
 
         exoPlayer = ExoPlayer.Builder(context)
-            .setWakeMode(C.WAKE_MODE_LOCAL)
+            .setWakeMode(C.WAKE_MODE_NETWORK)
             .build()
+
         exoPlayer.addListener(playerEventListener)
     }
 
@@ -260,7 +279,8 @@ internal class PlayerManagerImpl(
     }
 
     private fun cancelJobAndReleasePlayer() {
-        updatePlayingPositionJob?.cancel()
+        cancelProgressUpdater()
+        cancelBufferUpdater()
         playerScope.cancel()
 
         controllerInfoFlow.update { null }
@@ -288,6 +308,7 @@ internal class PlayerManagerImpl(
                     if (duration != C.TIME_UNSET) {
                         updateControllerInfo(duration = duration)
                         startProgressUpdater()
+                        startBufferUpdater()
                     }
                 }
             }
@@ -302,8 +323,7 @@ internal class PlayerManagerImpl(
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            endProgressUpdater()
-            currentProgressMlsFlow.update { 0 }
+            cancelProgressUpdater()
             startProgressUpdater()
         }
 

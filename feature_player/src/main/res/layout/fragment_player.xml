@@ -16,13 +16,14 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="@dimen/spacing_xl"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="999dp"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toTopOf="@id/tv_track_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.8">
+        app:layout_constraintWidth_percent="0.9"
+        app:layout_constraintDimensionRatio="1:1">
 
         <ImageView
             android:id="@+id/iv_cover_art"
@@ -119,6 +120,28 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="20dp">
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:valueFrom="0f"
+                android:valueTo="1000f"
+                android:stepSize="1"
+                tools:value="60f"
+                android:contentDescription="@string/next"
+                app:thumbRadius="0dp"
+                app:tickRadiusActive="0dp"
+                app:trackHeight="4dp"
+                app:thumbElevation="0dp"
+                app:thumbStrokeWidth="0dp"
+                android:scrollIndicators="none"
+                app:tickVisible="false"
+                app:labelBehavior="floating"
+                app:trackColorActive="@color/grey_300"
+                app:trackColorInactive="@color/grey_200" />
+
             <com.google.android.material.slider.Slider
                 android:id="@+id/slider_seek"
                 android:layout_width="match_parent"
@@ -138,7 +161,7 @@
                 app:tickVisible="false"
                 app:labelBehavior="floating"
                 app:trackColorActive="@color/color_primary"
-                app:trackColorInactive="@color/grey_200" />
+                app:trackColorInactive="@android:color/transparent" />
         </FrameLayout>
 
     </LinearLayout>

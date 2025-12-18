@@ -5,14 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
+import com.minhthong.core.model.ControllerState
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.navigation.Navigation
+import com.minhthong.navigation.Screen
 import com.minhthong.zamu.R
+import com.minhthong.player.R as PR
 import com.minhthong.zamu.databinding.FragmentMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -55,8 +61,9 @@ class MainFragment: Fragment() {
 
     private fun setUpCollector() {
         collectFlowSafely {
-            viewModel.hasSetPlaylistFlow.collect {
-                binding.bottomNavigation.showPlayerItem(isShow = it)
+            viewModel.controllerInfoFlow.collect { info ->
+                binding.bottomNavigation.showPlayerItem(isShow = info != null)
+                bindMiniPlayer(controllerState = info)
             }
         }
 
@@ -69,6 +76,8 @@ class MainFragment: Fragment() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.llMiniPlayer.isVisible = destination.id != R.id.playerFragment
+
             binding.bottomNavigation.setSelectedItem(destination.id)
             binding.title.text = destination.label
         }
@@ -79,6 +88,48 @@ class MainFragment: Fragment() {
 
         binding.ivBack.setOnClickListener {
             handleOnBackPressed()
+        }
+    }
+
+    private fun bindMiniPlayer(controllerState: ControllerState?) {
+        val isVisible = navController.currentDestination?.id != R.id.playerFragment
+        if(controllerState == null || isVisible.not()) {
+            binding.llMiniPlayer.isVisible = false
+        } else {
+            binding.llMiniPlayer.isVisible = true
+
+            val playingItem = controllerState.playingItem
+            binding.tvTrackTitle.text = playingItem.title
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                binding.ivAvatar.setImageBitmap(
+                    playingItem.getAvatarBitmap(requireContext())
+                )
+            }
+
+            binding.ivPlay.setImageResource(
+                if (controllerState.isPlaying) {
+                    PR.drawable.ic_player_pause
+                } else {
+                    PR.drawable.ic_player_playing
+                }
+            )
+
+            binding.ivPlay.setOnClickListener {
+                viewModel.play()
+            }
+
+            binding.ivMoveToNext.setOnClickListener {
+                viewModel.moveToNext()
+            }
+
+            binding.ivMoveToPrev.setOnClickListener {
+                viewModel.moveToPrev()
+            }
+
+            binding.llMiniPlayer.setOnClickListener {
+                navigation.navigateTo(Screen.PLAYER)
+            }
         }
     }
 

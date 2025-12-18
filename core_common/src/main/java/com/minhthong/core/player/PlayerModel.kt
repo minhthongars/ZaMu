@@ -12,6 +12,8 @@ open class PlayerModel {
 
     protected var updatePlayingPositionJob: Job? = null
 
+    protected var updateBufferPositionJob: Job? = null
+
     protected var currentPlaylistItems = emptyList<PlaylistItemEntity>()
 
     protected var currentItemIndex = -1

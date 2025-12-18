@@ -10,12 +10,16 @@ import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.player.databinding.FragmentPlayerBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PlayerFragment: Fragment() {
@@ -24,6 +28,8 @@ class PlayerFragment: Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: PlayerViewModel by viewModels()
+
+    private var animationJob: Job? = null
 
     private val onSliderTouchListener = object : Slider.OnSliderTouchListener {
         override fun onStartTrackingTouch(slider: Slider) {
@@ -92,7 +98,9 @@ class PlayerFragment: Fragment() {
         collectFlowSafely {
             viewModel.uiModel.collect { info ->
                 if (info.sliderBarValue > 0) {
-                    binding.sliderSeek.valueTo = info.sliderBarValue.toFloat()
+                    val valueTo = info.sliderBarValue.toFloat()
+                    binding.sliderSeek.valueTo = valueTo
+                    binding.sliderSecondary.valueTo = valueTo
                 }
 
                 binding.tvTrackTitle.text = info.trackName
@@ -101,6 +109,8 @@ class PlayerFragment: Fragment() {
                 binding.tvTotalTime.text = info.duration
 
                 binding.btnPlayPause.setImageResource(info.playIcon)
+
+                startAnimation(isStart = info.startAnimation)
 
                 ImageViewCompat.setImageTintList(
                     binding.btnRepeat,
@@ -124,6 +134,28 @@ class PlayerFragment: Fragment() {
         collectFlowSafely {
             viewModel.currentProgressMls.collect { mls ->
                 binding.sliderSeek.value = mls.toFloat()
+            }
+        }
+
+        collectFlowSafely {
+            viewModel.currentBufferMls.collect { mls ->
+                binding.sliderSecondary.value = mls.toFloat()
+            }
+        }
+    }
+
+    private fun startAnimation(isStart: Boolean) {
+        if (isStart.not()) {
+            animationJob?.cancel()
+            return
+        }
+        animationJob?.cancel()
+        animationJob = viewLifecycleOwner.lifecycleScope.launch {
+            while (true) {
+                val current = binding.cvCoverArt.rotation
+                binding.cvCoverArt.rotation = current + 1.5F
+
+                delay(16)
             }
         }
     }

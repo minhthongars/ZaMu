@@ -15,7 +15,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_gravity="center"
@@ -24,8 +24,8 @@
 
         <ImageView
             android:id="@+id/iv_back"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginStart="6dp"
             android:padding="10dp"
             app:srcCompat="@drawable/ic_back"
@@ -33,20 +33,91 @@
 
     </FrameLayout>
 
-    <View
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/grey_300"/>
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/main_nav_host"
-        android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        app:navGraph="@navigation/main_graph"
-        app:defaultNavHost="true"
-        tools:layout="@layout/fragment_player" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/main_nav_host"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/main_graph"
+            tools:layout="@layout/fragment_player" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey_300" />
+
+        <LinearLayout
+            android:id="@+id/ll_mini_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/green_100"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:padding="10dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                app:cardCornerRadius="6dp">
+
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    tools:srcCompat="@drawable/ic_launcher_background" />
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/tv_track_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:maxLines="1"
+                android:paddingEnd="8dp"
+                android:text="Em của ngày hôm kia"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/iv_move_to_prev"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:tint="@color/grey_500"
+                android:foreground="?attr/selectableItemBackground"
+                app:srcCompat="@drawable/media3_icon_previous" />
+
+            <ImageView
+                android:id="@+id/iv_play"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginHorizontal="8dp"
+                android:foreground="?attr/selectableItemBackground"
+                app:srcCompat="@drawable/ic_player_pause" />
+
+            <ImageView
+                android:id="@+id/iv_move_to_next"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:tint="@color/grey_500"
+                android:foreground="?attr/selectableItemBackground"
+                app:srcCompat="@drawable/media3_icon_next" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
     <com.minhthong.zamu.main.BottomNavigationBar
         android:id="@+id/bottom_navigation"

@@ -15,7 +15,7 @@ class MainViewModel @Inject constructor(
     private val playerManager: PlayerManager,
 ): ViewModel() {
 
-    val hasSetPlaylistFlow = playerManager.hasSetPlaylistFlow
+    val controllerInfoFlow = playerManager.controllerInfoFlow
 
     fun observerPlaylist() {
         playlistBridge
@@ -24,5 +24,17 @@ class MainViewModel @Inject constructor(
                 playerManager.setPlaylist(playlistItems = items)
             }
             .launchIn(viewModelScope)
+    }
+
+    fun play() {
+        playerManager.play()
+    }
+
+    fun moveToNext() {
+        playerManager.moveToNext()
+    }
+
+    fun moveToPrev() {
+        playerManager.moveToPrevious()
     }
 }

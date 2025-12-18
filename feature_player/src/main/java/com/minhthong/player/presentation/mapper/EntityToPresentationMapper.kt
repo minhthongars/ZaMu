@@ -37,6 +37,7 @@ class EntityToPresentationMapper(
                 disableColor
             ),
             sliderBarValue = duration,
+            startAnimation = isPlaying
         )
     }
 }

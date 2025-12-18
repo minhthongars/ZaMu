@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface PlayerManager {
 
-    val hasSetPlaylistFlow: Flow<Boolean>
-
     val currentProgressMlsFlow: StateFlow<Long>
+
+    val currentBufferMlsFlow: StateFlow<Long>
 
     val controllerInfoFlow: StateFlow<ControllerState?>
 

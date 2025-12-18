@@ -34,6 +34,8 @@ class PlayerViewModel @Inject constructor(
         onTouchingSeekFlow.value.not()
     }
 
+    val currentBufferMls = playerManager.currentBufferMlsFlow
+
     fun playMedia() {
         playerManager.play()
     }
