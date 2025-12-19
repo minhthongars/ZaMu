@@ -3,16 +3,11 @@ package com.minhthong.zamu.main
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.Fragment
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
 import com.minhthong.core.R
 import dagger.hilt.android.AndroidEntryPoint
-import com.minhthong.zamu.R as AppR
 
 @AndroidEntryPoint
 class MainActivity: AppCompatActivity() {
@@ -64,7 +59,7 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
-    private fun saveThemeAndRecreate(value: String) {
+    /*private fun saveThemeAndRecreate(value: String) {
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         prefs.edit { putString(KEY_THEME, value) }
         recreate()
@@ -79,7 +74,7 @@ class MainActivity: AppCompatActivity() {
         
         val navHostFragment = mainFragment.childFragmentManager.findFragmentById(AppR.id.main_nav_host)
         return (navHostFragment as? NavHostFragment)?.navController
-    }
+    }*/
 
     private fun enableEdgeToEdge() {
         WindowCompat.setDecorFitsSystemWindows(window, false)

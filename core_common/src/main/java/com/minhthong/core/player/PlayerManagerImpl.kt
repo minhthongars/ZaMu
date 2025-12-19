@@ -15,7 +15,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -81,23 +80,53 @@ internal class PlayerManagerImpl(
 
         cancelProgressUpdater()
 
-        playTrack()
+        transitionTrack()
 
         cancelBufferUpdater()
 
         updateControllerInfo(duration = 0)
     }
 
-    private fun playTrack() {
+    private fun transitionTrack() {
         val playlistItem = currentPlaylistItems[currentItemIndex]
 
         val mediaItem = createMediaItem(entity = playlistItem)
 
-        exoPlayer.stop()
+        if (exoPlayer.isPlaying) {
+            crossfadeTransition(mediaItem)
+        } else {
+            playTrack(mediaItem)
+        }
+    }
+
+    private fun crossfadeTransition(mediaItem: MediaItem) = playerScope.launch {
+        exoPlayer.addMediaItem(mediaItem)
+        while (true) {
+            exoPlayer.volume -= 0.02F
+            delay(20)
+
+            if (exoPlayer.volume == 0F) {
+                exoPlayer.seekToNext()
+                exoPlayer.seekTo(0, 800)
+                exoPlayer.removeMediaItem(0)
+
+                while (true) {
+                    exoPlayer.volume += 0.02F
+                    delay(15)
+
+                    if (exoPlayer.volume == 1F) {
+                        cancel()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun playTrack(mediaItem: MediaItem) {
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
-        exoPlayer.seekTo(0, 0)
         exoPlayer.play()
+        exoPlayer.seekTo(0, 800)
     }
 
     private fun createMediaItem(entity: PlaylistItemEntity): MediaItem {

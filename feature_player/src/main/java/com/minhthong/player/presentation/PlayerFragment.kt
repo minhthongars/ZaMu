@@ -152,9 +152,7 @@ class PlayerFragment: Fragment() {
         animationJob?.cancel()
         animationJob = viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                val current = binding.cvCoverArt.rotation
-                binding.cvCoverArt.rotation = current + 1.2F
-
+                binding.cvCoverArt.rotation += 1.2F
                 delay(16)
             }
         }

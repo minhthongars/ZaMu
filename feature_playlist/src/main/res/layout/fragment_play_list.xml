@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:id="@+id/ll_success"
@@ -10,13 +11,45 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/iv_shuffle"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:layout_margin="6dp"
-            android:layout_gravity="end"
-            app:srcCompat="@drawable/media3_icon_shuffle_on"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="22dp"
+            android:layout_gravity="center">
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_scroll_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:valueFrom="0f"
+                android:valueTo="1000f"
+                android:stepSize="1"
+                android:layout_weight="1"
+                tools:value="60f"
+                android:contentDescription="@string/appbar_scrolling_view_behavior"
+                app:thumbRadius="6dp"
+                app:thumbStrokeColor="@color/grey_700"
+                app:tickRadiusActive="0dp"
+                app:trackHeight="6dp"
+                app:thumbElevation="0dp"
+                app:thumbStrokeWidth="0dp"
+                android:scrollIndicators="none"
+                app:tickVisible="false"
+                app:labelBehavior="gone"
+                app:trackColorActive="@color/grey_200"
+                app:trackColorInactive="@color/grey_200" />
+
+            <ImageView
+                android:id="@+id/iv_shuffle"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_margin="6dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/media3_icon_shuffle_on"/>
+
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"
@@ -38,7 +71,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:visibility="gone">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -155,7 +189,8 @@
         android:id="@+id/fl_error"
         android:layout_width="match_parent"
         android:padding="16dp"
-        android:layout_height="200dp">
+        android:layout_height="200dp"
+        tools:visibility="gone">
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

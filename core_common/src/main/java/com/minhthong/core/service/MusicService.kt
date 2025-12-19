@@ -54,9 +54,6 @@ class MusicService : Service() {
     @Inject
     internal lateinit var navigator: Navigation
 
-    private val exoPlayer
-        get() = playerManager.getPlayer()
-
     private lateinit var mediaSession: MediaSessionCompat
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -116,9 +113,9 @@ class MusicService : Service() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        if (exoPlayer.isPlaying.not()) {
-            stopSelf()
-        }
+//        if (exoPlayer.isPlaying.not()) {
+//            stopSelf()
+//        }
     }
 
     private fun initMediaSession() {
@@ -139,7 +136,7 @@ class MusicService : Service() {
             .setContentTitle(trackInfo?.title)
             .setContentText(trackInfo?.artist)
             .setContentIntent(contentIntent())
-            .setDeleteIntent(deleteIntent())
+            //.setDeleteIntent(deleteIntent())
             .setSilent(true)
             .setOnlyAlertOnce(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

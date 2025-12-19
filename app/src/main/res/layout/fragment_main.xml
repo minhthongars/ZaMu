@@ -20,7 +20,7 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:textColor="@color/black"
-            android:text="Favorite"/>
+            tools:text="Favorite"/>
 
         <ImageView
             android:id="@+id/iv_back"
@@ -35,7 +35,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1">
 
         <androidx.fragment.app.FragmentContainerView
@@ -60,7 +60,8 @@
             android:background="@color/green_100"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
-            android:padding="10dp"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="16dp"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -80,15 +81,16 @@
 
             <TextView
                 android:id="@+id/tv_track_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:ellipsize="marquee"
                 android:maxLines="1"
                 android:paddingEnd="8dp"
+                android:paddingStart="0dp"
                 android:textColor="@color/color_text_secondary"
-                android:text="Em của ngày hôm kia"
+                tools:text="Em của ngày hôm kia"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -96,9 +98,9 @@
                 android:id="@+id/iv_move_to_prev"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
-                android:tint="@color/grey_500"
                 android:foreground="?attr/selectableItemBackground"
-                app:srcCompat="@drawable/media3_icon_previous" />
+                app:srcCompat="@drawable/media3_icon_previous"
+                app:tint="@color/grey_500" />
 
             <ImageView
                 android:id="@+id/iv_play"
@@ -112,9 +114,9 @@
                 android:id="@+id/iv_move_to_next"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
-                android:tint="@color/grey_500"
                 android:foreground="?attr/selectableItemBackground"
-                app:srcCompat="@drawable/media3_icon_next" />
+                app:srcCompat="@drawable/media3_icon_next"
+                app:tint="@color/grey_500" />
 
         </LinearLayout>
 

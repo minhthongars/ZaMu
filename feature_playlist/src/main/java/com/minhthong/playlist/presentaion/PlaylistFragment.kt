@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.minhthong.core.R
 import com.minhthong.core.util.NotificationPermissionHelper
@@ -90,10 +91,10 @@ class PlaylistFragment: Fragment() {
 
     private fun setupViews() {
         val itemAnimator = binding.recyclerView.itemAnimator
-        if (itemAnimator is SimpleItemAnimator) {
-            itemAnimator.supportsChangeAnimations = false
-            itemAnimator.moveDuration = 220
-            itemAnimator.changeDuration = 220
+        (itemAnimator as? SimpleItemAnimator)?.apply {
+            supportsChangeAnimations = false
+            moveDuration = 250
+            changeDuration = 250
         }
 
         binding.recyclerView.adapter = adapter
@@ -104,6 +105,19 @@ class PlaylistFragment: Fragment() {
 
         binding.ivShuffle.setOnClickListener {
             viewModel.updateShufflePlaylist()
+        }
+
+        binding.recyclerView.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                }
+            }
+        )
+
+        binding.sliderScrollBar.addOnChangeListener { _, value, _ ->
+
         }
     }
 
@@ -120,7 +134,10 @@ class PlaylistFragment: Fragment() {
                     }
 
                     is PlaylistUiState.Success -> {
-                        successContent(tracks = state.tracks, isShuffling = state.isShuffling)
+                        successContent(
+                            tracks = state.tracks,
+                            isShuffling = state.isShuffling
+                        )
                     }
                 }
             }
@@ -168,7 +185,7 @@ class PlaylistFragment: Fragment() {
 
     private fun saveStateSubmitList(tracks: List<PlaylistUiState.Track>) {
         val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
-        val scrollPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+        val scrollPosition = layoutManager.findFirstVisibleItemPosition()
         val view = layoutManager.findViewByPosition(scrollPosition)
         val scrollOffset = view?.top ?: 0
 
