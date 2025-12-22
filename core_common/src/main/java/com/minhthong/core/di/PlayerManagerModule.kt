@@ -1,7 +1,9 @@
 package com.minhthong.core.di
 
+import android.content.Context
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.player.PlayerManagerImpl
+import com.minhthong.core.player.AudioFocusManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,9 +19,11 @@ class PlayerManagerModule {
     @Singleton
     fun providePlayerManager(
         @MainDispatcher mainDispatcher: CoroutineDispatcher,
+        context: Context
     ): PlayerManager {
         return PlayerManagerImpl(
             mainDispatcher = mainDispatcher,
+            audioFocusManager = AudioFocusManager(context),
         )
     }
 }

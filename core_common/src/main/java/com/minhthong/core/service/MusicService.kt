@@ -6,7 +6,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Binder
 import android.os.Build
 import android.os.Bundle
@@ -58,6 +60,7 @@ class MusicService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private var isForeground = false
+    private var noisyReceiverRegistered = false
 
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() {
@@ -101,12 +104,15 @@ class MusicService : Service() {
 
         initMediaSession()
 
+        registerNoisyReceiver()
+
         showNotification(info = null)
     }
 
     override fun onBind(intent: Intent?): IBinder = LocalBinder()
 
     override fun onDestroy() {
+        unregisterNoisyReceiver()
         serviceScope.cancel()
         mediaSession.release()
         super.onDestroy()
@@ -291,6 +297,34 @@ class MusicService : Service() {
                 Utils.stopPlaybackService(baseContext)
             }
             isForeground = false
+        }
+    }
+
+    private val becomingNoisyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: Intent?) {
+            if (intent?.action == android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                val isPlaying = playerManager.controllerInfoFlow.value?.isPlaying == true
+                if (isPlaying) {
+                    playerManager.play()
+                }
+            }
+        }
+    }
+
+    private fun registerNoisyReceiver() {
+        if (noisyReceiverRegistered) return
+        val filter = IntentFilter(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        registerReceiver(becomingNoisyReceiver, filter)
+        noisyReceiverRegistered = true
+    }
+
+    private fun unregisterNoisyReceiver() {
+        if (!noisyReceiverRegistered) return
+        try {
+            unregisterReceiver(becomingNoisyReceiver)
+        } catch (_: Exception) {
+        } finally {
+            noisyReceiverRegistered = false
         }
     }
 

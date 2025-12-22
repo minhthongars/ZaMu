@@ -18,9 +18,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 internal class PlayerManagerImpl(
     private val mainDispatcher: CoroutineDispatcher,
+    private val audioFocusManager: AudioFocusManager,
 ): PlayerManager, PlayerModel() {
 
     override val controllerInfoFlow = MutableStateFlow<ControllerState?>(null)
@@ -80,9 +82,9 @@ internal class PlayerManagerImpl(
 
         cancelProgressUpdater()
 
-        transitionTrack()
-
         cancelBufferUpdater()
+
+        transitionTrack()
 
         updateControllerInfo(duration = 0)
     }
@@ -93,40 +95,54 @@ internal class PlayerManagerImpl(
         val mediaItem = createMediaItem(entity = playlistItem)
 
         if (exoPlayer.isPlaying) {
-            crossfadeTransition(mediaItem)
+            mediaTransitionJob?.cancel()
+            mediaTransitionJob = crossfadeTransition(mediaItem)
         } else {
             playTrack(mediaItem)
         }
     }
 
     private fun crossfadeTransition(mediaItem: MediaItem) = playerScope.launch {
-        exoPlayer.addMediaItem(mediaItem)
+        subExoPlayer.safeAddListener(subPlayerEventListener)
+
+        subExoPlayer.apply {
+            setMediaItem(mediaItem)
+            prepare()
+            volume = 0f
+            play()
+        }
+
+        val temp = exoPlayer
+        exoPlayer = subExoPlayer
+        subExoPlayer = temp
+
+        exoPlayer.safeAddListener(playerEventListener)
+
         while (true) {
-            exoPlayer.volume -= 0.02F
+            exoPlayer.volume = (exoPlayer.volume + 0.01f).coerceAtLeast(0f)
+            subExoPlayer.volume = (subExoPlayer.volume - 0.01f).coerceAtMost(1f)
             delay(20)
 
-            if (exoPlayer.volume == 0F) {
-                exoPlayer.seekToNext()
-                exoPlayer.seekTo(0, 800)
-                exoPlayer.removeMediaItem(0)
-
-                while (true) {
-                    exoPlayer.volume += 0.02F
-                    delay(15)
-
-                    if (exoPlayer.volume == 1F) {
-                        cancel()
-                    }
-                }
+            if (exoPlayer.volume == 1F) {
+                break
             }
         }
+
+        exoPlayer.removeListener(subPlayerEventListener)
+    }
+
+    private fun ExoPlayer.safeAddListener(listener: Player.Listener) {
+        removeListener(listener)
+        addListener(listener)
     }
 
     private fun playTrack(mediaItem: MediaItem) {
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
-        exoPlayer.play()
-        exoPlayer.seekTo(0, 800)
+        val granted = audioFocusManager.requestAudioFocus(audioFocusCallback)
+        if (granted) {
+            exoPlayer.play()
+        }
     }
 
     private fun createMediaItem(entity: PlaylistItemEntity): MediaItem {
@@ -191,6 +207,7 @@ internal class PlayerManagerImpl(
         exoPlayer.clearMediaItems()
         controllerInfoFlow.update { null }
         currentPlaylistItems = emptyList()
+        audioFocusManager.abandonFocus()
     }
 
     private fun calculateNewTrackIndex(playingTrack: PlaylistItemEntity?) {
@@ -236,6 +253,8 @@ internal class PlayerManagerImpl(
             .setWakeMode(C.WAKE_MODE_NETWORK)
             .build()
 
+        subExoPlayer = ExoPlayer.Builder(context).build()
+
         exoPlayer.addListener(playerEventListener)
     }
 
@@ -273,7 +292,11 @@ internal class PlayerManagerImpl(
     private fun handlePlayOrPause() {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
+            audioFocusManager.abandonFocus()
         } else {
+            val granted = audioFocusManager.requestAudioFocus(audioFocusCallback)
+            if (!granted) return
+
             if (exoPlayer.playbackState == Player.STATE_IDLE) {
                 exoPlayer.prepare()
             }
@@ -315,6 +338,7 @@ internal class PlayerManagerImpl(
         controllerInfoFlow.update { null }
         cancelProgressUpdater()
 
+        audioFocusManager.abandonFocus()
         exoPlayer.removeListener(playerEventListener)
         exoPlayer.clearMediaItems()
         exoPlayer.release()
@@ -325,6 +349,56 @@ internal class PlayerManagerImpl(
         currentProgressMlsFlow.update { 0 }
     }
 
+    private fun handleFocusLoss() {
+        shouldResumeOnFocusGain = false
+        if (exoPlayer.isPlaying) {
+            exoPlayer.pause()
+        }
+        audioFocusManager.abandonFocus()
+    }
+
+    private fun handleFocusLossTransient() {
+        if (exoPlayer.isPlaying) {
+            shouldResumeOnFocusGain = true
+            exoPlayer.pause()
+        }
+    }
+
+    private fun handleFocusGain() {
+        if (isDucked) {
+            exoPlayer.volume = NORMAL_VOLUME
+            isDucked = false
+        }
+
+        if (shouldResumeOnFocusGain) {
+            if (exoPlayer.playbackState == Player.STATE_IDLE) {
+                exoPlayer.prepare()
+            }
+            exoPlayer.play()
+            shouldResumeOnFocusGain = false
+        }
+    }
+
+    private fun handleFocusDuck() {
+        if (exoPlayer.isPlaying) {
+            exoPlayer.volume = DUCK_VOLUME
+            isDucked = true
+        }
+    }
+
+    private val subPlayerEventListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(state: Int) {
+            when (state) {
+                Player.STATE_READY -> {
+                    val duration = subExoPlayer.duration
+                    if (duration != C.TIME_UNSET) {
+                        updateControllerInfo(duration = duration)
+                    }
+                }
+            }
+        }
+    }
+
     private val playerEventListener = object : Player.Listener {
 
         override fun onPlaybackStateChanged(state: Int) {
@@ -333,7 +407,7 @@ internal class PlayerManagerImpl(
                     moveToNext()
                 }
                 Player.STATE_READY -> {
-                    val duration = exoPlayer.duration
+                    val duration = max(exoPlayer.duration, subExoPlayer.duration)
                     if (duration != C.TIME_UNSET) {
                         updateControllerInfo(duration = duration)
                         startProgressUpdater()
@@ -371,6 +445,18 @@ internal class PlayerManagerImpl(
                 currentProgressMlsFlow.update { newPosition.positionMs }
             }
         }
+    }
+
+    private val audioFocusCallback = object : AudioFocusManager.Callback {
+        override fun onFocusGained() = handleFocusGain()
+        override fun onFocusLost() = handleFocusLoss()
+        override fun onFocusLostTransient() = handleFocusLossTransient()
+        override fun onDuck() = handleFocusDuck()
+    }
+
+    companion object {
+        private const val DUCK_VOLUME = 0.2f
+        private const val NORMAL_VOLUME = 1f
     }
 }
 

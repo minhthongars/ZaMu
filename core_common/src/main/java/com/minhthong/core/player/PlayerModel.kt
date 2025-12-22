@@ -8,15 +8,23 @@ import kotlinx.coroutines.Job
 open class PlayerModel {
     protected lateinit var exoPlayer: ExoPlayer
 
+    protected lateinit var subExoPlayer: ExoPlayer
+
     protected lateinit var playerScope: CoroutineScope
 
     protected var updatePlayingPositionJob: Job? = null
 
     protected var updateBufferPositionJob: Job? = null
 
+    protected var mediaTransitionJob: Job? = null
+
     protected var currentPlaylistItems = emptyList<PlaylistItemEntity>()
 
     protected var currentItemIndex = -1
 
     protected var isLooping = false
+
+    protected var shouldResumeOnFocusGain = false
+
+    protected var isDucked = false
 }
