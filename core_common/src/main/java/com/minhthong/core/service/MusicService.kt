@@ -64,11 +64,11 @@ class MusicService : Service() {
 
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() {
-            playerManager.play()
+            playerManager.playOrPause()
         }
 
         override fun onPause() {
-            playerManager.play()
+            playerManager.playOrPause()
         }
 
         override fun onSkipToNext() {
@@ -86,10 +86,10 @@ class MusicService : Service() {
         override fun onCustomAction(action: String?, extras: Bundle?) {
             when(action) {
                 ACTION_REPEAT_OFF -> {
-                    playerManager.loop()
+                    playerManager.loopOrNot()
                 }
                 ACTION_REPEAT_ONE -> {
-                    playerManager.loop()
+                    playerManager.loopOrNot()
                 }
             }
         }
@@ -305,7 +305,7 @@ class MusicService : Service() {
             if (intent?.action == android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
                 val isPlaying = playerManager.controllerInfoFlow.value?.isPlaying == true
                 if (isPlaying) {
-                    playerManager.play()
+                    playerManager.playOrPause()
                 }
             }
         }

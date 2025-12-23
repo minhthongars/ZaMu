@@ -37,7 +37,7 @@ class PlayerViewModel @Inject constructor(
     val currentBufferMls = playerManager.currentBufferMlsFlow
 
     fun playMedia() {
-        playerManager.play()
+        playerManager.playOrPause()
     }
 
     fun moveToNextMedia() {
@@ -49,7 +49,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun loopMedia() {
-        playerManager.loop()
+        playerManager.loopOrNot()
     }
 
     fun shuffleMedia() {

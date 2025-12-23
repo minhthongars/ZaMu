@@ -1,6 +1,7 @@
 package com.minhthong.core.player
 
 import android.content.Context
+import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -47,11 +48,11 @@ internal class PlayerManagerImpl(
         addAndSeek(playlistItem)
     }
 
-    override fun play() {
+    override fun playOrPause() {
         handlePlayOrPause()
     }
 
-    override fun loop() {
+    override fun loopOrNot() {
         handleLoopOrNot()
     }
 
@@ -104,6 +105,7 @@ internal class PlayerManagerImpl(
 
     private fun crossfadeTransition(mediaItem: MediaItem) = playerScope.launch {
         subExoPlayer.safeAddListener(subPlayerEventListener)
+        exoPlayer.removeListener(playerEventListener)
 
         subExoPlayer.apply {
             setMediaItem(mediaItem)
@@ -112,23 +114,32 @@ internal class PlayerManagerImpl(
             play()
         }
 
-        val temp = exoPlayer
-        exoPlayer = subExoPlayer
-        subExoPlayer = temp
-
-        exoPlayer.safeAddListener(playerEventListener)
+        cancelProgressUpdater()
 
         while (true) {
-            exoPlayer.volume = (exoPlayer.volume + 0.01f).coerceAtLeast(0f)
-            subExoPlayer.volume = (subExoPlayer.volume - 0.01f).coerceAtMost(1f)
-            delay(20)
+            exoPlayer.volume -= 0.01f
+            subExoPlayer.volume += 0.01f
+            delay(CROSSFADE_DELAY)
 
-            if (exoPlayer.volume == 1F) {
+            currentProgressMlsFlow.update {
+                (subExoPlayer.volume * 100 * 20).toLong()
+            }
+
+            if (subExoPlayer.volume == 1F) {
                 break
             }
         }
 
-        exoPlayer.removeListener(subPlayerEventListener)
+        subExoPlayer.removeListener(subPlayerEventListener)
+
+        val temp = subExoPlayer
+        subExoPlayer = exoPlayer
+        exoPlayer = temp
+
+        exoPlayer.safeAddListener(playerEventListener)
+
+        startProgressUpdater()
+        startBufferUpdater()
     }
 
     private fun ExoPlayer.safeAddListener(listener: Player.Listener) {
@@ -162,10 +173,10 @@ internal class PlayerManagerImpl(
     private fun startProgressUpdater() {
         if (updatePlayingPositionJob?.isActive == true) return
 
-        updatePlayingPositionJob = playerScope.launch(mainDispatcher) {
+        updatePlayingPositionJob = playerScope.launch {
             while (isActive) {
                 currentProgressMlsFlow.update { exoPlayer.currentPosition }
-                delay(200)
+                delay(POSITION_DELAY)
             }
         }
     }
@@ -173,10 +184,10 @@ internal class PlayerManagerImpl(
     private fun startBufferUpdater() {
         if (updateBufferPositionJob?.isActive == true) return
 
-        updateBufferPositionJob = playerScope.launch(mainDispatcher) {
+        updateBufferPositionJob = playerScope.launch {
             while (isActive) {
                 currentBufferMlsFlow.update { exoPlayer.bufferedPosition }
-                delay(300)
+                delay(BUFFER_DELAY)
             }
         }
     }
@@ -194,8 +205,8 @@ internal class PlayerManagerImpl(
         val trackSize = currentPlaylistItems.size
 
         return if (index >= trackSize) {
-            0
-        } else if (index < 0) {
+            ZERO
+        } else if (index < ZERO) {
             trackSize - 1
         } else {
             index
@@ -219,7 +230,7 @@ internal class PlayerManagerImpl(
                 currentItemIndex = newPlayingIndex
             }
         } else {
-            currentItemIndex = 0
+            currentItemIndex = ZERO
         }
     }
 
@@ -291,17 +302,40 @@ internal class PlayerManagerImpl(
 
     private fun handlePlayOrPause() {
         if (exoPlayer.isPlaying) {
-            exoPlayer.pause()
-            audioFocusManager.abandonFocus()
+            crossfadePause()
         } else {
             val granted = audioFocusManager.requestAudioFocus(audioFocusCallback)
             if (!granted) return
 
-            if (exoPlayer.playbackState == Player.STATE_IDLE) {
-                exoPlayer.prepare()
-            }
-            exoPlayer.play()
+            safePlay()
         }
+    }
+
+    private fun crossfadePause() = playerScope.launch {
+        controllerInfoFlow.update { current ->
+            current?.copy(isPlaying = false)
+        }
+
+        while (true) {
+            exoPlayer.volume -= 0.03F
+            delay(CROSSFADE_DELAY)
+
+            if (exoPlayer.volume == 0F) {
+                exoPlayer.pause()
+                exoPlayer.volume = 1F
+
+                audioFocusManager.abandonFocus()
+
+                break
+            }
+        }
+    }
+
+    private fun safePlay() {
+        if (exoPlayer.playbackState == Player.STATE_IDLE) {
+            exoPlayer.prepare()
+        }
+        exoPlayer.play()
     }
 
     private fun handleLoopOrNot() {
@@ -371,10 +405,7 @@ internal class PlayerManagerImpl(
         }
 
         if (shouldResumeOnFocusGain) {
-            if (exoPlayer.playbackState == Player.STATE_IDLE) {
-                exoPlayer.prepare()
-            }
-            exoPlayer.play()
+            safePlay()
             shouldResumeOnFocusGain = false
         }
     }
@@ -400,16 +431,16 @@ internal class PlayerManagerImpl(
     }
 
     private val playerEventListener = object : Player.Listener {
-
         override fun onPlaybackStateChanged(state: Int) {
             when (state) {
                 Player.STATE_ENDED -> {
                     moveToNext()
                 }
                 Player.STATE_READY -> {
-                    val duration = max(exoPlayer.duration, subExoPlayer.duration)
+                    val duration = exoPlayer.duration
                     if (duration != C.TIME_UNSET) {
                         updateControllerInfo(duration = duration)
+
                         startProgressUpdater()
                         startBufferUpdater()
                     }
@@ -457,6 +488,10 @@ internal class PlayerManagerImpl(
     companion object {
         private const val DUCK_VOLUME = 0.2f
         private const val NORMAL_VOLUME = 1f
+        private const val ZERO = 0
+        private const val BUFFER_DELAY = 300L
+        private const val POSITION_DELAY = 150L
+        private const val CROSSFADE_DELAY = 20L
     }
 }
 

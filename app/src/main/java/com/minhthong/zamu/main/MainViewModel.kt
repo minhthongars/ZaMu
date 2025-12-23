@@ -44,7 +44,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun play() {
-        playerManager.play()
+        playerManager.playOrPause()
     }
 
     fun moveToNext() {
