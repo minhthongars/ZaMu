@@ -85,15 +85,7 @@ class MashupViewModel @Inject constructor(
 
     private fun List<CutEntity>.toPresentation(): List<CutAdapterItem> {
         return this.map { entity ->
-            val startPos = entity.startPosition
-            val endPos = entity.endPosition
-
-            val startPosString = startPos.toDurationString()
-            val endPosString = endPos.toDurationString()
-            val totalCutDurationString = (endPos - startPos).toDurationString()
-            val totalDurationString = entity.duration.toDurationString()
-
-            val cutInfo = "$startPosString - $endPosString  ||  ${totalCutDurationString}/${totalDurationString}"
+            val cutInfo = createCutInfo(entity)
 
             CutAdapterItem(
                 id = entity.id,
@@ -105,17 +97,43 @@ class MashupViewModel @Inject constructor(
         }
     }
 
+    private fun createCutInfo(entity: CutEntity): String {
+        val startPos = entity.startPosition
+        val endPos = entity.endPosition
+
+        val totalDurationString = entity.duration.toDurationString()
+
+        if (startPos == 0L && endPos == 0L) {
+            return totalDurationString
+        } else {
+            val startPosString = startPos.toDurationString()
+            val endPosString = endPos.toDurationString()
+            val totalCutDurationString = (endPos - startPos).toDurationString()
+
+            return "$startPosString - $endPosString  |  " +
+                    "${totalCutDurationString}/${totalDurationString}"
+        }
+    }
+
     private suspend fun addToPlaylist(cutId: Int) {
         _isLoadingFlow.update { true }
 
         cutEntities.find { it.id == cutId }?.let { entity ->
 
-            val startPosString = entity.startPosition.toDurationString()
-            val endPosString = entity.endPosition.toDurationString()
+            val startPos = entity.startPosition
+            val endPos = entity.endPosition
+
+            val title = if (startPos != 0L || endPos != 0L) {
+                val startPosString = startPos.toDurationString()
+                val endPosString = endPos.toDurationString()
+                "[$startPosString - $endPosString] ${entity.name}"
+            } else {
+                entity.name
+            }
 
             val result = playlistApi.addTrackToPlaylistAwareShuffle(
                 trackId = entity.id.toLong(),
-                title = "[$startPosString - $endPosString] ${entity.name}",
+                title = title,
                 performer = entity.performer,
                 uri = entity.uri.toString(),
                 avatarBitmap = entity.avatar
@@ -135,9 +153,12 @@ class MashupViewModel @Inject constructor(
     }
 
     fun createMashup() = viewModelScope.launch {
+        val selectedItemMap = selectedItemMapFlow.value
+        if (selectedItemMap.isEmpty()) {
+            return@launch
+        }
         _isLoadingFlow.update { true }
 
-        val selectedItemMap = selectedItemMapFlow.value
         val cutList = selectedItemMap.entries
             .sortedBy { it.value }
             .mapNotNull { (key, _) ->
@@ -155,11 +176,11 @@ class MashupViewModel @Inject constructor(
 
         repository.insertCut(
             uriString = filePath.toUri().toString(),
-            name = name,
+            name = "Mashup(${cutList.size}): $name",
             performer = performer,
             duration = duration,
             startPosition = 0,
-            endPosition = duration,
+            endPosition = 0,
             avatarBitmap = BitmapUtils.mergeBitmapsGrid(bitmaps)
         )
 

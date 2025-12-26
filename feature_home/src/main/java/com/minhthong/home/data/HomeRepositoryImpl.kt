@@ -34,7 +34,6 @@ class HomeRepositoryImpl(
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-                delay(1000)
                 val response = remoteDataSource.fetchUserData()
                 with(mapper) { response.toDomain() }
             }
@@ -45,7 +44,6 @@ class HomeRepositoryImpl(
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-                delay(600)
                 val response = remoteDataSource.fetchPremiumTrack()
                 with(mapper) { response.toDomain() }
             }

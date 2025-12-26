@@ -91,6 +91,9 @@ class HomeViewModel @Inject constructor(
         )
 
     fun fetchUserInfo() = viewModelScope.launch {
+        if (userEntity != null)
+            return@launch
+
         showUserInfoLoadingItem()
 
         fetchUserInfoUseCase.invoke()
@@ -103,9 +106,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getDeviceTrack() = viewModelScope.launch {
+        if (deviceTrackEntities.isNotEmpty())
+            return@launch
+
         showTrackLoadingItems()
 
-        delay(400)
         getTrackFromDeviceUseCase.invoke()
             .onError { messageId ->
                 showTrackErrorItems(messageId)
@@ -120,9 +125,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun fetchPremiumTrack() = viewModelScope.launch {
+        if (remoteTrackEntities.isNotEmpty())
+            return@launch
+
         showRemoteTrackLoadingItems()
 
-        delay(700)
         fetchPremiumTrackUseCase.invoke()
             .onError {
                 hideRemoteTrack()
@@ -295,7 +302,6 @@ class HomeViewModel @Inject constructor(
             currentItems + trackId
         }
 
-        delay(150)
         addTrackToPlaylist(deviceTrack = trackEntity)
             .onSuccess {
                 addingToPlaylistTrackIdsFlow.update { currentItems ->

@@ -191,8 +191,6 @@ class PlayerFragment: Fragment() {
 
         binding.btnShuffle.isInvisible = info.isAudioCutting
         binding.progressCircular.isVisible = info.isAudioCutting
-
-        binding.tvTrackTitle.isSelected = true
     }
 
     override fun onDestroyView() {

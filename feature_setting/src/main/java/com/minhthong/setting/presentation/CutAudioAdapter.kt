@@ -24,7 +24,6 @@ class CutAudioAdapter(
         ): Boolean {
             return oldItem == newItem
         }
-
     }
 ) {
     override fun onCreateViewHolder(

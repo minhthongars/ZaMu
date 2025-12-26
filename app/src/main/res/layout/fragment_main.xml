@@ -85,14 +85,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                android:ellipsize="marquee"
-                android:maxLines="1"
                 android:paddingEnd="8dp"
                 android:paddingStart="0dp"
                 android:textColor="@color/color_text_secondary"
                 tools:text="Em của ngày hôm kia"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"
+                android:textIsSelectable="true"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"/>
 
             <ImageView
                 android:id="@+id/iv_move_to_prev"

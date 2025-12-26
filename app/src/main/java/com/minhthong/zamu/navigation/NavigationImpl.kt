@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
 import com.minhthong.zamu.R
@@ -34,12 +33,7 @@ class NavigationImpl(
             return
         }
 
-        val navOptions = NavOptions.Builder()
-            .setLaunchSingleTop(true)
-            .setRestoreState(true)
-            .build()
-
-        navController.navigate(destination, null, navOptions)
+        navController.navigate(destination)
     }
 
     override fun appLaunchIntent(context: Context): PendingIntent {

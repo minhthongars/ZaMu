@@ -133,7 +133,6 @@ class PlaylistViewModel @Inject constructor(
     fun removePlaylistItem(playlistItemId: Int) = viewModelScope.launch {
         addRemovingItemId(playlistItemId = playlistItemId)
 
-        delay(300)
         removeTrackUseCase.invoke(playlistItemId)
             .onError { deleteRemovingItemId(playlistItemId = playlistItemId) }
     }

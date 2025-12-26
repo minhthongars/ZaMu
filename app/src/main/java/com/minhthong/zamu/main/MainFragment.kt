@@ -110,6 +110,7 @@ class MainFragment: Fragment() {
 
         val playingItem = controllerState.playingItem
         binding.tvTrackTitle.text = playingItem.title
+        binding.tvTrackTitle.isSelected = true
 
         binding.ivAvatar.setImageBitmap(
             playingItem.avatarImage

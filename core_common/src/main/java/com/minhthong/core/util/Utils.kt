@@ -39,7 +39,7 @@ object Utils {
 
     fun Long.toMbString(): String {
         val mb = this / (1024.0 * 1024.0)
-        return String.format(Locale.getDefault(), "%.2f MB", mb)
+        return String.format(Locale.getDefault(), "%.2f Mb", mb)
     }
 
     fun Fragment.collectFlowSafely(
