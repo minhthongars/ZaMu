@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:name=".ZamuApplication"
+        android:name=".application.ZamuApplication"
         android:allowBackup="true"
         android:windowOptOutEdgeToEdgeEnforcement="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

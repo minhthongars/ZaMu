@@ -12,7 +12,7 @@
     <fragment
         android:id="@+id/playerFragment"
         android:label="Play music"
-        android:name="com.minhthong.player.presentation.PlayerFragment"/>
+        android:name="com.minhthong.player.presentation.presentation.PlayerFragment"/>
 
     <fragment
         android:id="@+id/playlistFragment"

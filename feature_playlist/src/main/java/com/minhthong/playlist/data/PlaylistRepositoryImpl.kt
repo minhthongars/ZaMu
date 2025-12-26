@@ -1,9 +1,9 @@
 package com.minhthong.playlist.data
 
 import android.graphics.Bitmap
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.core.model.PlaylistItemEntity
-import com.minhthong.core.safeGetDataCall
+import com.minhthong.core.common.safeGetDataCall
 import com.minhthong.core.util.Utils.toByteArray
 import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.mapper.Mapper.toData

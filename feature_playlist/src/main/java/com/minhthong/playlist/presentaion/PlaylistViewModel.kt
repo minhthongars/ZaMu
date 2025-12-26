@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minhthong.core.R
 import com.minhthong.core.model.PlaylistItemEntity
-import com.minhthong.core.onError
-import com.minhthong.core.onFinish
-import com.minhthong.core.onSuccess
+import com.minhthong.core.common.onError
+import com.minhthong.core.common.onFinish
+import com.minhthong.core.common.onSuccess
 import com.minhthong.core.player.PlayerManager
-import com.minhthong.core.toAppError
+import com.minhthong.core.common.toAppError
 import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
 import com.minhthong.playlist.domain.usecase.GetShuffleEnableUseCase
 import com.minhthong.playlist.domain.usecase.RemoveTrackFromPlaylistUseCase

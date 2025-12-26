@@ -1,8 +1,8 @@
 package com.minhthong.home.data
 
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.home.domain.model.TrackEntity
-import com.minhthong.core.safeGetDataCall
+import com.minhthong.core.common.safeGetDataCall
 import com.minhthong.home.data.datasource.DeviceDataSource
 import com.minhthong.home.data.datasource.RemoteDataSource
 import com.minhthong.home.data.mapper.DataToDomainMapper

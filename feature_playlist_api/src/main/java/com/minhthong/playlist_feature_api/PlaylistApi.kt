@@ -1,7 +1,7 @@
 package com.minhthong.playlist_feature_api
 
 import android.graphics.Bitmap
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.flow.Flow
 

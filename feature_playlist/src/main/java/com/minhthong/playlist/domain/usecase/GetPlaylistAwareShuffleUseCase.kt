@@ -1,6 +1,6 @@
 package com.minhthong.playlist.domain.usecase
 
-import com.minhthong.core.getData
+import com.minhthong.core.common.getData
 import com.minhthong.playlist.domain.PlaylistRepository
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.flow.Flow

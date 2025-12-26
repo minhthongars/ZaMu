@@ -1,10 +1,10 @@
-package com.minhthong.player.presentation
+package com.minhthong.player.presentation.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.util.Utils.toDurationString
-import com.minhthong.feature_mashup_api.MashupRepository
+import com.minhthong.feature_mashup_api.repository.MashupRepository
 import com.minhthong.player.presentation.mapper.EntityToPresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

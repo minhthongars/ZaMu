@@ -6,7 +6,7 @@ import androidx.core.content.ContextCompat
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.core.model.ControllerState
 import com.minhthong.player.R
-import com.minhthong.player.presentation.PlayerUiModel
+import com.minhthong.player.presentation.presentation.PlayerUiModel
 import com.minhthong.core.R as CR
 
 class EntityToPresentationMapper(

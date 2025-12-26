@@ -1,4 +1,4 @@
-package com.minhthong.zamu
+package com.minhthong.zamu.application
 
 import android.app.Application
 import com.minhthong.core.player.PlayerManager

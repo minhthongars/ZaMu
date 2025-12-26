@@ -4,7 +4,7 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import androidx.room.Room
 import com.minhthong.core.di.IoDispatcher
-import com.minhthong.feature_mashup_api.MashupRepository
+import com.minhthong.feature_mashup_api.repository.MashupRepository
 import com.minhthong.setting.data.MashupDao
 import com.minhthong.setting.data.MashupDatabase
 import com.minhthong.setting.data.MashupRepositoryImpl

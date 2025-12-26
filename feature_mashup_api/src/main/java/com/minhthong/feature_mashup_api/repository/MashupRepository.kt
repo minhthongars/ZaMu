@@ -1,7 +1,8 @@
-package com.minhthong.feature_mashup_api
+package com.minhthong.feature_mashup_api.repository
 
 import android.graphics.Bitmap
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
+import com.minhthong.feature_mashup_api.entity.CutEntity
 import kotlinx.coroutines.flow.Flow
 
 interface MashupRepository {

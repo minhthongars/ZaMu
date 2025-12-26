@@ -1,4 +1,4 @@
-package com.minhthong.core
+package com.minhthong.core.common
 
 sealed class Result<out T> {
 

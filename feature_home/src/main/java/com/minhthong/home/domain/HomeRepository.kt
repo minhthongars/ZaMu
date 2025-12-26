@@ -1,7 +1,7 @@
 package com.minhthong.home.domain
 
 import com.minhthong.home.domain.model.TrackEntity
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.home.domain.model.RemoteTrackEntity
 import com.minhthong.home.domain.model.UserEntity
 

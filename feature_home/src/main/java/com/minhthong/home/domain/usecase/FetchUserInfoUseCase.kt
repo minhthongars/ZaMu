@@ -1,6 +1,6 @@
 package com.minhthong.home.domain.usecase
 
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.home.domain.HomeRepository
 import com.minhthong.home.domain.model.UserEntity
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.minhthong.feature_mashup_api
+package com.minhthong.feature_mashup_api.entity
 
 import android.graphics.Bitmap
 import android.net.Uri

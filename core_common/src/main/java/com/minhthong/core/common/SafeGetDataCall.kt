@@ -1,4 +1,4 @@
-package com.minhthong.core
+package com.minhthong.core.common
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

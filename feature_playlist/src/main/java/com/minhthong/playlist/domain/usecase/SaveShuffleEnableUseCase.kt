@@ -1,8 +1,7 @@
 package com.minhthong.playlist.domain.usecase
 
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.playlist.domain.PlaylistRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class SaveShuffleEnableUseCase @Inject constructor(

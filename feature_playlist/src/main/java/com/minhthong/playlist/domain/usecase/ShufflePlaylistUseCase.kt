@@ -1,6 +1,6 @@
 package com.minhthong.playlist.domain.usecase
 
-import com.minhthong.core.Result
+import com.minhthong.core.common.Result
 import com.minhthong.playlist.domain.PlaylistRepository
 import javax.inject.Inject
 

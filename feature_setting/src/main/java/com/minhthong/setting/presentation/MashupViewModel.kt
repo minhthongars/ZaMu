@@ -3,13 +3,13 @@ package com.minhthong.setting.presentation
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.minhthong.core.onError
-import com.minhthong.core.onSuccess
+import com.minhthong.core.common.onError
+import com.minhthong.core.common.onSuccess
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.util.BitmapUtils
 import com.minhthong.core.util.Utils.toDurationString
-import com.minhthong.feature_mashup_api.CutEntity
-import com.minhthong.feature_mashup_api.MashupRepository
+import com.minhthong.feature_mashup_api.entity.CutEntity
+import com.minhthong.feature_mashup_api.repository.MashupRepository
 import com.minhthong.playlist_feature_api.PlaylistApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

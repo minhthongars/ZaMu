@@ -1,8 +1,9 @@
-package com.minhthong.core
+package com.minhthong.core.common
 
 import android.database.sqlite.SQLiteException
 import android.net.http.HttpException
 import androidx.annotation.StringRes
+import com.minhthong.core.R
 import org.json.JSONException
 import java.net.ConnectException
 import java.net.SocketException
