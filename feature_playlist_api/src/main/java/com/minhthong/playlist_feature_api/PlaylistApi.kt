@@ -1,8 +1,8 @@
 package com.minhthong.playlist_feature_api
 
+import android.graphics.Bitmap
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
-import com.minhthong.core.model.PlaylistItemEntity.Source
 import kotlinx.coroutines.flow.Flow
 
 interface PlaylistApi {
@@ -11,8 +11,7 @@ interface PlaylistApi {
         title: String,
         performer: String,
         uri: String,
-        source: Source,
-        avatarUrl: String?
+        avatarBitmap: Bitmap?
     ): Result<PlaylistItemEntity>
 
     fun observerPlaylist(): Flow<List<PlaylistItemEntity>>

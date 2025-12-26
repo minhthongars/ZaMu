@@ -53,6 +53,14 @@ class MainFragment: Fragment() {
         setUpAppNavigation()
         setupBottomNavigation()
         setUpCollector()
+        handleNavigation()
+    }
+
+    private fun handleNavigation() {
+        val screenId = activity?.intent?.getIntExtra(MainActivity.NAVIGATE_SCREEN_ID, 0)
+        if (screenId != null && screenId != 0) {
+            navigation.navigateTo(screenId)
+        }
     }
 
     private fun setUpAppNavigation() {
@@ -103,11 +111,9 @@ class MainFragment: Fragment() {
         val playingItem = controllerState.playingItem
         binding.tvTrackTitle.text = playingItem.title
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            binding.ivAvatar.setImageBitmap(
-                playingItem.getAvatarBitmap(requireContext())
-            )
-        }
+        binding.ivAvatar.setImageBitmap(
+            playingItem.avatarImage
+        )
 
         binding.ivPlay.setImageResource(
             if (controllerState.isPlaying) {

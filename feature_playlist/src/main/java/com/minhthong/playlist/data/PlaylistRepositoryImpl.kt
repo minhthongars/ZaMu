@@ -1,8 +1,10 @@
 package com.minhthong.playlist.data
 
+import android.graphics.Bitmap
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.safeGetDataCall
+import com.minhthong.core.util.Utils.toByteArray
 import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.mapper.Mapper.toData
 import com.minhthong.playlist.data.mapper.Mapper.toDomain
@@ -32,8 +34,7 @@ class PlaylistRepositoryImpl(
         title: String,
         performer: String,
         uri: String,
-        source: PlaylistItemEntity.Source,
-        avatarUrl: String?
+        avatarBitmap: Bitmap?
     ): Result<PlaylistItemEntity> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
@@ -48,8 +49,7 @@ class PlaylistRepositoryImpl(
                     uri = uri,
                     orderIndex = newOrder,
                     shuffleOrderIndex = newShuffleOrder,
-                    source = source.ordinal,
-                    avatarUrl = avatarUrl
+                    avatarImage = avatarBitmap.toByteArray()
                 )
 
                 dao.insertTrack(dto)

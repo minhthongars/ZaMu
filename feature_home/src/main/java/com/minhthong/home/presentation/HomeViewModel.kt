@@ -5,13 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
-import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.core.onError
 import com.minhthong.core.onSuccess
 import com.minhthong.core.player.PlayerManager
-import com.minhthong.core.util.Utils
+import com.minhthong.core.util.BitmapUtils
 import com.minhthong.home.R
 import com.minhthong.home.domain.model.RemoteTrackEntity
+import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.home.domain.model.UserEntity
 import com.minhthong.home.domain.usecase.FetchPremiumTrackUseCase
 import com.minhthong.home.domain.usecase.FetchUserInfoUseCase
@@ -274,7 +274,7 @@ class HomeViewModel @Inject constructor(
             return@launch
         }
 
-        addTrackToPlaylist(remoteTrack = clickedTrack)
+        addRemoteTrackToPlaylist(remoteTrack = clickedTrack)
             .onSuccess { _ ->
                 showToast(msgId = R.string.add_track_to_playlist_successful)
             }
@@ -322,12 +322,11 @@ class HomeViewModel @Inject constructor(
             performer = deviceTrack.artist,
             trackId = deviceTrack.id,
             uri = deviceTrack.uri.toString(),
-            source = PlaylistItemEntity.Source.DEVICE,
-            avatarUrl = null
+            avatarBitmap = deviceTrack.avatarBitmap
         )
     }
 
-    private suspend fun addTrackToPlaylist(
+    private suspend fun addRemoteTrackToPlaylist(
         remoteTrack: RemoteTrackEntity
     ): Result<PlaylistItemEntity> {
         return playlistApi.addTrackToPlaylistAwareShuffle(
@@ -335,8 +334,7 @@ class HomeViewModel @Inject constructor(
             performer = remoteTrack.performer,
             trackId = remoteTrack.id,
             uri = remoteTrack.mp3Url.toUri().toString(),
-            source = PlaylistItemEntity.Source.REMOTE,
-            avatarUrl = remoteTrack.avatarUrl
+            avatarBitmap = BitmapUtils.getAlbumArtFromRemote(remoteTrack.avatarUrl)
         )
     }
 

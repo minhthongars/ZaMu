@@ -40,10 +40,16 @@ android {
 dependencies {
     implementation(project(":core_common"))
     implementation(project(":navigation"))
+    implementation(project(":feature_mashup_api"))
+    implementation(project(":feature_playlist_api"))
 
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
 
     implementation(libs.hilt.android)
     ksp(libs.dagger.hilt.android.compiler)
+
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 }

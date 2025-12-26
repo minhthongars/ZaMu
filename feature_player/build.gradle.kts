@@ -40,6 +40,7 @@ android {
 dependencies {
     implementation(project(":core_common"))
     implementation(project(":navigation"))
+    implementation(project(":feature_mashup_api"))
 
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)

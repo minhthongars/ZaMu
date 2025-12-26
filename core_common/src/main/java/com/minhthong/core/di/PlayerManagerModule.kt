@@ -24,6 +24,7 @@ class PlayerManagerModule {
         return PlayerManagerImpl(
             mainDispatcher = mainDispatcher,
             audioFocusManager = AudioFocusManager(context),
+            context = context
         )
     }
 }

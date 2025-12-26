@@ -1,5 +1,6 @@
 package com.minhthong.home.domain.model
 
+import android.graphics.Bitmap
 import android.net.Uri
 
 data class TrackEntity(
@@ -9,5 +10,6 @@ data class TrackEntity(
     val album: String,
     val durationMs: Long,
     val sizeBytes: Long,
-    val uri: Uri
+    val uri: Uri,
+    val avatarBitmap: Bitmap?
 )

@@ -1,12 +1,20 @@
 package com.minhthong.core.player
 
 import android.content.Context
-import android.util.Log
+import android.net.Uri
+import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.transformer.Composition
+import androidx.media3.transformer.EditedMediaItem
+import androidx.media3.transformer.EditedMediaItemSequence
+import androidx.media3.transformer.ExportException
+import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.Transformer
 import com.minhthong.core.model.ControllerState
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.CoroutineDispatcher
@@ -19,9 +27,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.max
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.File
+import java.util.UUID
+import kotlin.coroutines.resumeWithException
 
+@OptIn(UnstableApi::class)
 internal class PlayerManagerImpl(
+    private val context: Context,
     private val mainDispatcher: CoroutineDispatcher,
     private val audioFocusManager: AudioFocusManager,
 ): PlayerManager, PlayerModel() {
@@ -32,7 +45,7 @@ internal class PlayerManagerImpl(
 
     override val currentBufferMlsFlow = MutableStateFlow(0L)
 
-    override fun initialize(context: Context) {
+    override fun initialize() {
         initPlayer(context)
     }
 
@@ -75,6 +88,100 @@ internal class PlayerManagerImpl(
     override fun release() {
         cancelJobAndReleasePlayer()
     }
+
+    override suspend fun cutAudio(
+        startMls: Long,
+        endMls: Long
+    ): String = suspendCancellableCoroutine { cont ->
+        val currentTrack = currentPlaylistItems[currentItemIndex]
+
+        val input = MediaItem.Builder()
+            .setUri(currentTrack.uri)
+            .setClippingConfiguration(
+                MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs(startMls)
+                    .setEndPositionMs(endMls)
+                    .build()
+            )
+            .build()
+
+        val outputFile = File(
+            context.filesDir,
+            "audio_cut_${UUID.randomUUID()}.mp3"
+        )
+
+        val transformer = Transformer.Builder(context)
+            .addListener(
+                object : Transformer.Listener {
+                    override fun onCompleted(
+                        composition: Composition,
+                        exportResult: ExportResult
+                    ) {
+                        cont.resume(outputFile.absolutePath) { cause, _, _ ->
+                            cont.resumeWithException(cause)
+                        }
+                    }
+
+                    override fun onError(
+                        composition: Composition,
+                        exportResult: ExportResult,
+                        exception: ExportException
+                    ) {
+                        cont.resumeWithException(exception)
+                    }
+                }
+            )
+            .build()
+
+        transformer.start(input, outputFile.absolutePath)
+    }
+
+    override suspend fun createMashup(
+        uriList: List<Uri>
+    ): String = suspendCancellableCoroutine { cont ->
+        val editedItems = uriList.map { uri ->
+            EditedMediaItem.Builder(
+                MediaItem.fromUri(uri)
+            ).build()
+        }
+
+        val sequence = EditedMediaItemSequence.Builder()
+            .addItems(editedItems)
+            .build()
+
+        val composition = Composition.Builder(sequence).build()
+
+        val outputFile = File(
+            context.filesDir,
+            "mashup_${System.currentTimeMillis()}.mp3"
+        )
+
+        val transformer = Transformer.Builder(context)
+            .addListener(
+                object : Transformer.Listener {
+                    override fun onCompleted(
+                        composition: Composition,
+                        exportResult: ExportResult
+                    ) {
+                        cont.resume(outputFile.absolutePath) { cause, _, _ ->
+                            cont.resumeWithException(cause)
+                        }
+                    }
+
+                    override fun onError(
+                        composition: Composition,
+                        exportResult: ExportResult,
+                        exception: ExportException
+                    ) {
+                        cont.resumeWithException(exception)
+                    }
+                }
+            )
+            .build()
+
+        transformer.start(composition, outputFile.absolutePath)
+    }
+
 
     private fun playMediaItem(index: Int) {
         if(currentPlaylistItems.isEmpty()) return
@@ -419,12 +526,10 @@ internal class PlayerManagerImpl(
 
     private val subPlayerEventListener = object : Player.Listener {
         override fun onPlaybackStateChanged(state: Int) {
-            when (state) {
-                Player.STATE_READY -> {
-                    val duration = subExoPlayer.duration
-                    if (duration != C.TIME_UNSET) {
-                        updateControllerInfo(duration = duration)
-                    }
+            if (state == Player.STATE_READY) {
+                val duration = subExoPlayer.duration
+                if (duration != C.TIME_UNSET) {
+                    updateControllerInfo(duration = duration)
                 }
             }
         }
@@ -445,6 +550,8 @@ internal class PlayerManagerImpl(
                         startBufferUpdater()
                     }
                 }
+
+                else -> Unit
             }
         }
 

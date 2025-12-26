@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.media3.transformer)
     ksp(libs.dagger.hilt.android.compiler)
     implementation(libs.glide)
 

@@ -40,20 +40,19 @@ object HomeModule {
     fun provideHomeRepository(
         dataSource: DeviceDataSource,
         remoteDataSource: RemoteDataSource,
+        context: Context,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): HomeRepository {
         return HomeRepositoryImpl(
             deviceDataSource = dataSource,
-            mapper = DataToDomainMapper(),
+            mapper = DataToDomainMapper(context),
             remoteDataSource = remoteDataSource,
             ioDispatcher = ioDispatcher,
         )
     }
 
     @Provides
-    fun provideHomeEntityToPresentationMapper(
-        context: Context
-    ): EntityToPresentationMapper {
-        return EntityToPresentationMapper(context)
+    fun provideHomeEntityToPresentationMapper(): EntityToPresentationMapper {
+        return EntityToPresentationMapper()
     }
 }

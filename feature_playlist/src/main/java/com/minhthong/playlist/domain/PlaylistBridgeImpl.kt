@@ -1,8 +1,8 @@
 package com.minhthong.playlist.domain
 
+import android.graphics.Bitmap
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
-import com.minhthong.core.model.PlaylistItemEntity.Source
 import com.minhthong.playlist.domain.usecase.AddTrackToPlaylistUseCase
 import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
 import com.minhthong.playlist_feature_api.PlaylistApi
@@ -18,10 +18,15 @@ class PlaylistBridgeImpl(
         title: String,
         performer: String,
         uri: String,
-        source: Source,
-        avatarUrl: String?
+        avatarBitmap: Bitmap?
     ): Result<PlaylistItemEntity> {
-        return addTrackToPlaylistUseCase.invoke(trackId, title, performer, uri, source, avatarUrl)
+        return addTrackToPlaylistUseCase.invoke(
+            trackId,
+            title,
+            performer,
+            uri,
+            avatarBitmap
+        )
     }
 
     override fun observerPlaylist(): Flow<List<PlaylistItemEntity>> {

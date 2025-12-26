@@ -7,6 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
+import com.minhthong.zamu.R
 import com.minhthong.zamu.main.MainActivity
 
 class NavigationImpl(
@@ -45,6 +46,8 @@ class NavigationImpl(
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+            putExtra(MainActivity.NAVIGATE_SCREEN_ID, R.id.playerFragment)
         }
 
         return PendingIntent.getActivity(

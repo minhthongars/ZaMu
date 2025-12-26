@@ -1,19 +1,13 @@
 package com.minhthong.home.presentation.mapper
 
-import android.content.Context
-import com.minhthong.core.util.BitmapUtils
-import com.minhthong.core.util.Utils
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.core.util.Utils.toMbString
-import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.home.domain.model.RemoteTrackEntity
+import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.home.domain.model.UserEntity
 import com.minhthong.home.presentation.adapter.HomeAdapterItem
-import javax.inject.Inject
 
-class EntityToPresentationMapper @Inject constructor(
-    private val context: Context
-) {
+class EntityToPresentationMapper {
 
     fun TrackEntity.toPresentation(): HomeAdapterItem.Track {
         val sizeString = sizeBytes.toMbString()
@@ -25,7 +19,7 @@ class EntityToPresentationMapper @Inject constructor(
             performer = artist,
             durationString = durationString,
             sizeString = sizeString,
-            avatarBitmap = BitmapUtils.getAlbumArt(context, uri),
+            avatarBitmap = avatarBitmap,
             isLoading = false
         )
     }

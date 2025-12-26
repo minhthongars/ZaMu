@@ -207,10 +207,12 @@ class MusicService : Service() {
         mediaSession.setPlaybackState(state)
     }
 
-    private suspend fun updateNotification(controller: ControllerState?) {
+    private fun updateNotification(controller: ControllerState?) {
         val track = controller?.playingItem ?: return
 
-        mediaSession.setMetadata(buildMetadata(track = track, durationMs = controller.duration))
+        mediaSession.setMetadata(
+            buildMetadata(track = track, durationMs = controller.duration)
+        )
 
         NotificationManagerCompat.from(this)
             .notify(
@@ -219,14 +221,14 @@ class MusicService : Service() {
             )
     }
 
-    private suspend fun buildMetadata(
+    private fun buildMetadata(
         track: PlaylistItemEntity,
         durationMs: Long
     ): MediaMetadataCompat {
         return MediaMetadataCompat.Builder()
             .putBitmap(
                 MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-                track.getAvatarBitmap(baseContext)
+                track.avatarImage
             )
             .putString(
                 MediaMetadataCompat.METADATA_KEY_ARTIST,

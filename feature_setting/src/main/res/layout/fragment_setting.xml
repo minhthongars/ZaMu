@@ -1,14 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:theme="@style/Theme.Zamu">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="30sp"
-        android:layout_gravity="center"
-        android:text="Setting fragment"/>
+        android:paddingTop="4dp"
+        android:orientation="horizontal">
 
-</FrameLayout>
+        <CheckedTextView
+            android:id="@+id/check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/select_mode"
+            android:textSize="18sp"
+            android:paddingStart="10dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="10dp"
+            android:textColor="@color/grey_700"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:checkMark="?android:attr/listChoiceIndicatorSingle"
+            android:checked="false" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp">
+
+            <ImageView
+                android:id="@+id/iv_shuffle"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_gravity="center"
+                app:tint="@color/grey_700"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:focusable="true"
+                app:srcCompat="@drawable/media3_icon_shuffle_on"/>
+
+            <ProgressBar
+                android:id="@+id/progress_circular"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+</LinearLayout>

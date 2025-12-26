@@ -13,14 +13,16 @@ class EntityToPresentationMapper(
     private val context: Context
 ) {
 
-    suspend fun ControllerState.toPresentation(): PlayerUiModel {
+    fun ControllerState.toPresentation(
+        isAudioCutting: Boolean
+    ): PlayerUiModel {
         val enableColor = CR.color.blue_600
         val disableColor = CR.color.grey_500
 
         return PlayerUiModel(
             trackName = playingItem.title,
             performer = playingItem.artist,
-            avatar = playingItem.getAvatarBitmap(context, 1024),
+            avatar = playingItem.avatarImage,
             album = "Unknow album",
             duration = duration.toDurationString(),
             playIcon = if (isPlaying) {
@@ -37,7 +39,8 @@ class EntityToPresentationMapper(
                 disableColor
             ),
             sliderBarValue = duration,
-            startAnimation = isPlaying
+            startAnimation = isPlaying,
+            isAudioCutting = isAudioCutting
         )
     }
 }

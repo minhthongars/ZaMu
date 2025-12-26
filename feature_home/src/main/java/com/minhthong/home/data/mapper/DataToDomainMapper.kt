@@ -1,6 +1,8 @@
 package com.minhthong.home.data.mapper
 
+import android.content.Context
 import android.net.Uri
+import com.minhthong.core.util.BitmapUtils
 import com.minhthong.home.domain.model.TrackEntity
 import com.minhthong.home.data.model.RemoteTrackDto
 import com.minhthong.home.data.model.TrackDto
@@ -8,7 +10,9 @@ import com.minhthong.home.data.model.UserDto
 import com.minhthong.home.domain.model.RemoteTrackEntity
 import com.minhthong.home.domain.model.UserEntity
 
-class DataToDomainMapper {
+class DataToDomainMapper(
+    private val context: Context
+) {
 
     fun TrackDto.toDomain(): TrackEntity {
         val dto = this
@@ -19,7 +23,8 @@ class DataToDomainMapper {
             album = dto.album.orEmpty(),
             durationMs = dto.durationMs ?: 0,
             sizeBytes = dto.sizeBytes ?: 0,
-            uri = dto.uri ?: Uri.EMPTY
+            uri = dto.uri ?: Uri.EMPTY,
+            avatarBitmap = BitmapUtils.getAlbumArt(context, dto.uri)
         )
     }
 

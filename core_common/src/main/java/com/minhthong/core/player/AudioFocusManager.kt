@@ -32,7 +32,6 @@ class AudioFocusManager(
             .build()
 
         val listener = AudioManager.OnAudioFocusChangeListener { change ->
-            Log.e("minhthong1", change.toString())
             when (change) {
                 AudioManager.AUDIOFOCUS_GAIN -> callback.onFocusGained()
                 AudioManager.AUDIOFOCUS_LOSS -> callback.onFocusLost()
@@ -58,4 +57,9 @@ class AudioFocusManager(
         focusRequest = null
     }
 }
+
+
+
+
+
 

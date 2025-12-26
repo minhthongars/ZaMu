@@ -62,7 +62,7 @@ object Utils {
     fun Bitmap?.toByteArray(): ByteArray? {
         if (this == null) return null
         val outputStream = ByteArrayOutputStream()
-        this.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        this.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
         return outputStream.toByteArray()
     }
 

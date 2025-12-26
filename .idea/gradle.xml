@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/core_common" />
             <option value="$PROJECT_DIR$/feature_home" />
+            <option value="$PROJECT_DIR$/feature_mashup_api" />
             <option value="$PROJECT_DIR$/feature_player" />
             <option value="$PROJECT_DIR$/feature_playlist" />
             <option value="$PROJECT_DIR$/feature_playlist_api" />

@@ -1,6 +1,6 @@
 package com.minhthong.core.player
 
-import android.content.Context
+import android.net.Uri
 import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.ControllerState
 import com.minhthong.core.model.PlaylistItemEntity
@@ -14,7 +14,7 @@ interface PlayerManager {
 
     val controllerInfoFlow: StateFlow<ControllerState?>
 
-    fun initialize(context: Context)
+    fun initialize()
 
     fun setPlaylist(playlistItems: List<PlaylistItemEntity>)
 
@@ -35,4 +35,8 @@ interface PlayerManager {
     fun moveToPrevious()
 
     fun getPlayer(): ExoPlayer
+
+    suspend fun cutAudio(startMls: Long, endMls: Long): String
+
+    suspend fun createMashup(uriList: List<Uri>): String
 }

@@ -41,8 +41,10 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_marginBottom="4dp"
-        android:maxLines="1"
-        android:ellipsize="end"
+        android:textIsSelectable="true"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
         android:textColor="@color/color_on_surface"
         android:textSize="@dimen/text_huge"
         android:textStyle="bold"
@@ -63,34 +65,17 @@
         android:textSize="@dimen/text_large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/tv_album"
-        tools:text="Võ Văn Minh Thông" />
-
-    <TextView
-        android:id="@+id/tv_album"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:maxLines="1"
-        android:layout_marginBottom="20dp"
-        android:ellipsize="end"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="@dimen/text_medium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/ll_seek_container"
-        tools:text="Album Name"
-        tools:visibility="visible" />
+        tools:text="Võ Văn Minh Thông" />
 
     <LinearLayout
         android:id="@+id/ll_seek_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/ll_controls">
+        app:layout_constraintBottom_toTopOf="@id/slider_range">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -166,6 +151,25 @@
 
     </LinearLayout>
 
+    <com.google.android.material.slider.RangeSlider
+        android:id="@+id/slider_range"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        style="@style/Widget.MaterialComponents.Slider"
+        app:thumbRadius="4dp"
+        android:valueFrom="0f"
+        android:valueTo="1000f"
+        android:stepSize="1"
+        app:trackHeight="1dp"
+        app:tickVisible="false"
+        app:labelBehavior="floating"
+        app:thumbElevation="0dp"
+        app:thumbStrokeWidth="0dp"
+        app:trackColorInactive="@color/grey_300"
+        app:trackColorActive="@color/blue_300"
+        app:layout_constraintBottom_toTopOf="@id/ll_controls"/>
+
     <LinearLayout
         android:id="@+id/ll_controls"
         android:layout_width="match_parent"
@@ -212,7 +216,6 @@
             app:tint="@color/grey_500"
             app:srcCompat="@drawable/ic_player_pause" />
 
-        <!-- Next Button -->
         <ImageView
             android:id="@+id/btn_next"
             android:layout_width="50dp"
@@ -225,19 +228,30 @@
             app:srcCompat="@drawable/ic_player_move"
             app:tint="@color/grey_500"/>
 
-        <!-- Shuffle Button -->
-        <ImageView
-            android:id="@+id/btn_shuffle"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="30dp"
-            android:contentDescription="@string/shuffle"
-            android:padding="6dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_player_random"
-            app:tint="@color/grey_500"/>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp">
+
+            <ImageView
+                android:id="@+id/btn_shuffle"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:contentDescription="@string/shuffle"
+                android:padding="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                app:srcCompat="@drawable/ic_player_random"
+                app:tint="@color/grey_500"/>
+
+            <ProgressBar
+                android:id="@+id/progress_circular"
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+
+        </FrameLayout>
 
     </LinearLayout>
 

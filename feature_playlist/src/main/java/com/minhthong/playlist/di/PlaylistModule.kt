@@ -29,7 +29,7 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun providePlaylistDatabase(
-        @ApplicationContext context: Context
+        context: Context
     ): PlaylistDatabase {
         return Room.databaseBuilder(
             context,
@@ -48,9 +48,8 @@ object DatabaseModule {
 
     @Provides
     fun provideMapper(
-        context: Context
     ): PresentationMapper {
-        return PresentationMapper(context = context)
+        return PresentationMapper()
     }
 
     @Provides

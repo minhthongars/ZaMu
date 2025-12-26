@@ -14,6 +14,6 @@ class ZamuApplication: Application() {
     override fun onCreate() {
         super.onCreate()
 
-        playerManager.initialize(context = this)
+        playerManager.initialize()
     }
 }

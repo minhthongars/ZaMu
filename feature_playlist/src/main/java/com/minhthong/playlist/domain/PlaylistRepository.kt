@@ -1,5 +1,6 @@
 package com.minhthong.playlist.domain
 
+import android.graphics.Bitmap
 import com.minhthong.core.Result
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.flow.Flow
@@ -12,8 +13,7 @@ interface PlaylistRepository {
         title: String,
         performer: String,
         uri: String,
-        source: PlaylistItemEntity.Source,
-        avatarUrl: String?
+        avatarBitmap: Bitmap?
     ): Result<PlaylistItemEntity>
 
     suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit>

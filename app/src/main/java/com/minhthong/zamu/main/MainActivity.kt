@@ -18,6 +18,8 @@ class MainActivity: AppCompatActivity() {
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"
         const val THEME_DRACULA = "dracula"
+
+        const val NAVIGATE_SCREEN_ID = "navigate"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
