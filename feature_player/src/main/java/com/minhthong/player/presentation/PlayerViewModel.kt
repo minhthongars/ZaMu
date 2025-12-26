@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.first
+import kotlin.collections.last
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
@@ -71,16 +73,30 @@ class PlayerViewModel @Inject constructor(
 
     private fun handlePlayInRange(positionMls: Long) {
         val playTo = playRange.last
+        val playFrom = playRange.first
 
-        if (playTo > 0) {
-            val playFrom = playRange.first
-            if (positionMls > playTo) {
+        if (playTo == 0L && playFrom == 0L) {
+            return
+        }
+        val newPlayTo = if (playFrom > 0) {
+            playTo - 155
+        } else {
+            playTo
+        }
+
+        when {
+            positionMls >= newPlayTo -> {
                 playerManager.seek(positionMs = playFrom)
             }
-            if (positionMls < playFrom) {
+            positionMls < playFrom -> {
                 playerManager.seek(positionMs = playFrom)
             }
         }
+    }
+
+    private fun resetPlayRange() {
+        val newRange = LongRange(0, 0)
+        _playRangeFlow.update { newRange }
     }
 
     fun setPlayRange(values: List<Float>) {
@@ -96,10 +112,12 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun moveToNextMedia() {
+        resetPlayRange()
         playerManager.moveToNext()
     }
 
     fun moveToPreviousMedia() {
+        resetPlayRange()
         playerManager.moveToPrevious()
     }
 

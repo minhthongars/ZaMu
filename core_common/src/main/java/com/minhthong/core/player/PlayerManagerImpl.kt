@@ -186,15 +186,14 @@ internal class PlayerManagerImpl(
     private fun playMediaItem(index: Int) {
         if(currentPlaylistItems.isEmpty()) return
 
-        currentItemIndex = getSafeIndex(index)
-
+        cancelBufferUpdater()
         cancelProgressUpdater()
 
-        cancelBufferUpdater()
-
-        transitionTrack()
+        currentItemIndex = getSafeIndex(index)
 
         updateControllerInfo(duration = 0)
+
+        transitionTrack()
     }
 
     private fun transitionTrack() {
@@ -221,15 +220,13 @@ internal class PlayerManagerImpl(
             play()
         }
 
-        cancelProgressUpdater()
-
         while (true) {
             exoPlayer.volume -= 0.01f
             subExoPlayer.volume += 0.01f
             delay(CROSSFADE_DELAY)
 
             currentProgressMlsFlow.update {
-                (subExoPlayer.volume * 100 * 20).toLong()
+                (subExoPlayer.volume * 100 * CROSSFADE_DELAY).toLong()
             }
 
             if (subExoPlayer.volume == 1F) {
@@ -261,6 +258,9 @@ internal class PlayerManagerImpl(
         if (granted) {
             exoPlayer.play()
         }
+
+        startProgressUpdater()
+        startBufferUpdater()
     }
 
     private fun createMediaItem(entity: PlaylistItemEntity): MediaItem {
@@ -299,13 +299,14 @@ internal class PlayerManagerImpl(
         }
     }
 
-    private fun endProgressUpdater() {
-        updatePlayingPositionJob?.cancel()
-    }
-
     private fun cancelBufferUpdater() {
         currentBufferMlsFlow.update { 0 }
         updateBufferPositionJob?.cancel()
+    }
+
+    private fun cancelProgressUpdater() {
+        updatePlayingPositionJob?.cancel()
+        currentProgressMlsFlow.update { 0 }
     }
 
     private fun getSafeIndex(index: Int): Int {
@@ -472,22 +473,14 @@ internal class PlayerManagerImpl(
     }
 
     private fun cancelJobAndReleasePlayer() {
-        cancelProgressUpdater()
-        cancelBufferUpdater()
         playerScope.cancel()
 
         controllerInfoFlow.update { null }
-        cancelProgressUpdater()
 
         audioFocusManager.abandonFocus()
         exoPlayer.removeListener(playerEventListener)
         exoPlayer.clearMediaItems()
         exoPlayer.release()
-    }
-
-    private fun cancelProgressUpdater() {
-        updatePlayingPositionJob?.cancel()
-        currentProgressMlsFlow.update { 0 }
     }
 
     private fun handleFocusLoss() {
@@ -527,10 +520,7 @@ internal class PlayerManagerImpl(
     private val subPlayerEventListener = object : Player.Listener {
         override fun onPlaybackStateChanged(state: Int) {
             if (state == Player.STATE_READY) {
-                val duration = subExoPlayer.duration
-                if (duration != C.TIME_UNSET) {
-                    updateControllerInfo(duration = duration)
-                }
+                updateControllerInfo(duration = subExoPlayer.duration)
             }
         }
     }
@@ -542,35 +532,17 @@ internal class PlayerManagerImpl(
                     moveToNext()
                 }
                 Player.STATE_READY -> {
-                    val duration = exoPlayer.duration
-                    if (duration != C.TIME_UNSET) {
-                        updateControllerInfo(duration = duration)
-
-                        startProgressUpdater()
-                        startBufferUpdater()
-                    }
+                    updateControllerInfo(duration = exoPlayer.duration)
                 }
 
                 else -> Unit
             }
         }
 
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            if (isPlaying) {
-                startProgressUpdater()
-            } else {
-                endProgressUpdater()
-            }
-        }
-
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            cancelProgressUpdater()
-            startProgressUpdater()
-        }
-
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            val isCanPlay = exoPlayer.playWhenReady
             controllerInfoFlow.update { current ->
-                current?.copy(isPlaying = exoPlayer.playWhenReady)
+                current?.copy(isPlaying = isCanPlay)
             }
         }
 
