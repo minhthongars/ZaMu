@@ -1,10 +1,11 @@
 package com.minhthong.player.presentation.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.util.Utils.toDurationString
-import com.minhthong.feature_mashup_api.repository.MashupRepository
+import com.minhthong.feature_mashup_api.worker.TransformerWorker
 import com.minhthong.player.presentation.mapper.EntityToPresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,14 +20,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.first
-import kotlin.collections.last
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val playerManager: PlayerManager,
     private val mapper: EntityToPresentationMapper,
-    private val mashupRepository: MashupRepository
 ) : ViewModel() {
 
     private val onTouchingSeekFlow = MutableStateFlow(false)
@@ -134,31 +132,11 @@ class PlayerViewModel @Inject constructor(
         onTouchingSeekFlow.update { isTouching }
     }
 
-    fun cutAudio() = viewModelScope.launch {
-        val controllerInfo = playerManager.controllerInfoFlow.value ?: return@launch
-
-        onCuttingAudioFlow.update { true }
-
-        val playingItemEntity = controllerInfo.playingItem
-
-        val startPosition = playRange.first
-        val endPosition = playRange.last
-
-        val outputPath = playerManager.cutAudio(
-            startMls = startPosition,
-            endMls = endPosition
+    fun cutAudio(context: Context) = viewModelScope.launch {
+        TransformerWorker.createCutAudioWorker(
+            context = context,
+            startMls = playRange.first,
+            endMls = playRange.last
         )
-
-        mashupRepository.insertCut(
-            name = playingItemEntity.title,
-            startPosition = startPosition,
-            endPosition = endPosition,
-            duration = controllerInfo.duration,
-            uriString = outputPath,
-            performer = playingItemEntity.artist,
-            avatarBitmap = playingItemEntity.avatarImage
-        )
-
-        onCuttingAudioFlow.update { false }
     }
 }

@@ -45,4 +45,6 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.dagger.hilt.android.compiler)
+
+    implementation(libs.androidx.work.runtime.ktx)
 }

@@ -3,12 +3,12 @@ package com.minhthong.playlist.presentaion
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minhthong.core.R
-import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.common.onError
 import com.minhthong.core.common.onFinish
 import com.minhthong.core.common.onSuccess
-import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.common.toAppError
+import com.minhthong.core.model.PlaylistItemEntity
+import com.minhthong.core.player.PlayerManager
 import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
 import com.minhthong.playlist.domain.usecase.GetShuffleEnableUseCase
 import com.minhthong.playlist.domain.usecase.RemoveTrackFromPlaylistUseCase
@@ -16,16 +16,13 @@ import com.minhthong.playlist.domain.usecase.SaveShuffleEnableUseCase
 import com.minhthong.playlist.domain.usecase.UpdatePlaylistUseCase
 import com.minhthong.playlist.presentaion.mapper.PresentationMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -92,7 +89,6 @@ class PlaylistViewModel @Inject constructor(
             .catch { throwable ->
                 showErrorState(throwable = throwable)
             }
-            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 

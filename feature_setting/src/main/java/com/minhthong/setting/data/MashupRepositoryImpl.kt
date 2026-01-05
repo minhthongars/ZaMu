@@ -65,7 +65,7 @@ class MashupRepositoryImpl(
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
-               mashupDao.deleteCut(cutId = id)
+                mashupDao.deleteCut(cutId = id)
             }
         )
     }

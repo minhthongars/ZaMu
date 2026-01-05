@@ -16,6 +16,7 @@ import com.google.android.material.slider.RangeSlider
 import com.google.android.material.slider.Slider
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.core.util.Utils.toDurationString
+import com.minhthong.feature_mashup_api.worker.TransformerWorker
 import com.minhthong.player.databinding.FragmentPlayerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -93,7 +94,7 @@ class PlayerFragment: Fragment() {
         }
 
         binding.btnShuffle.setOnClickListener {
-            viewModel.cutAudio()
+            viewModel.cutAudio(requireContext())
         }
 
         setUpSliderBar()
@@ -152,7 +153,7 @@ class PlayerFragment: Fragment() {
         animationJob?.cancel()
         animationJob = viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                binding.cvCoverArt.rotation += 1.2F
+                binding.cvCoverArt.rotation += 0.8F
                 delay(16)
             }
         }

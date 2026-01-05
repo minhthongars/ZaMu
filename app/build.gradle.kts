@@ -55,6 +55,7 @@ dependencies {
     implementation(project(":feature_setting"))
     implementation(project(":feature_playlist"))
     implementation(project(":feature_playlist_api"))
+    implementation(project(":feature_mashup_api"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -66,4 +67,6 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.dagger.hilt.android.compiler)
+
+    implementation(libs.androidx.work.runtime.ktx)
 }

@@ -340,7 +340,9 @@ class HomeViewModel @Inject constructor(
             performer = remoteTrack.performer,
             trackId = remoteTrack.id,
             uri = remoteTrack.mp3Url.toUri().toString(),
-            avatarBitmap = BitmapUtils.getAlbumArtFromRemote(remoteTrack.avatarUrl)
+            avatarBitmap = BitmapUtils.getAlbumArtFromRemote(
+                url = remoteTrack.avatarUrl
+            )
         )
     }
 

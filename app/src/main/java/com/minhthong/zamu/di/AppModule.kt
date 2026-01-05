@@ -1,6 +1,9 @@
 package com.minhthong.zamu.di
 
 import android.content.Context
+import com.minhthong.core.player.PlayerManager
+import com.minhthong.core.transformer.TransformerWrapper
+import com.minhthong.feature_mashup_api.repository.MashupRepository
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
 import com.minhthong.zamu.R
@@ -39,5 +42,19 @@ object AppModule {
         screenMap: Map<Screen, Int>
     ): Navigation {
         return NavigationImpl(screenMap)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTransformerWorkerFactory(
+        mashupRepository: MashupRepository,
+        playerManager: PlayerManager,
+        transformerWrapper: TransformerWrapper
+    ): TransformerWorkerFactory {
+        return TransformerWorkerFactory(
+            transformer = transformerWrapper,
+            mashupRepository = mashupRepository,
+            playerManager = playerManager
+        )
     }
 }
