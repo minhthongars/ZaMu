@@ -35,8 +35,4 @@ interface PlayerManager {
     fun moveToPrevious()
 
     fun getPlayer(): ExoPlayer
-
-    suspend fun cutAudio(startMls: Long, endMls: Long): String
-
-    suspend fun createMashup(uriList: List<Uri>): String
 }

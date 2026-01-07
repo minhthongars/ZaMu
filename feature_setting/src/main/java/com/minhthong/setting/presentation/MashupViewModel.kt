@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.minhthong.core.common.onError
 import com.minhthong.core.common.onSuccess
 import com.minhthong.core.player.PlayerManager
+import com.minhthong.core.transformer.TransformerWrapper
 import com.minhthong.core.util.BitmapUtils
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.feature_mashup_api.entity.CutEntity
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class MashupViewModel @Inject constructor(
     private val repository: MashupRepository,
     private val playlistApi: PlaylistApi,
-    private val playerManager: PlayerManager
+    private val playerManager: PlayerManager,
+    private val transformerWrapper: TransformerWrapper
 ): ViewModel() {
 
     private var cutEntities: List<CutEntity> = emptyList()
@@ -167,10 +169,19 @@ class MashupViewModel @Inject constructor(
 
         val uriList = cutList.map { it.uri }
 
-        val filePath = playerManager.createMashup(uriList)
+        val durations = cutList.map {
+            (it.endPosition - it.startPosition) * 1000
+        }
 
-        val name = cutList.map { it.name }.distinct().joinToString(" - ")
-        val performer = cutList.map { it.performer }.distinct().joinToString(" - ")
+        val filePath = transformerWrapper.createMashupWithCrossfade(
+            uriList = uriList,
+            durations = durations,
+            crossfadeDurationMs = 3000,
+            onProgressChange = { }
+        )
+
+        val name = cutList.map { it.name }.distinct().joinToString("/")
+        val performer = cutList.map { it.performer }.distinct().joinToString("/")
         val duration = cutList.sumOf { it.endPosition - it.startPosition }
         val bitmaps = cutList.mapNotNull { it.avatar }.distinct()
 
