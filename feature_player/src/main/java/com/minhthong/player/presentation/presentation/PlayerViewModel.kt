@@ -37,6 +37,8 @@ class PlayerViewModel @Inject constructor(
 
     val currentBufferMls = playerManager.currentBufferMlsFlow
 
+    val waveformSamples = playerManager.waveformSamplesFlow
+
     val uiModel = combine(
         playerManager.controllerInfoFlow.filterNotNull(),
         onCuttingAudioFlow

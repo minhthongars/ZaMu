@@ -139,6 +139,10 @@ class MainFragment: Fragment() {
         binding.llMiniPlayer.setOnClickListener {
             navigation.navigateTo(Screen.PLAYER)
         }
+
+        binding.tvTrackTitle.setOnClickListener {
+            navigation.navigateTo(Screen.PLAYER)
+        }
     }
 
     private fun setupBackPressHandler() {

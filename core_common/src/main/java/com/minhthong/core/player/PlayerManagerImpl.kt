@@ -1,13 +1,21 @@
 package com.minhthong.core.player
 
 import android.content.Context
+import android.os.Handler
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.audio.AudioRendererEventListener
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import com.minhthong.core.model.ControllerState
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,11 +36,23 @@ internal class PlayerManagerImpl(
     private val audioFocusManager: AudioFocusManager,
 ): PlayerManager, PlayerModel() {
 
+    companion object {
+        private const val DUCK_VOLUME = 0.2f
+        private const val NORMAL_VOLUME = 1f
+        private const val ZERO = 0
+        private const val BUFFER_DELAY = 300L
+        private const val POSITION_DELAY = 150L
+        private const val CROSSFADE_DELAY = 20L
+    }
+
     override val controllerInfoFlow = MutableStateFlow<ControllerState?>(null)
 
     override val currentProgressMlsFlow = MutableStateFlow(0L)
 
     override val currentBufferMlsFlow = MutableStateFlow(0L)
+
+    override val waveformSamplesFlow = MutableStateFlow(FloatArray(0))
+
 
     override fun initialize() {
         initPlayer(context)
@@ -135,6 +155,7 @@ internal class PlayerManagerImpl(
         subExoPlayer = exoPlayer
         exoPlayer = temp
 
+        subExoPlayer.stop()
         exoPlayer.safeAddListener(playerEventListener)
 
         startProgressUpdater()
@@ -263,13 +284,60 @@ internal class PlayerManagerImpl(
         val coroutineContext = mainDispatcher + playerExceptionHandler + SupervisorJob()
         playerScope = CoroutineScope(coroutineContext)
 
-        exoPlayer = ExoPlayer.Builder(context)
-            .setWakeMode(C.WAKE_MODE_NETWORK)
-            .build()
+        waveformProcessor = WaveformAudioProcessor(
+            onSamplesReady = { samples ->
+                waveformSamplesFlow.update { samples }
+            }
+        )
 
-        subExoPlayer = ExoPlayer.Builder(context).build()
+        subWaveformProcessor = WaveformAudioProcessor(
+            onSamplesReady = { samples ->
+                waveformSamplesFlow.update { samples }
+            }
+        )
+
+        exoPlayer = buildExoPlayerWithWaveform(context, waveformProcessor)
+
+        subExoPlayer = buildExoPlayerWithWaveform(context, subWaveformProcessor)
 
         exoPlayer.addListener(playerEventListener)
+    }
+
+    private fun buildExoPlayerWithWaveform(
+        context: Context,
+        processor: WaveformAudioProcessor
+    ): ExoPlayer {
+        val rendererFactory = object : DefaultRenderersFactory(context) {
+            override fun buildAudioRenderers(
+                context: Context,
+                extensionRendererMode: Int,
+                mediaCodecSelector: MediaCodecSelector,
+                enableDecoderFallback: Boolean,
+                audioSink: AudioSink,
+                eventHandler: Handler,
+                eventListener: AudioRendererEventListener,
+                out: ArrayList<Renderer>
+            ) {
+                val sink = DefaultAudioSink.Builder(context)
+                    .setAudioProcessors(arrayOf<AudioProcessor>(processor))
+                    .build()
+
+                super.buildAudioRenderers(
+                    context,
+                    extensionRendererMode,
+                    mediaCodecSelector,
+                    enableDecoderFallback,
+                    sink,
+                    eventHandler,
+                    eventListener,
+                    out
+                )
+            }
+        }
+
+        return ExoPlayer.Builder(context, rendererFactory)
+            .setWakeMode(C.WAKE_MODE_NETWORK)
+            .build()
     }
 
     private fun handleSetPlaylistItemsAwareEdgeCase(
@@ -376,6 +444,7 @@ internal class PlayerManagerImpl(
         exoPlayer.removeListener(playerEventListener)
         exoPlayer.clearMediaItems()
         exoPlayer.release()
+        waveformSamplesFlow.update { FloatArray(0) }
     }
 
     private fun handleFocusLoss() {
@@ -458,14 +527,6 @@ internal class PlayerManagerImpl(
         override fun onFocusLostTransient() = handleFocusLossTransient()
         override fun onDuck() = handleFocusDuck()
     }
-
-    companion object {
-        private const val DUCK_VOLUME = 0.2f
-        private const val NORMAL_VOLUME = 1f
-        private const val ZERO = 0
-        private const val BUFFER_DELAY = 300L
-        private const val POSITION_DELAY = 150L
-        private const val CROSSFADE_DELAY = 20L
-    }
 }
+
 

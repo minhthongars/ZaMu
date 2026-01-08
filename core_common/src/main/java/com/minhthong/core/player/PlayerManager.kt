@@ -14,6 +14,8 @@ interface PlayerManager {
 
     val controllerInfoFlow: StateFlow<ControllerState?>
 
+    val waveformSamplesFlow: StateFlow<FloatArray>
+
     fun initialize()
 
     fun setPlaylist(playlistItems: List<PlaylistItemEntity>)

@@ -16,7 +16,6 @@ import com.google.android.material.slider.RangeSlider
 import com.google.android.material.slider.Slider
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.core.util.Utils.toDurationString
-import com.minhthong.feature_mashup_api.worker.TransformerWorker
 import com.minhthong.player.databinding.FragmentPlayerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -72,8 +71,6 @@ class PlayerFragment: Fragment() {
 
         setupViews()
         setUpCollectors()
-
-        binding.sliderRange.values = listOf(10F, 80F)
     }
 
     private fun setupViews() {
@@ -143,6 +140,12 @@ class PlayerFragment: Fragment() {
                 )
             }
         }
+
+        collectFlowSafely {
+            viewModel.waveformSamples.collect { samples ->
+                binding.waveformView.setSamples(samples)
+            }
+        }
     }
 
     private fun startAnimation(isStart: Boolean) {
@@ -153,8 +156,8 @@ class PlayerFragment: Fragment() {
         animationJob?.cancel()
         animationJob = viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
-                binding.cvCoverArt.rotation += 0.8F
-                delay(16)
+                binding.cvCoverArt.rotation += 0.6F
+                delay(18)
             }
         }
     }
