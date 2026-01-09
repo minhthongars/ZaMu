@@ -2,6 +2,7 @@ package com.minhthong.core.player
 
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.audio.BaseAudioProcessor
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.PlaylistItemEntity
 import kotlinx.coroutines.CoroutineScope
@@ -9,6 +10,7 @@ import kotlinx.coroutines.Job
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
+@UnstableApi
 open class PlayerModel {
 
     companion object {

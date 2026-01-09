@@ -1,6 +1,5 @@
 package com.minhthong.core.player
 
-import android.net.Uri
 import androidx.media3.exoplayer.ExoPlayer
 import com.minhthong.core.model.ControllerState
 import com.minhthong.core.model.PlaylistItemEntity

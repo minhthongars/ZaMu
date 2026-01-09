@@ -35,12 +35,16 @@ class PlayerViewModel @Inject constructor(
     private val playRange get() = _playRangeFlow.value
     val playRangeFlow = _playRangeFlow.asStateFlow()
 
+    private val controllerInfoFlow = playerManager.controllerInfoFlow
+
     val currentBufferMls = playerManager.currentBufferMlsFlow
 
-    val waveformSamples = playerManager.waveformSamplesFlow
+    val waveformSamples = playerManager.waveformSamplesFlow.filter {
+        controllerInfoFlow.value?.isPlaying == true
+    }
 
     val uiModel = combine(
-        playerManager.controllerInfoFlow.filterNotNull(),
+        controllerInfoFlow.filterNotNull(),
         onCuttingAudioFlow
     ) { controllerInfo, isCutting ->
             with(mapper) {

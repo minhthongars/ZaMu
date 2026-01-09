@@ -2,13 +2,13 @@ package com.minhthong.player.presentation.presentation
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.ContextCompat
-import com.minhthong.core.R
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
 
 class WaveformView @JvmOverloads constructor(
     context: Context,
@@ -16,8 +16,7 @@ class WaveformView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val waveformPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.teal_700)
+    private val waveformPaint = Paint().apply {
         strokeWidth = 4f
         strokeCap = Paint.Cap.ROUND
         isAntiAlias = true
@@ -26,7 +25,6 @@ class WaveformView @JvmOverloads constructor(
     private var samples: FloatArray = FloatArray(0)
 
     fun setSamples(newSamples: FloatArray) {
-        if (newSamples.isEmpty()) return
         samples = newSamples
         invalidate()
     }
@@ -34,7 +32,9 @@ class WaveformView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        if (samples.isEmpty()) return
+        if (samples.isEmpty()) {
+            return
+        }
 
         val w = width.toFloat()
         val h = height.toFloat()
@@ -61,8 +61,18 @@ class WaveformView @JvmOverloads constructor(
             val endX = cx + endR * cosA
             val endY = cy + endR * sinA
 
+            waveformPaint.color = getRandomColorInt()
             canvas.drawLine(startX, startY, endX, endY, waveformPaint)
         }
+    }
+
+    private fun getRandomColorInt(): Int {
+        return Color.argb(
+            250,
+            Random.nextInt(256),
+            100,
+            Random.nextInt(256)
+        )
     }
 
 }

@@ -2,7 +2,6 @@ package com.minhthong.core.player
 
 import android.content.Context
 import android.os.Handler
-import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -29,7 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-@OptIn(UnstableApi::class)
+@UnstableApi
 internal class PlayerManagerImpl(
     private val context: Context,
     private val mainDispatcher: CoroutineDispatcher,
@@ -96,6 +95,13 @@ internal class PlayerManagerImpl(
 
     override fun release() {
         cancelJobAndReleasePlayer()
+    }
+
+    private val audioFocusCallback = object : AudioFocusManager.Callback {
+        override fun onFocusGained() = handleFocusGain()
+        override fun onFocusLost() = handleFocusLoss()
+        override fun onFocusLostTransient() = handleFocusLossTransient()
+        override fun onDuck() = handleFocusDuck()
     }
 
     private fun playMediaItem(index: Int) {
@@ -445,6 +451,8 @@ internal class PlayerManagerImpl(
         exoPlayer.clearMediaItems()
         exoPlayer.release()
         waveformSamplesFlow.update { FloatArray(0) }
+        waveformProcessor.reset()
+        subWaveformProcessor.reset()
     }
 
     private fun handleFocusLoss() {
@@ -519,13 +527,6 @@ internal class PlayerManagerImpl(
                 currentProgressMlsFlow.update { newPosition.positionMs }
             }
         }
-    }
-
-    private val audioFocusCallback = object : AudioFocusManager.Callback {
-        override fun onFocusGained() = handleFocusGain()
-        override fun onFocusLost() = handleFocusLoss()
-        override fun onFocusLostTransient() = handleFocusLossTransient()
-        override fun onDuck() = handleFocusDuck()
     }
 }
 
