@@ -89,6 +89,15 @@ internal class PlayerManagerImpl(
         exoPlayer.seekTo(positionMs)
     }
 
+    override fun setAudioPlaybackSpeed(speed: Float) {
+        playbackSpeed = speed
+        exoPlayer.playbackParameters = exoPlayer.playbackParameters.withSpeed(speed)
+        subExoPlayer.playbackParameters = subExoPlayer.playbackParameters.withSpeed(speed)
+        controllerInfoFlow.update { current ->
+            current?.copy(playbackSpeed = speed)
+        }
+    }
+
     override fun getPlayer(): ExoPlayer {
         return exoPlayer
     }
@@ -138,6 +147,7 @@ internal class PlayerManagerImpl(
             setMediaItem(mediaItem)
             prepare()
             volume = 0f
+            playbackParameters = playbackParameters.withSpeed(playbackSpeed)
             play()
         }
 
@@ -280,7 +290,8 @@ internal class PlayerManagerImpl(
                 isLooping = isLooping,
                 isPlaying = exoPlayer.playWhenReady,
                 duration = duration,
-                playingItem = playingItem
+                playingItem = playingItem,
+                playbackSpeed = playbackSpeed
             )
         }
     }

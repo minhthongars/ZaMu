@@ -13,5 +13,6 @@ data class PlayerUiModel(
     val shuffleIconColor: Int = 0,
     val sliderBarValue: Long = 0,
     val startAnimation: Boolean = false,
-    val isAudioCutting: Boolean = false
+    val isAudioCutting: Boolean = false,
+    val playbackSpeed: Float = 1.0f
 )

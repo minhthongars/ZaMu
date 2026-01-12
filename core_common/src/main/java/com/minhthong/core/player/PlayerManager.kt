@@ -35,5 +35,7 @@ interface PlayerManager {
 
     fun moveToPrevious()
 
+    fun setAudioPlaybackSpeed(speed: Float)
+
     fun getPlayer(): ExoPlayer
 }

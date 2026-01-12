@@ -4,5 +4,6 @@ data class ControllerState(
     val isPlaying: Boolean,
     val isLooping: Boolean,
     val duration: Long,
-    val playingItem: PlaylistItemEntity
+    val playingItem: PlaylistItemEntity,
+    val playbackSpeed: Float = 1.0f
 )

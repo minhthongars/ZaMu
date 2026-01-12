@@ -90,6 +90,10 @@ class PlayerFragment: Fragment() {
             viewModel.loopMedia()
         }
 
+        binding.btnSpeed.setOnClickListener {
+            viewModel.cyclePlaybackSpeed()
+        }
+
         binding.btnShuffle.setOnClickListener {
             viewModel.cutAudio(requireContext())
         }
@@ -192,6 +196,15 @@ class PlayerFragment: Fragment() {
         )
 
         binding.ivCoverArt.setImageBitmap(info.avatar)
+
+        binding.btnSpeed.text = when (info.playbackSpeed) {
+            0.5f -> "0.5x"
+            0.75f -> "0.75x"
+            1.0f -> "1.0x"
+            1.25f -> "1.25x"
+            1.5f -> "1.5x"
+            else -> String.format("%.2fx", info.playbackSpeed)
+        }
 
         binding.btnShuffle.isInvisible = info.isAudioCutting
         binding.progressCircular.isVisible = info.isAudioCutting

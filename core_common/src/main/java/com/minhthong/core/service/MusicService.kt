@@ -180,10 +180,12 @@ class MusicService : Service() {
                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
                 PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or PlaybackStateCompat.ACTION_SET_RATING
 
+        val playbackSpeed = info?.playbackSpeed ?: 1.0f
+
         return PlaybackStateCompat.Builder()
             .setActions(actions)
             .addCustomAction(loopAction, NAME_REPEAT_ACTION, loopActionIcon)
-            .setState(state, currentPosition, 1f)
+            .setState(state, currentPosition, playbackSpeed)
             .build()
 
     }
