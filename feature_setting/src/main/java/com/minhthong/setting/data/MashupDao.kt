@@ -17,6 +17,6 @@ interface MashupDao {
     suspend fun insertCut(track: CutDto)
 
     @Query("DELETE FROM cut_audio WHERE id = :cutId")
-    fun deleteCut(cutId: Int)
+    fun deleteCut(cutId: Long)
 
 }

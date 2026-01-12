@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.minhthong.core.model.ControllerState
+import com.minhthong.core.util.BitmapUtils.setBitmapImages
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.navigation.Navigation
 import com.minhthong.navigation.Screen
@@ -112,8 +113,10 @@ class MainFragment: Fragment() {
         binding.tvTrackTitle.text = playingItem.title
         binding.tvTrackTitle.isSelected = true
 
-        binding.ivAvatar.setImageBitmap(
-            playingItem.avatarImage
+        binding.ivAvatar.setBitmapImages(
+            bitmaps = playingItem.avatarImage,
+            compressForSmallDisplay = true,
+            key = playingItem.uri.toString()
         )
 
         binding.ivPlay.setImageResource(

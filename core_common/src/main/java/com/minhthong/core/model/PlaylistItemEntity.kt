@@ -4,12 +4,12 @@ import android.graphics.Bitmap
 import android.net.Uri
 
 data class PlaylistItemEntity(
-    val id: Int,
+    val id: Long,
     val orderIndex: Long,
     val shuffleOrderIndex: Long,
     val trackId: Long,
     val title: String,
     val artist: String,
     val uri: Uri,
-    val avatarImage: Bitmap?
+    val avatarImage: List<Bitmap?>
 )

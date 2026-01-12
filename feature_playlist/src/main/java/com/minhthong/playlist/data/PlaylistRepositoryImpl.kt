@@ -8,6 +8,7 @@ import com.minhthong.core.util.Utils.toByteArray
 import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.mapper.Mapper.toData
 import com.minhthong.playlist.data.mapper.Mapper.toDomain
+import com.minhthong.playlist.data.model.AvatarDto
 import com.minhthong.playlist.data.model.TrackDto
 import com.minhthong.playlist.data.sharePref.ShuffleSharePreference
 import com.minhthong.playlist.domain.PlaylistRepository
@@ -26,7 +27,23 @@ class PlaylistRepositoryImpl(
 
     override fun getPlaylist(): Flow<List<PlaylistItemEntity>> {
         val playlist = dao.getPlaylist()
-        return playlist.map { dto -> dto.toDomain() }
+
+        return playlist.map { dtoList ->
+            val avatarMap = getAllAvatar()
+            dtoList.map { dto ->
+                if (dto.parentTrackId.isEmpty()) {
+                    dto.toDomain(avatarImage = avatarMap[dto.trackId])
+                } else {
+                    dto.toDomain(
+                        avatarImages = dto.parentTrackId.map { avatarMap[it] }
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun getAllAvatar(): Map<Long, ByteArray?> {
+        return dao.getAllAvatar().associate { it.trackId to it.byteArray }
     }
 
     override suspend fun insertTrackToPlaylist(
@@ -39,30 +56,69 @@ class PlaylistRepositoryImpl(
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {
+                val avatarBytes = avatarBitmap.toByteArray()
+                dao.insertAvatar(
+                    AvatarDto(
+                        trackId = trackId,
+                        byteArray = avatarBytes
+                    )
+                )
+
                 val newOrder = dao.getNextOrderIndex() + gapOrder
                 val newShuffleOrder = dao.shuffleOrderIndex() + gapOrder
 
-                val dto = TrackDto(
-                    trackId = trackId,
-                    title = title,
-                    artist = performer,
-                    uri = uri,
-                    orderIndex = newOrder,
-                    shuffleOrderIndex = newShuffleOrder,
-                    avatarImage = avatarBitmap.toByteArray()
+                val itemId = dao.insertTrack(
+                    TrackDto(
+                        trackId = trackId,
+                        title = title,
+                        artist = performer,
+                        uri = uri,
+                        orderIndex = newOrder,
+                        shuffleOrderIndex = newShuffleOrder,
+                        parentTrackId = emptyList()
+                    )
                 )
 
-                dao.insertTrack(dto)
+                val insertedTrack = dao.getTrackById(itemId = itemId)
 
-                val insertedTrack = dao.getTrackByOrder(order = newOrder)
-                    ?: throw IllegalStateException("Track not found after insert")
-
-                insertedTrack.toDomain()
+                insertedTrack!!.toDomain(avatarImage = avatarBytes)
             }
         )
     }
 
-    override suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit> {
+    override suspend fun insertMashupToPlaylist(
+        trackId: Long,
+        title: String,
+        performer: String,
+        uri: String,
+        parentTrackId: List<Long>
+    ): Result<PlaylistItemEntity> {
+        return safeGetDataCall(
+            dispatcher = ioDispatcher,
+            getDataCall = {
+                val newOrder = dao.getNextOrderIndex() + gapOrder
+                val newShuffleOrder = dao.shuffleOrderIndex() + gapOrder
+
+                val itemId = dao.insertTrack(
+                    TrackDto(
+                        trackId = trackId,
+                        title = title,
+                        artist = performer,
+                        uri = uri,
+                        orderIndex = newOrder,
+                        shuffleOrderIndex = newShuffleOrder,
+                        parentTrackId = parentTrackId
+                    )
+                )
+
+                val insertedTrack = dao.getTrackById(itemId = itemId)
+
+                insertedTrack!!.toDomain(avatarImage = null)
+            }
+        )
+    }
+
+    override suspend fun removeTrackFromPlaylist(playlistItemId: Long): Result<Unit> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {

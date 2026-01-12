@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.RangeSlider
 import com.google.android.material.slider.Slider
+import com.minhthong.core.util.BitmapUtils.setBitmapImages
 import com.minhthong.core.util.Utils.collectFlowSafely
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.player.databinding.FragmentPlayerBinding
@@ -195,7 +196,11 @@ class PlayerFragment: Fragment() {
             ColorStateList.valueOf(info.shuffleIconColor)
         )
 
-        binding.ivCoverArt.setImageBitmap(info.avatar)
+        binding.ivCoverArt.setBitmapImages(
+            bitmaps = info.avatar,
+            compressForSmallDisplay = false,
+            key = info.trackName
+        )
 
         binding.btnSpeed.text = when (info.playbackSpeed) {
             0.5f -> "0.5x"

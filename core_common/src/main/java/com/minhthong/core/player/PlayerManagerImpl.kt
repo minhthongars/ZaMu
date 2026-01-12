@@ -61,7 +61,7 @@ internal class PlayerManagerImpl(
         handleSetPlaylistItemsAwareEdgeCase(playlistItems)
     }
 
-    override fun seekToMediaItem(playlistItemId: Int) {
+    override fun seekToMediaItem(playlistItemId: Long) {
         findItemAndSeek(playlistItemId)
     }
 
@@ -377,7 +377,7 @@ internal class PlayerManagerImpl(
     }
 
     private fun findItemAndSeek(
-        playlistItemId: Int
+        playlistItemId: Long
     ) {
         val index = currentPlaylistItems.indexOfFirst { it.id == playlistItemId }
         playMediaItem(index = index)

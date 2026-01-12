@@ -4,20 +4,21 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.minhthong.core.util.BitmapUtils.setBitmapImages
 import com.minhthong.playlist.databinding.ViewHolderPlaylistTrackBinding
 import com.minhthong.playlist.presentaion.PlaylistUiState
 
 class TrackViewHolder(
     private val binding: ViewHolderPlaylistTrackBinding,
-    private val onItemClick: (Int, Boolean) -> Unit,
-    private val onRemoveItemClick: (Int) -> Unit
+    private val onItemClick: (Long, Boolean) -> Unit,
+    private val onRemoveItemClick: (Long) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         fun create(
             parent: ViewGroup,
-            onItemClick: (Int, Boolean) -> Unit,
-            onItemRemoveClick: (Int) -> Unit
+            onItemClick: (Long, Boolean) -> Unit,
+            onItemRemoveClick: (Long) -> Unit
         ): TrackViewHolder {
             return TrackViewHolder(
                 binding = ViewHolderPlaylistTrackBinding.inflate(
@@ -38,7 +39,11 @@ class TrackViewHolder(
         )
         updateRemovingInfo(isRemoving = track.isRemoving)
 
-        binding.ivTrackAvatar.setImageBitmap(track.avatar)
+        binding.ivTrackAvatar.setBitmapImages(
+            bitmaps = track.avatar,
+            compressForSmallDisplay = true,
+            key = track.name
+        )
         binding.tvName.text = track.name
         binding.tvPerformer.text = track.performer
 
@@ -47,7 +52,7 @@ class TrackViewHolder(
         }
     }
 
-    fun updatePlayingInfo(trackId: Int, isPlaying: Boolean) {
+    fun updatePlayingInfo(trackId: Long, isPlaying: Boolean) {
         binding.ivPlaying.isVisible = isPlaying
 
         binding.root.setOnClickListener {

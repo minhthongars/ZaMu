@@ -93,11 +93,11 @@ class TransformerWorker(
         val result = mashupRepository.insertCut(
             uriString = filePath.toUri().toString(),
             duration = controllerInfo.duration,
-            avatarBitmap = trackEntity.avatarImage,
             name = trackEntity.title,
             performer = trackEntity.artist,
             startPosition = startMls,
-            endPosition = endMls
+            endPosition = endMls,
+            parentTrackId = listOf(trackEntity.trackId)
         )
 
         return when(result) {

@@ -2,17 +2,23 @@ package com.minhthong.setting.presentation
 
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.minhthong.core.util.BitmapUtils.setBitmapImages
 import com.minhthong.setting.databinding.ViewHolderCutAudioBinding
 
 class CutAudioViewHolder(
     private val binding: ViewHolderCutAudioBinding,
-    private val onItemClicked: (Int) -> Unit,
-    private val onRemoveItemClick: (Int) -> Unit,
+    private val onItemClicked: (Long) -> Unit,
+    private val onRemoveItemClick: (Long) -> Unit,
 ): RecyclerView.ViewHolder(binding.root) {
 
     fun bind(cutAdapterItem: CutAdapterItem) {
         binding.tvName.text = cutAdapterItem.name
-        binding.ivTrackAvatar.setImageBitmap(cutAdapterItem.avatar)
+
+        binding.ivTrackAvatar.setBitmapImages(
+            bitmaps = cutAdapterItem.avatar,
+            compressForSmallDisplay = false,
+            key = cutAdapterItem.name
+        )
         binding.tvCutInfo.text = cutAdapterItem.cutInfo
 
         binding.tvOrder.isVisible = cutAdapterItem.order != null

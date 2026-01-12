@@ -23,6 +23,7 @@ import com.minhthong.core.model.ControllerState
 import com.minhthong.core.model.PlaylistItemEntity
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.receiver.NotificationDismissReceiver
+import com.minhthong.core.util.BitmapUtils
 import com.minhthong.core.util.Utils
 import com.minhthong.navigation.Navigation
 import dagger.hilt.android.AndroidEntryPoint
@@ -230,7 +231,11 @@ class MusicService : Service() {
         return MediaMetadataCompat.Builder()
             .putBitmap(
                 MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-                track.avatarImage
+                BitmapUtils.mergeBitmapsGrid(
+                    bitmapList = track.avatarImage,
+                    compressForSmallDisplay = true,
+                    key = track.uri.toString()
+                )
             )
             .putString(
                 MediaMetadataCompat.METADATA_KEY_ARTIST,

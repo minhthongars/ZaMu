@@ -10,7 +10,9 @@ import com.minhthong.playlist.data.dao.PlaylistDao
 import com.minhthong.playlist.data.sharePref.ShuffleSharePreference
 import com.minhthong.playlist.domain.PlaylistBridgeImpl
 import com.minhthong.playlist.domain.PlaylistRepository
+import com.minhthong.playlist.domain.usecase.AddMashupToPlaylistUseCase
 import com.minhthong.playlist.domain.usecase.AddTrackToPlaylistUseCase
+import com.minhthong.playlist.domain.usecase.GetAllAvatarUseCase
 import com.minhthong.playlist.domain.usecase.GetPlaylistAwareShuffleUseCase
 import com.minhthong.playlist.presentaion.mapper.PresentationMapper
 import com.minhthong.playlist_feature_api.PlaylistApi
@@ -73,7 +75,9 @@ object DatabaseModule {
     ): PlaylistApi {
         return PlaylistBridgeImpl(
             addTrackToPlaylistUseCase = AddTrackToPlaylistUseCase(repository),
-            getPlaylistAwareShuffleUseCase = GetPlaylistAwareShuffleUseCase(repository)
+            getPlaylistAwareShuffleUseCase = GetPlaylistAwareShuffleUseCase(repository),
+            getAllAvatarUseCase = GetAllAvatarUseCase(repository),
+            addMashupToPlaylistUseCase = AddMashupToPlaylistUseCase(repository)
         )
     }
 }

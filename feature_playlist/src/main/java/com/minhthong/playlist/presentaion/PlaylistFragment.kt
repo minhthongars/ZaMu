@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.minhthong.core.R
 import com.minhthong.core.util.NotificationPermissionHelper
@@ -42,7 +41,7 @@ class PlaylistFragment: Fragment() {
         wFragment = WeakReference(this)
     )
 
-    private val onItemClickListener: (Int, Boolean) -> Unit = { id, isPlaying ->
+    private val onItemClickListener: (Long, Boolean) -> Unit = { id, isPlaying ->
         if (isPlaying) {
             navigation.navigateTo(Screen.PLAYER)
         } else {
@@ -50,7 +49,7 @@ class PlaylistFragment: Fragment() {
         }
     }
 
-    private val onRemoveItemClick: (Int) -> Unit = { id ->
+    private val onRemoveItemClick: (Long) -> Unit = { id ->
         viewModel.removePlaylistItem(playlistItemId = id)
     }
 
@@ -105,19 +104,6 @@ class PlaylistFragment: Fragment() {
 
         binding.ivShuffle.setOnClickListener {
             viewModel.updateShufflePlaylist()
-        }
-
-        binding.recyclerView.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-
-                }
-            }
-        )
-
-        binding.sliderScrollBar.addOnChangeListener { _, value, _ ->
-
         }
     }
 
@@ -220,7 +206,7 @@ class PlaylistFragment: Fragment() {
         }
     }
 
-    private fun requestNotificationPermissionAndPlayMusic(playlistItemId: Int) {
+    private fun requestNotificationPermissionAndPlayMusic(playlistItemId: Long) {
         notificationPermissionHelper.requestPermissionAndStartService(
             onGranted = {
                 viewModel.playMusic(playlistItemId = playlistItemId)

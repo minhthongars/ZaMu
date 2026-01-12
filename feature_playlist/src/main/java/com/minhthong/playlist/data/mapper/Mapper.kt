@@ -9,7 +9,9 @@ import com.minhthong.playlist.data.model.TrackDto
 
 object Mapper {
 
-    fun TrackDto.toDomain(): PlaylistItemEntity {
+    fun TrackDto.toDomain(
+        avatarImage: ByteArray?
+    ): PlaylistItemEntity {
 
         return PlaylistItemEntity(
             id = id,
@@ -19,12 +21,24 @@ object Mapper {
             artist = artist.orEmpty(),
             title = title.orEmpty(),
             uri = uri?.toUri() ?: Uri.EMPTY,
-            avatarImage = avatarImage.toBitmap()
+            avatarImage = listOf(avatarImage.toBitmap())
         )
     }
 
-    fun List<TrackDto>.toDomain(): List<PlaylistItemEntity> {
-        return map { it.toDomain() }
+    fun TrackDto.toDomain(
+        avatarImages: List<ByteArray?>
+    ): PlaylistItemEntity {
+
+        return PlaylistItemEntity(
+            id = id,
+            orderIndex = orderIndex,
+            shuffleOrderIndex = shuffleOrderIndex,
+            trackId = trackId,
+            artist = artist.orEmpty(),
+            title = title.orEmpty(),
+            uri = uri?.toUri() ?: Uri.EMPTY,
+            avatarImage = avatarImages.map { it.toBitmap() }
+        )
     }
 
     fun PlaylistItemEntity.toData(): TrackDto {
@@ -36,7 +50,7 @@ object Mapper {
             orderIndex = orderIndex,
             uri = uri.toString(),
             shuffleOrderIndex = shuffleOrderIndex,
-            avatarImage = avatarImage.toByteArray()
+            parentTrackId = emptyList()
         )
     }
 }

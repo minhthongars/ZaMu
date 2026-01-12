@@ -7,8 +7,8 @@ import androidx.recyclerview.widget.ListAdapter
 import com.minhthong.setting.databinding.ViewHolderCutAudioBinding
 
 class CutAudioAdapter(
-    private val onItemClicked: (Int) -> Unit,
-    private val onRemoveItemClick: (Int) -> Unit,
+    private val onItemClicked: (Long) -> Unit,
+    private val onRemoveItemClick: (Long) -> Unit,
 ): ListAdapter<CutAdapterItem, CutAudioViewHolder>(
     object : DiffUtil.ItemCallback<CutAdapterItem>() {
         override fun areItemsTheSame(
