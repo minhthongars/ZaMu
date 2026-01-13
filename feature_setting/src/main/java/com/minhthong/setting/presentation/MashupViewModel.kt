@@ -35,8 +35,14 @@ class MashupViewModel @Inject constructor(
 
     private val selectedItemMapFlow = MutableStateFlow(mapOf<Long, Int>())
 
-    private val _isLoadingFlow = MutableStateFlow(false)
-    val isLoadingFlow = _isLoadingFlow.asStateFlow()
+    private val _createMashupProgress = MutableStateFlow(-1)
+    val createMashupProgress = _createMashupProgress.map {
+        if (it >= 0) {
+            "$it%"
+        } else {
+            null
+        }
+    }
 
     private val rawAdapterItemsFlow = repository.getAllCuts().map { entities ->
         val allAvatar = playlistApi.getAllAvatar()
@@ -125,8 +131,6 @@ class MashupViewModel @Inject constructor(
     }
 
     private suspend fun addToPlaylist(cutId: Long) {
-        _isLoadingFlow.update { true }
-
         cutEntities.find { it.id == cutId }?.let { entity ->
 
             val startPos = entity.startPosition
@@ -150,9 +154,6 @@ class MashupViewModel @Inject constructor(
 
             result.onSuccess { playlistItem ->
                 playerManager.seekToLastMediaItem(playlistItem)
-                _isLoadingFlow.update { false }
-            }.onError {
-                _isLoadingFlow.update { false }
             }
         }
     }
@@ -166,7 +167,8 @@ class MashupViewModel @Inject constructor(
         if (selectedItemMap.isEmpty()) {
             return@launch
         }
-        _isLoadingFlow.update { true }
+
+        _createMashupProgress.update { 0 }
 
         val cutList = selectedItemMap.entries
             .sortedBy { it.value }
@@ -184,7 +186,9 @@ class MashupViewModel @Inject constructor(
             uriList = uriList,
             durations = durations,
             crossfadeDurationMs = 3000,
-            onProgressChange = { }
+            onProgressChange = { progress ->
+                _createMashupProgress.update { progress }
+            }
         )
 
         val name = cutList.map { it.name }.distinct().joinToString("/")
@@ -202,7 +206,7 @@ class MashupViewModel @Inject constructor(
             parentTrackId = trackIds
         )
 
-        _isLoadingFlow.update { false }
+        _createMashupProgress.update { -1 }
     }
 
     fun deleteCut(cutId: Long) = viewModelScope.launch {

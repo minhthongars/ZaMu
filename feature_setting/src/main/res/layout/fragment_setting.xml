@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:theme="@style/Theme.Zamu">
@@ -47,11 +48,14 @@
                 android:focusable="true"
                 app:srcCompat="@drawable/media3_icon_shuffle_on"/>
 
-            <ProgressBar
-                android:id="@+id/progress_circular"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_progress"
+                android:layout_gravity="center"
+                android:textSize="16sp"
+                tools:text="100%"
+                android:textColor="@color/black"/>
 
         </FrameLayout>
 
