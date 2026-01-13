@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.widget.ImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.URL
@@ -14,6 +15,8 @@ import kotlin.collections.get
 import kotlin.math.ceil
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
+import kotlin.collections.get
+import kotlin.math.min
 
 object BitmapUtils {
 
@@ -73,33 +76,49 @@ object BitmapUtils {
     }
 
     fun mergeBitmapsGrid(
-        bitmaps: List<Bitmap>
-    ): Bitmap {
-        val columns = if (bitmaps.size > 4) {
-            3
-        } else {
-            2
+        bitmapList: List<Bitmap?>,
+        key: String,
+        compressForSmallDisplay: Boolean = false
+    ): Bitmap? {
+        val bitmaps = bitmapList.filterNotNull()
+        if (bitmaps.isEmpty()) return null
+
+        val finalKey = key + compressForSmallDisplay.toString()
+        val cache = bitmapCache[finalKey]
+        if (cache != null) {
+            return cache
         }
 
-        require(bitmaps.isNotEmpty())
-        require(columns > 0)
+        val columns = when (bitmaps.size) {
+            1 -> 1
+            2, 4 -> 2
+            3, 5, 6 -> 3
+            else -> 3
+        }
 
         val rows = ceil(bitmaps.size / columns.toFloat()).toInt()
 
-        val cellWidth = bitmaps.minOf { it.width }
-        val cellHeight = bitmaps.minOf { it.height }
+        val cellWidth = if (compressForSmallDisplay) {
+            min(bitmaps.minOf { it.width }, 120)
+        } else {
+            bitmaps.minOf { it.width }
+        }
+
+        val cellHeight = if (compressForSmallDisplay) {
+            min(bitmaps.minOf { it.height }, 120)
+        } else {
+            bitmaps.minOf { it.height }
+        }
 
         val totalWidth = columns * cellWidth
         val totalHeight = rows * cellHeight
 
         val result = createBitmap(totalWidth, totalHeight)
-
         val canvas = Canvas(result)
 
         bitmaps.forEachIndexed { index, bitmap ->
             val col = index % columns
             val row = index / columns
-
             val left = col * cellWidth
             val top = row * cellHeight
 
@@ -119,6 +138,7 @@ object BitmapUtils {
 
             canvas.drawBitmap(bitmap, srcRect, dstRect, null)
         }
+        bitmapCache[finalKey] = result
 
         return result
     }
@@ -160,6 +180,23 @@ object BitmapUtils {
             }
         }
         return inSampleSize
+    }
+
+    fun ImageView.setBitmapImages(
+        bitmaps: List<Bitmap?>,
+        key: String,
+        compressForSmallDisplay: Boolean = false
+    ) {
+        if (bitmaps.size == 1) {
+            setImageBitmap(bitmaps.first())
+        } else if (bitmaps.size > 1) {
+            val bitmap = mergeBitmapsGrid(
+                bitmapList = bitmaps,
+                key = key,
+                compressForSmallDisplay = compressForSmallDisplay
+            )
+            setImageBitmap(bitmap)
+        }
     }
 
     fun clearCache() {

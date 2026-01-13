@@ -14,9 +14,9 @@ sealed class PlaylistUiState {
     ): PlaylistUiState()
 
     data class Track(
-        val id: Int,
+        val id: Long,
         val trackId: Long,
-        val avatar: Bitmap?,
+        val avatar: List<Bitmap?>,
         val name: String,
         val performer: String,
         val isPlaying: Boolean,

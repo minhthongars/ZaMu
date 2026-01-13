@@ -1,13 +1,12 @@
 package com.minhthong.setting.data
 
-import android.graphics.Bitmap
 import androidx.core.net.toUri
 import com.minhthong.core.common.Result
 import com.minhthong.core.common.safeGetDataCall
 import com.minhthong.core.util.Utils.toBitmap
-import com.minhthong.core.util.Utils.toByteArray
 import com.minhthong.feature_mashup_api.entity.CutEntity
 import com.minhthong.feature_mashup_api.repository.MashupRepository
+import com.minhthong.playlist_feature_api.PlaylistApi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,7 +27,8 @@ class MashupRepositoryImpl(
                     startPosition = dto.startPosition,
                     endPosition = dto.endPosition,
                     duration = dto.duration,
-                    avatar = dto.avatarImage.toBitmap()
+                    avatars = emptyList(),
+                    parentTracks = dto.parentTrackId
                 )
             }
         }
@@ -41,7 +41,7 @@ class MashupRepositoryImpl(
         duration: Long,
         startPosition: Long,
         endPosition: Long,
-        avatarBitmap: Bitmap?
+        parentTrackId: List<Long>,
     ): Result<Unit> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
@@ -54,14 +54,14 @@ class MashupRepositoryImpl(
                         duration = duration,
                         startPosition = startPosition,
                         endPosition = endPosition,
-                        avatarImage = avatarBitmap.toByteArray()
+                        parentTrackId = parentTrackId
                     )
                 )
             }
         )
     }
 
-    override suspend fun removeCut(id: Int): Result<Unit> {
+    override suspend fun removeCut(id: Long): Result<Unit> {
         return safeGetDataCall(
             dispatcher = ioDispatcher,
             getDataCall = {

@@ -41,11 +41,11 @@ class PlaylistViewModel @Inject constructor(
     private val mapper: PresentationMapper,
 ): ViewModel() {
 
-    private var playlistItemEntities: Map<Int, PlaylistItemEntity> = emptyMap()
+    private var playlistItemEntities: Map<Long, PlaylistItemEntity> = emptyMap()
 
     private val _uiState = MutableStateFlow<PlaylistUiState>(PlaylistUiState.Loading)
 
-    private val removingItemIdFlow = MutableStateFlow<Set<Int>>(emptySet())
+    private val removingItemIdFlow = MutableStateFlow<Set<Long>>(emptySet())
 
     private val isShufflingFlow: MutableStateFlow<Boolean?> = MutableStateFlow(null)
 
@@ -121,12 +121,12 @@ class PlaylistViewModel @Inject constructor(
             }
     }
 
-    fun playMusic(playlistItemId: Int) {
+    fun playMusic(playlistItemId: Long) {
         val item = playlistItemEntities[playlistItemId] ?: return
         playerManager.seekToMediaItem(playlistItemId = item.id)
     }
 
-    fun removePlaylistItem(playlistItemId: Int) = viewModelScope.launch {
+    fun removePlaylistItem(playlistItemId: Long) = viewModelScope.launch {
         addRemovingItemId(playlistItemId = playlistItemId)
 
         removeTrackUseCase.invoke(playlistItemId)
@@ -151,9 +151,9 @@ class PlaylistViewModel @Inject constructor(
 
     private fun updatePlayingInfo(
         trackUiItems: List<PlaylistUiState.Track>,
-        removingItems: Set<Int>,
+        removingItems: Set<Long>,
         isShuffling: Boolean,
-        playingItemId: Int?
+        playingItemId: Long?
     ): PlaylistUiState {
 
         val tracks = trackUiItems.map { track ->
@@ -168,13 +168,13 @@ class PlaylistViewModel @Inject constructor(
         return PlaylistUiState.Success(tracks = tracks, isShuffling = isShuffling)
     }
 
-    private fun addRemovingItemId(playlistItemId: Int) {
+    private fun addRemovingItemId(playlistItemId: Long) {
         removingItemIdFlow.update { current ->
             current + playlistItemId
         }
     }
 
-    private fun deleteRemovingItemId(playlistItemId: Int) {
+    private fun deleteRemovingItemId(playlistItemId: Long) {
         removingItemIdFlow.update { current ->
             current - playlistItemId
         }

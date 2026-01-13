@@ -40,7 +40,8 @@ class EntityToPresentationMapper(
             ),
             sliderBarValue = duration,
             startAnimation = isPlaying,
-            isAudioCutting = isAudioCutting
+            isAudioCutting = isAudioCutting,
+            playbackSpeed = playbackSpeed
         )
     }
 }

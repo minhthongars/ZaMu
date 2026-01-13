@@ -15,8 +15,8 @@ interface MashupRepository {
         duration: Long,
         startPosition: Long,
         endPosition: Long,
-        avatarBitmap: Bitmap?
+        parentTrackId: List<Long>,
     ): Result<Unit>
 
-    suspend fun removeCut(id: Int): Result<Unit>
+    suspend fun removeCut(id: Long): Result<Unit>
 }

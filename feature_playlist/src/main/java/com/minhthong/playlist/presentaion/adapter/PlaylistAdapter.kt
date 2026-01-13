@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.ListAdapter
 import com.minhthong.playlist.presentaion.PlaylistUiState
 
 class PlaylistAdapter(
-    private val onItemClick: (Int, Boolean) -> Unit,
-    private val onRemoveItemClick: (Int) -> Unit
+    private val onItemClick: (Long, Boolean) -> Unit,
+    private val onRemoveItemClick: (Long) -> Unit
 ): ListAdapter<PlaylistUiState.Track, TrackViewHolder>(ItemCallback()) {
 
     override fun onCreateViewHolder(

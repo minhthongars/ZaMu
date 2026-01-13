@@ -40,6 +40,8 @@ open class PlayerModel {
 
     protected var isLooping = false
 
+    protected var playbackSpeed = 1.0f
+
     protected var shouldResumeOnFocusGain = false
 
     protected var isDucked = false

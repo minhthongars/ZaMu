@@ -4,8 +4,10 @@ object DbConstant {
     const val DB_NAME = "playlist"
     const val DB_VERSION = 1
     const val TABLE_NAME_TRACK = "tracks"
+    const val TABLE_NAME_AVATAR = "avatar"
     const val COLUMN_ID = "id"
-    const val COLUMN_TRACK_ID = "Track_id"
+    const val COLUMN_TRACK_ID = "track_id"
+    const val COLUMN_PARENT_TRACK_ID = "parent_track"
     const val COLUMN_ORDER = "order_index"
     const val COLUMN_SHUFFLE_ORDER = "shuffle_order_index"
     const val COLUMN_TITLE = "title"

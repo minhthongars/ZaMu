@@ -21,7 +21,7 @@ interface PlayerManager {
 
     fun release()
 
-    fun seekToMediaItem(playlistItemId: Int)
+    fun seekToMediaItem(playlistItemId: Long)
 
     fun seekToLastMediaItem(playlistItem: PlaylistItemEntity)
 
@@ -34,6 +34,8 @@ interface PlayerManager {
     fun moveToNext()
 
     fun moveToPrevious()
+
+    fun setAudioPlaybackSpeed(speed: Float)
 
     fun getPlayer(): ExoPlayer
 }

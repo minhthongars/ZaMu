@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface PlaylistRepository {
     fun getPlaylist(): Flow<List<PlaylistItemEntity>>
 
+    suspend fun getAllAvatar(): Map<Long, ByteArray?>
+
     suspend fun insertTrackToPlaylist(
         trackId: Long,
         title: String,
@@ -16,7 +18,15 @@ interface PlaylistRepository {
         avatarBitmap: Bitmap?
     ): Result<PlaylistItemEntity>
 
-    suspend fun removeTrackFromPlaylist(playlistItemId: Int): Result<Unit>
+    suspend fun insertMashupToPlaylist(
+        trackId: Long,
+        title: String,
+        performer: String,
+        uri: String,
+        parentTrackId: List<Long>
+    ): Result<PlaylistItemEntity>
+
+    suspend fun removeTrackFromPlaylist(playlistItemId: Long): Result<Unit>
 
     suspend fun updatePlaylist(isShuffle: Boolean, tracks: List<PlaylistItemEntity>): Result<Unit>
 

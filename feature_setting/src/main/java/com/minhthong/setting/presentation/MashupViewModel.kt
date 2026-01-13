@@ -7,7 +7,7 @@ import com.minhthong.core.common.onError
 import com.minhthong.core.common.onSuccess
 import com.minhthong.core.player.PlayerManager
 import com.minhthong.core.transformer.TransformerWrapper
-import com.minhthong.core.util.BitmapUtils
+import com.minhthong.core.util.Utils.toBitmap
 import com.minhthong.core.util.Utils.toDurationString
 import com.minhthong.feature_mashup_api.entity.CutEntity
 import com.minhthong.feature_mashup_api.repository.MashupRepository
@@ -33,14 +33,27 @@ class MashupViewModel @Inject constructor(
 
     private val selectModeEnabledFlow = MutableStateFlow(false)
 
-    private val selectedItemMapFlow = MutableStateFlow(mapOf<Int, Int>())
+    private val selectedItemMapFlow = MutableStateFlow(mapOf<Long, Int>())
 
-    private val _isLoadingFlow = MutableStateFlow(false)
-    val isLoadingFlow = _isLoadingFlow.asStateFlow()
+    private val _createMashupProgress = MutableStateFlow(-1)
+    val createMashupProgress = _createMashupProgress.map {
+        if (it >= 0) {
+            "$it%"
+        } else {
+            null
+        }
+    }
 
     private val rawAdapterItemsFlow = repository.getAllCuts().map { entities ->
-        cutEntities = entities
-        entities.toPresentation()
+        val allAvatar = playlistApi.getAllAvatar()
+        cutEntities = entities.map { entity ->
+            entity.copy(
+                avatars = entity.parentTracks.map { trackId ->
+                    allAvatar[trackId].toBitmap()
+                }
+            )
+        }
+        cutEntities.toPresentation()
     }
 
     val adapterItemsWithOrderFlow = combine(
@@ -59,7 +72,7 @@ class MashupViewModel @Inject constructor(
         }
     }
 
-    fun handleOnItemClicked(cutId: Int) = viewModelScope.launch {
+    fun handleOnItemClicked(cutId: Long) = viewModelScope.launch {
         if (selectModeEnabledFlow.value) {
             addToSelectedItems(cutId)
         } else {
@@ -67,7 +80,7 @@ class MashupViewModel @Inject constructor(
         }
     }
 
-    private fun addToSelectedItems(cutId: Int) {
+    private fun addToSelectedItems(cutId: Long) {
         val selectedItemMap = selectedItemMapFlow.value.toMutableMap()
         if (selectedItemMap.contains(cutId)) {
             selectedItemMap.remove(cutId)
@@ -92,7 +105,7 @@ class MashupViewModel @Inject constructor(
             CutAdapterItem(
                 id = entity.id,
                 name = entity.name,
-                avatar = entity.avatar,
+                avatar = entity.avatars,
                 cutInfo = cutInfo,
                 order = null
             )
@@ -117,9 +130,7 @@ class MashupViewModel @Inject constructor(
         }
     }
 
-    private suspend fun addToPlaylist(cutId: Int) {
-        _isLoadingFlow.update { true }
-
+    private suspend fun addToPlaylist(cutId: Long) {
         cutEntities.find { it.id == cutId }?.let { entity ->
 
             val startPos = entity.startPosition
@@ -133,19 +144,16 @@ class MashupViewModel @Inject constructor(
                 entity.name
             }
 
-            val result = playlistApi.addTrackToPlaylistAwareShuffle(
-                trackId = entity.id.toLong(),
+            val result = playlistApi.addMashupToPlaylistAwareShuffle(
+                trackId = entity.id + 1011,
                 title = title,
                 performer = entity.performer,
                 uri = entity.uri.toString(),
-                avatarBitmap = entity.avatar
+                parentTrackId = entity.parentTracks
             )
 
             result.onSuccess { playlistItem ->
                 playerManager.seekToLastMediaItem(playlistItem)
-                _isLoadingFlow.update { false }
-            }.onError {
-                _isLoadingFlow.update { false }
             }
         }
     }
@@ -159,7 +167,8 @@ class MashupViewModel @Inject constructor(
         if (selectedItemMap.isEmpty()) {
             return@launch
         }
-        _isLoadingFlow.update { true }
+
+        _createMashupProgress.update { 0 }
 
         val cutList = selectedItemMap.entries
             .sortedBy { it.value }
@@ -177,13 +186,15 @@ class MashupViewModel @Inject constructor(
             uriList = uriList,
             durations = durations,
             crossfadeDurationMs = 3000,
-            onProgressChange = { }
+            onProgressChange = { progress ->
+                _createMashupProgress.update { progress }
+            }
         )
 
         val name = cutList.map { it.name }.distinct().joinToString("/")
         val performer = cutList.map { it.performer }.distinct().joinToString("/")
         val duration = cutList.sumOf { it.endPosition - it.startPosition }
-        val bitmaps = cutList.mapNotNull { it.avatar }.distinct()
+        val trackIds = cutList.map { it.parentTracks }.flatten().distinct()
 
         repository.insertCut(
             uriString = filePath.toUri().toString(),
@@ -192,13 +203,13 @@ class MashupViewModel @Inject constructor(
             duration = duration,
             startPosition = 0,
             endPosition = 0,
-            avatarBitmap = BitmapUtils.mergeBitmapsGrid(bitmaps)
+            parentTrackId = trackIds
         )
 
-        _isLoadingFlow.update { false }
+        _createMashupProgress.update { -1 }
     }
 
-    fun deleteCut(cutId: Int) = viewModelScope.launch {
+    fun deleteCut(cutId: Long) = viewModelScope.launch {
         repository.removeCut(cutId)
     }
 }

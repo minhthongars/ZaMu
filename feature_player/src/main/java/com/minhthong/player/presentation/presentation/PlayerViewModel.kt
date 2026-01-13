@@ -129,6 +129,18 @@ class PlayerViewModel @Inject constructor(
         playerManager.loopOrNot()
     }
 
+    fun setPlaybackSpeed(speed: Float) {
+        playerManager.setAudioPlaybackSpeed(speed)
+    }
+
+    fun cyclePlaybackSpeed() {
+        val currentSpeed = controllerInfoFlow.value?.playbackSpeed ?: 1.0f
+        val speeds = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)
+        val currentIndex = speeds.indexOf(currentSpeed)
+        val nextIndex = (currentIndex + 1) % speeds.size
+        setPlaybackSpeed(speeds[nextIndex])
+    }
+
     fun seek(mls: Float) {
         setIsSeeking(isTouching = false)
         playerManager.seek(mls.toLong())

@@ -9,4 +9,5 @@
     <string name="media_notification_action_pause">Pause</string>
     <string name="media_notification_action_previous">Previous</string>
     <string name="media_notification_action_next">Next</string>
+    <string name="playback_speed">Playback speed</string>
 </resources>

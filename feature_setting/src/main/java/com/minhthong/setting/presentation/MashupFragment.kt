@@ -50,9 +50,10 @@ class MashupFragment: Fragment() {
         }
 
         collectFlowSafely {
-            viewModel.isLoadingFlow.collect { isLoading ->
-                binding.progressCircular.isVisible = isLoading
-                binding.ivShuffle.isVisible = isLoading.not()
+            viewModel.createMashupProgress.collect { progress ->
+                binding.tvProgress.isVisible = progress != null
+                binding.tvProgress.text = progress
+                binding.ivShuffle.isVisible = progress == null
             }
         }
 

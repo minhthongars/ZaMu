@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 data class PlayerUiModel(
     val trackName: String = "",
     val performer: String = "",
-    val avatar: Bitmap? = null,
+    val avatar: List<Bitmap?> = emptyList(),
     val album: String = "",
     val duration: String = "00:00",
     val playIcon: Int = 0,
@@ -13,5 +13,6 @@ data class PlayerUiModel(
     val shuffleIconColor: Int = 0,
     val sliderBarValue: Long = 0,
     val startAnimation: Boolean = false,
-    val isAudioCutting: Boolean = false
+    val isAudioCutting: Boolean = false,
+    val playbackSpeed: Float = 1.0f
 )

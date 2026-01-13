@@ -4,12 +4,13 @@ import android.graphics.Bitmap
 import android.net.Uri
 
 data class CutEntity(
-    val id: Int,
+    val id: Long,
+    val parentTracks: List<Long>,
     val name: String,
     val performer: String,
     val uri: Uri,
     val duration: Long,
     val startPosition: Long,
     val endPosition: Long,
-    val avatar: Bitmap?
+    val avatars: List<Bitmap?>
 )

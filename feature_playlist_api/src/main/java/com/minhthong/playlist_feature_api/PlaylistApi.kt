@@ -14,5 +14,15 @@ interface PlaylistApi {
         avatarBitmap: Bitmap?
     ): Result<PlaylistItemEntity>
 
+    suspend fun addMashupToPlaylistAwareShuffle(
+        trackId: Long,
+        title: String,
+        performer: String,
+        uri: String,
+        parentTrackId: List<Long>
+    ): Result<PlaylistItemEntity>
+
     fun observerPlaylist(): Flow<List<PlaylistItemEntity>>
+
+    suspend fun getAllAvatar(): Map<Long, ByteArray?>
 }

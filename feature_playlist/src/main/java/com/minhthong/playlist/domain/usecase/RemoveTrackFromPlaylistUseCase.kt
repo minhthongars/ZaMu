@@ -8,7 +8,7 @@ class RemoveTrackFromPlaylistUseCase @Inject constructor(
     private val repository: PlaylistRepository
 ) {
 
-    suspend operator fun invoke(playlistItemId: Int): Result<Unit> {
+    suspend operator fun invoke(playlistItemId: Long): Result<Unit> {
         return repository.removeTrackFromPlaylist(playlistItemId)
     }
 }
